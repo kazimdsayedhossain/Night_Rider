@@ -1,0 +1,2407 @@
+{
+  "roads": [
+    {
+      "id": "NS_0",
+      "x1": 0,
+      "z1": -480,
+      "x2": 0,
+      "z2": 1360,
+      "width": 10,
+      "lanes": 4
+    },
+    {
+      "id": "NS_W160",
+      "x1": -160,
+      "z1": -160,
+      "x2": -160,
+      "z2": 1120,
+      "width": 10,
+      "lanes": 2
+    },
+    {
+      "id": "NS_E160",
+      "x1": 160,
+      "z1": -160,
+      "x2": 160,
+      "z2": 1120,
+      "width": 10,
+      "lanes": 2
+    },
+    {
+      "id": "EW_-320",
+      "x1": -160,
+      "z1": -320,
+      "x2": 160,
+      "z2": -320,
+      "width": 10,
+      "lanes": 2
+    },
+    {
+      "id": "EW_-160",
+      "x1": -160,
+      "z1": -160,
+      "x2": 160,
+      "z2": -160,
+      "width": 10,
+      "lanes": 2
+    },
+    {
+      "id": "EW_0",
+      "x1": -160,
+      "z1": 0,
+      "x2": 160,
+      "z2": 0,
+      "width": 10,
+      "lanes": 2
+    },
+    {
+      "id": "EW_160",
+      "x1": -160,
+      "z1": 160,
+      "x2": 160,
+      "z2": 160,
+      "width": 10,
+      "lanes": 2
+    },
+    {
+      "id": "EW_320",
+      "x1": -160,
+      "z1": 320,
+      "x2": 160,
+      "z2": 320,
+      "width": 10,
+      "lanes": 2
+    },
+    {
+      "id": "EW_480",
+      "x1": -160,
+      "z1": 480,
+      "x2": 160,
+      "z2": 480,
+      "width": 10,
+      "lanes": 2
+    },
+    {
+      "id": "EW_640",
+      "x1": -160,
+      "z1": 640,
+      "x2": 160,
+      "z2": 640,
+      "width": 10,
+      "lanes": 2
+    },
+    {
+      "id": "EW_800",
+      "x1": -160,
+      "z1": 800,
+      "x2": 160,
+      "z2": 800,
+      "width": 10,
+      "lanes": 2
+    },
+    {
+      "id": "EW_960",
+      "x1": -160,
+      "z1": 960,
+      "x2": 160,
+      "z2": 960,
+      "width": 10,
+      "lanes": 2
+    },
+    {
+      "id": "EW_1120",
+      "x1": -160,
+      "z1": 1120,
+      "x2": 160,
+      "z2": 1120,
+      "width": 10,
+      "lanes": 2
+    }
+  ],
+  "intersections": [
+    {
+      "id": "INT_0_-320",
+      "x": 0,
+      "z": -320,
+      "size": 14
+    },
+    {
+      "id": "INT_0_-160",
+      "x": 0,
+      "z": -160,
+      "size": 14
+    },
+    {
+      "id": "INT_0_0",
+      "x": 0,
+      "z": 0,
+      "size": 14
+    },
+    {
+      "id": "INT_0_160",
+      "x": 0,
+      "z": 160,
+      "size": 14
+    },
+    {
+      "id": "INT_0_320",
+      "x": 0,
+      "z": 320,
+      "size": 14
+    },
+    {
+      "id": "INT_0_480",
+      "x": 0,
+      "z": 480,
+      "size": 14
+    },
+    {
+      "id": "INT_0_640",
+      "x": 0,
+      "z": 640,
+      "size": 14
+    },
+    {
+      "id": "INT_0_800",
+      "x": 0,
+      "z": 800,
+      "size": 14
+    },
+    {
+      "id": "INT_0_960",
+      "x": 0,
+      "z": 960,
+      "size": 14
+    },
+    {
+      "id": "INT_0_1120",
+      "x": 0,
+      "z": 1120,
+      "size": 14
+    }
+  ],
+  "buildings": [
+    {
+      "templateId": "b5_green_bakery",
+      "name": "Green Bakery & Pastries",
+      "x": -20.5,
+      "y": 0,
+      "z": -142,
+      "yaw": 1.570796,
+      "scale": 1.0,
+      "halfWidth": 7.5,
+      "halfLength": 8.0,
+      "height": 28.0
+    },
+    {
+      "templateId": "b3_brick_cafe",
+      "name": "Brick Cafe & Roastery",
+      "x": 20.5,
+      "y": 0,
+      "z": -142,
+      "yaw": -1.570796,
+      "scale": 1.0,
+      "halfWidth": 7.0,
+      "halfLength": 8.0,
+      "height": 24.0
+    },
+    {
+      "templateId": "b1_blue_corner_shop",
+      "name": "Blue Corner Supermart",
+      "x": -20.5,
+      "y": 0,
+      "z": -118,
+      "yaw": 1.570796,
+      "scale": 1.0,
+      "halfWidth": 7.5,
+      "halfLength": 8.0,
+      "height": 28.0
+    },
+    {
+      "templateId": "b2_pink_tower",
+      "name": "Skyline Tower Hotel",
+      "x": 20.5,
+      "y": 0,
+      "z": -118,
+      "yaw": -1.570796,
+      "scale": 1.0,
+      "halfWidth": 7.5,
+      "halfLength": 8.0,
+      "height": 32.0
+    },
+    {
+      "templateId": "b4_music_store",
+      "name": "Neon Music & Records",
+      "x": -20.5,
+      "y": 0,
+      "z": -94,
+      "yaw": 1.570796,
+      "scale": 1.0,
+      "halfWidth": 7.0,
+      "halfLength": 8.0,
+      "height": 26.0
+    },
+    {
+      "templateId": "b6_apartment_mart",
+      "name": "Grand Plaza Apartments",
+      "x": 20.5,
+      "y": 0,
+      "z": -94,
+      "yaw": -1.570796,
+      "scale": 1.0,
+      "halfWidth": 8.0,
+      "halfLength": 8.5,
+      "height": 30.0
+    },
+    {
+      "templateId": "b7_office_tower",
+      "name": "Corporate Financial Center",
+      "x": -20.5,
+      "y": 0,
+      "z": -70,
+      "yaw": 1.570796,
+      "scale": 1.0,
+      "halfWidth": 8.0,
+      "halfLength": 8.0,
+      "height": 36.0
+    },
+    {
+      "templateId": "city-core-set",
+      "name": "Midtown Commercial Complex",
+      "x": 20.5,
+      "y": 0,
+      "z": -70,
+      "yaw": -1.570796,
+      "scale": 1.0,
+      "halfWidth": 12.0,
+      "halfLength": 12.0,
+      "height": 40.0
+    },
+    {
+      "templateId": "street-frontage-set",
+      "name": "Historic Frontage Block",
+      "x": -20.5,
+      "y": 0,
+      "z": -46,
+      "yaw": 1.570796,
+      "scale": 1.0,
+      "halfWidth": 10.5,
+      "halfLength": 10.0,
+      "height": 32.0
+    },
+    {
+      "templateId": "b5_green_bakery",
+      "name": "Green Bakery & Pastries",
+      "x": 20.5,
+      "y": 0,
+      "z": -46,
+      "yaw": -1.570796,
+      "scale": 1.0,
+      "halfWidth": 7.5,
+      "halfLength": 8.0,
+      "height": 28.0
+    },
+    {
+      "templateId": "b3_brick_cafe",
+      "name": "Brick Cafe & Roastery",
+      "x": -20.5,
+      "y": 0,
+      "z": -22,
+      "yaw": 1.570796,
+      "scale": 1.0,
+      "halfWidth": 7.0,
+      "halfLength": 8.0,
+      "height": 24.0
+    },
+    {
+      "templateId": "b1_blue_corner_shop",
+      "name": "Blue Corner Supermart",
+      "x": 20.5,
+      "y": 0,
+      "z": -22,
+      "yaw": -1.570796,
+      "scale": 1.0,
+      "halfWidth": 7.5,
+      "halfLength": 8.0,
+      "height": 28.0
+    },
+    {
+      "templateId": "b2_pink_tower",
+      "name": "Skyline Tower Hotel",
+      "x": -20.5,
+      "y": 0,
+      "z": 18,
+      "yaw": 1.570796,
+      "scale": 1.0,
+      "halfWidth": 7.5,
+      "halfLength": 8.0,
+      "height": 32.0
+    },
+    {
+      "templateId": "b4_music_store",
+      "name": "Neon Music & Records",
+      "x": 20.5,
+      "y": 0,
+      "z": 18,
+      "yaw": -1.570796,
+      "scale": 1.0,
+      "halfWidth": 7.0,
+      "halfLength": 8.0,
+      "height": 26.0
+    },
+    {
+      "templateId": "b6_apartment_mart",
+      "name": "Grand Plaza Apartments",
+      "x": -20.5,
+      "y": 0,
+      "z": 42,
+      "yaw": 1.570796,
+      "scale": 1.0,
+      "halfWidth": 8.0,
+      "halfLength": 8.5,
+      "height": 30.0
+    },
+    {
+      "templateId": "b7_office_tower",
+      "name": "Corporate Financial Center",
+      "x": 20.5,
+      "y": 0,
+      "z": 42,
+      "yaw": -1.570796,
+      "scale": 1.0,
+      "halfWidth": 8.0,
+      "halfLength": 8.0,
+      "height": 36.0
+    },
+    {
+      "templateId": "city-core-set",
+      "name": "Midtown Commercial Complex",
+      "x": -20.5,
+      "y": 0,
+      "z": 66,
+      "yaw": 1.570796,
+      "scale": 1.0,
+      "halfWidth": 12.0,
+      "halfLength": 12.0,
+      "height": 40.0
+    },
+    {
+      "templateId": "street-frontage-set",
+      "name": "Historic Frontage Block",
+      "x": 20.5,
+      "y": 0,
+      "z": 66,
+      "yaw": -1.570796,
+      "scale": 1.0,
+      "halfWidth": 10.5,
+      "halfLength": 10.0,
+      "height": 32.0
+    },
+    {
+      "templateId": "b5_green_bakery",
+      "name": "Green Bakery & Pastries",
+      "x": -20.5,
+      "y": 0,
+      "z": 90,
+      "yaw": 1.570796,
+      "scale": 1.0,
+      "halfWidth": 7.5,
+      "halfLength": 8.0,
+      "height": 28.0
+    },
+    {
+      "templateId": "b3_brick_cafe",
+      "name": "Brick Cafe & Roastery",
+      "x": 20.5,
+      "y": 0,
+      "z": 90,
+      "yaw": -1.570796,
+      "scale": 1.0,
+      "halfWidth": 7.0,
+      "halfLength": 8.0,
+      "height": 24.0
+    },
+    {
+      "templateId": "b1_blue_corner_shop",
+      "name": "Blue Corner Supermart",
+      "x": -20.5,
+      "y": 0,
+      "z": 114,
+      "yaw": 1.570796,
+      "scale": 1.0,
+      "halfWidth": 7.5,
+      "halfLength": 8.0,
+      "height": 28.0
+    },
+    {
+      "templateId": "b2_pink_tower",
+      "name": "Skyline Tower Hotel",
+      "x": 20.5,
+      "y": 0,
+      "z": 114,
+      "yaw": -1.570796,
+      "scale": 1.0,
+      "halfWidth": 7.5,
+      "halfLength": 8.0,
+      "height": 32.0
+    },
+    {
+      "templateId": "b4_music_store",
+      "name": "Neon Music & Records",
+      "x": -20.5,
+      "y": 0,
+      "z": 138,
+      "yaw": 1.570796,
+      "scale": 1.0,
+      "halfWidth": 7.0,
+      "halfLength": 8.0,
+      "height": 26.0
+    },
+    {
+      "templateId": "b6_apartment_mart",
+      "name": "Grand Plaza Apartments",
+      "x": 20.5,
+      "y": 0,
+      "z": 138,
+      "yaw": -1.570796,
+      "scale": 1.0,
+      "halfWidth": 8.0,
+      "halfLength": 8.5,
+      "height": 30.0
+    },
+    {
+      "templateId": "b7_office_tower",
+      "name": "Corporate Financial Center",
+      "x": -20.5,
+      "y": 0,
+      "z": 178,
+      "yaw": 1.570796,
+      "scale": 1.0,
+      "halfWidth": 8.0,
+      "halfLength": 8.0,
+      "height": 36.0
+    },
+    {
+      "templateId": "city-core-set",
+      "name": "Midtown Commercial Complex",
+      "x": 20.5,
+      "y": 0,
+      "z": 178,
+      "yaw": -1.570796,
+      "scale": 1.0,
+      "halfWidth": 12.0,
+      "halfLength": 12.0,
+      "height": 40.0
+    },
+    {
+      "templateId": "street-frontage-set",
+      "name": "Historic Frontage Block",
+      "x": -20.5,
+      "y": 0,
+      "z": 202,
+      "yaw": 1.570796,
+      "scale": 1.0,
+      "halfWidth": 10.5,
+      "halfLength": 10.0,
+      "height": 32.0
+    },
+    {
+      "templateId": "b5_green_bakery",
+      "name": "Green Bakery & Pastries",
+      "x": 20.5,
+      "y": 0,
+      "z": 202,
+      "yaw": -1.570796,
+      "scale": 1.0,
+      "halfWidth": 7.5,
+      "halfLength": 8.0,
+      "height": 28.0
+    },
+    {
+      "templateId": "b3_brick_cafe",
+      "name": "Brick Cafe & Roastery",
+      "x": -20.5,
+      "y": 0,
+      "z": 226,
+      "yaw": 1.570796,
+      "scale": 1.0,
+      "halfWidth": 7.0,
+      "halfLength": 8.0,
+      "height": 24.0
+    },
+    {
+      "templateId": "b1_blue_corner_shop",
+      "name": "Blue Corner Supermart",
+      "x": 20.5,
+      "y": 0,
+      "z": 226,
+      "yaw": -1.570796,
+      "scale": 1.0,
+      "halfWidth": 7.5,
+      "halfLength": 8.0,
+      "height": 28.0
+    },
+    {
+      "templateId": "b2_pink_tower",
+      "name": "Skyline Tower Hotel",
+      "x": -20.5,
+      "y": 0,
+      "z": 250,
+      "yaw": 1.570796,
+      "scale": 1.0,
+      "halfWidth": 7.5,
+      "halfLength": 8.0,
+      "height": 32.0
+    },
+    {
+      "templateId": "b4_music_store",
+      "name": "Neon Music & Records",
+      "x": 20.5,
+      "y": 0,
+      "z": 250,
+      "yaw": -1.570796,
+      "scale": 1.0,
+      "halfWidth": 7.0,
+      "halfLength": 8.0,
+      "height": 26.0
+    },
+    {
+      "templateId": "b6_apartment_mart",
+      "name": "Grand Plaza Apartments",
+      "x": -20.5,
+      "y": 0,
+      "z": 274,
+      "yaw": 1.570796,
+      "scale": 1.0,
+      "halfWidth": 8.0,
+      "halfLength": 8.5,
+      "height": 30.0
+    },
+    {
+      "templateId": "b7_office_tower",
+      "name": "Corporate Financial Center",
+      "x": 20.5,
+      "y": 0,
+      "z": 274,
+      "yaw": -1.570796,
+      "scale": 1.0,
+      "halfWidth": 8.0,
+      "halfLength": 8.0,
+      "height": 36.0
+    },
+    {
+      "templateId": "city-core-set",
+      "name": "Midtown Commercial Complex",
+      "x": -20.5,
+      "y": 0,
+      "z": 298,
+      "yaw": 1.570796,
+      "scale": 1.0,
+      "halfWidth": 12.0,
+      "halfLength": 12.0,
+      "height": 40.0
+    },
+    {
+      "templateId": "street-frontage-set",
+      "name": "Historic Frontage Block",
+      "x": 20.5,
+      "y": 0,
+      "z": 298,
+      "yaw": -1.570796,
+      "scale": 1.0,
+      "halfWidth": 10.5,
+      "halfLength": 10.0,
+      "height": 32.0
+    },
+    {
+      "templateId": "b5_green_bakery",
+      "name": "Green Bakery & Pastries",
+      "x": -20.5,
+      "y": 0,
+      "z": 338,
+      "yaw": 1.570796,
+      "scale": 1.0,
+      "halfWidth": 7.5,
+      "halfLength": 8.0,
+      "height": 28.0
+    },
+    {
+      "templateId": "b3_brick_cafe",
+      "name": "Brick Cafe & Roastery",
+      "x": 20.5,
+      "y": 0,
+      "z": 338,
+      "yaw": -1.570796,
+      "scale": 1.0,
+      "halfWidth": 7.0,
+      "halfLength": 8.0,
+      "height": 24.0
+    },
+    {
+      "templateId": "b1_blue_corner_shop",
+      "name": "Blue Corner Supermart",
+      "x": -20.5,
+      "y": 0,
+      "z": 362,
+      "yaw": 1.570796,
+      "scale": 1.0,
+      "halfWidth": 7.5,
+      "halfLength": 8.0,
+      "height": 28.0
+    },
+    {
+      "templateId": "b2_pink_tower",
+      "name": "Skyline Tower Hotel",
+      "x": 20.5,
+      "y": 0,
+      "z": 362,
+      "yaw": -1.570796,
+      "scale": 1.0,
+      "halfWidth": 7.5,
+      "halfLength": 8.0,
+      "height": 32.0
+    },
+    {
+      "templateId": "b4_music_store",
+      "name": "Neon Music & Records",
+      "x": -20.5,
+      "y": 0,
+      "z": 386,
+      "yaw": 1.570796,
+      "scale": 1.0,
+      "halfWidth": 7.0,
+      "halfLength": 8.0,
+      "height": 26.0
+    },
+    {
+      "templateId": "b6_apartment_mart",
+      "name": "Grand Plaza Apartments",
+      "x": 20.5,
+      "y": 0,
+      "z": 386,
+      "yaw": -1.570796,
+      "scale": 1.0,
+      "halfWidth": 8.0,
+      "halfLength": 8.5,
+      "height": 30.0
+    },
+    {
+      "templateId": "b7_office_tower",
+      "name": "Corporate Financial Center",
+      "x": -20.5,
+      "y": 0,
+      "z": 410,
+      "yaw": 1.570796,
+      "scale": 1.0,
+      "halfWidth": 8.0,
+      "halfLength": 8.0,
+      "height": 36.0
+    },
+    {
+      "templateId": "city-core-set",
+      "name": "Midtown Commercial Complex",
+      "x": 20.5,
+      "y": 0,
+      "z": 410,
+      "yaw": -1.570796,
+      "scale": 1.0,
+      "halfWidth": 12.0,
+      "halfLength": 12.0,
+      "height": 40.0
+    },
+    {
+      "templateId": "street-frontage-set",
+      "name": "Historic Frontage Block",
+      "x": -20.5,
+      "y": 0,
+      "z": 434,
+      "yaw": 1.570796,
+      "scale": 1.0,
+      "halfWidth": 10.5,
+      "halfLength": 10.0,
+      "height": 32.0
+    },
+    {
+      "templateId": "b5_green_bakery",
+      "name": "Green Bakery & Pastries",
+      "x": 20.5,
+      "y": 0,
+      "z": 434,
+      "yaw": -1.570796,
+      "scale": 1.0,
+      "halfWidth": 7.5,
+      "halfLength": 8.0,
+      "height": 28.0
+    },
+    {
+      "templateId": "b3_brick_cafe",
+      "name": "Brick Cafe & Roastery",
+      "x": -20.5,
+      "y": 0,
+      "z": 458,
+      "yaw": 1.570796,
+      "scale": 1.0,
+      "halfWidth": 7.0,
+      "halfLength": 8.0,
+      "height": 24.0
+    },
+    {
+      "templateId": "b1_blue_corner_shop",
+      "name": "Blue Corner Supermart",
+      "x": 20.5,
+      "y": 0,
+      "z": 458,
+      "yaw": -1.570796,
+      "scale": 1.0,
+      "halfWidth": 7.5,
+      "halfLength": 8.0,
+      "height": 28.0
+    },
+    {
+      "templateId": "b2_pink_tower",
+      "name": "Skyline Tower Hotel",
+      "x": -20.5,
+      "y": 0,
+      "z": 498,
+      "yaw": 1.570796,
+      "scale": 1.0,
+      "halfWidth": 7.5,
+      "halfLength": 8.0,
+      "height": 32.0
+    },
+    {
+      "templateId": "b4_music_store",
+      "name": "Neon Music & Records",
+      "x": 20.5,
+      "y": 0,
+      "z": 498,
+      "yaw": -1.570796,
+      "scale": 1.0,
+      "halfWidth": 7.0,
+      "halfLength": 8.0,
+      "height": 26.0
+    },
+    {
+      "templateId": "b6_apartment_mart",
+      "name": "Grand Plaza Apartments",
+      "x": -20.5,
+      "y": 0,
+      "z": 522,
+      "yaw": 1.570796,
+      "scale": 1.0,
+      "halfWidth": 8.0,
+      "halfLength": 8.5,
+      "height": 30.0
+    },
+    {
+      "templateId": "b7_office_tower",
+      "name": "Corporate Financial Center",
+      "x": 20.5,
+      "y": 0,
+      "z": 522,
+      "yaw": -1.570796,
+      "scale": 1.0,
+      "halfWidth": 8.0,
+      "halfLength": 8.0,
+      "height": 36.0
+    },
+    {
+      "templateId": "city-core-set",
+      "name": "Midtown Commercial Complex",
+      "x": -20.5,
+      "y": 0,
+      "z": 546,
+      "yaw": 1.570796,
+      "scale": 1.0,
+      "halfWidth": 12.0,
+      "halfLength": 12.0,
+      "height": 40.0
+    },
+    {
+      "templateId": "street-frontage-set",
+      "name": "Historic Frontage Block",
+      "x": 20.5,
+      "y": 0,
+      "z": 546,
+      "yaw": -1.570796,
+      "scale": 1.0,
+      "halfWidth": 10.5,
+      "halfLength": 10.0,
+      "height": 32.0
+    },
+    {
+      "templateId": "b5_green_bakery",
+      "name": "Green Bakery & Pastries",
+      "x": -20.5,
+      "y": 0,
+      "z": 570,
+      "yaw": 1.570796,
+      "scale": 1.0,
+      "halfWidth": 7.5,
+      "halfLength": 8.0,
+      "height": 28.0
+    },
+    {
+      "templateId": "b3_brick_cafe",
+      "name": "Brick Cafe & Roastery",
+      "x": 20.5,
+      "y": 0,
+      "z": 570,
+      "yaw": -1.570796,
+      "scale": 1.0,
+      "halfWidth": 7.0,
+      "halfLength": 8.0,
+      "height": 24.0
+    },
+    {
+      "templateId": "b1_blue_corner_shop",
+      "name": "Blue Corner Supermart",
+      "x": -20.5,
+      "y": 0,
+      "z": 594,
+      "yaw": 1.570796,
+      "scale": 1.0,
+      "halfWidth": 7.5,
+      "halfLength": 8.0,
+      "height": 28.0
+    },
+    {
+      "templateId": "b2_pink_tower",
+      "name": "Skyline Tower Hotel",
+      "x": 20.5,
+      "y": 0,
+      "z": 594,
+      "yaw": -1.570796,
+      "scale": 1.0,
+      "halfWidth": 7.5,
+      "halfLength": 8.0,
+      "height": 32.0
+    },
+    {
+      "templateId": "b4_music_store",
+      "name": "Neon Music & Records",
+      "x": -20.5,
+      "y": 0,
+      "z": 618,
+      "yaw": 1.570796,
+      "scale": 1.0,
+      "halfWidth": 7.0,
+      "halfLength": 8.0,
+      "height": 26.0
+    },
+    {
+      "templateId": "b6_apartment_mart",
+      "name": "Grand Plaza Apartments",
+      "x": 20.5,
+      "y": 0,
+      "z": 618,
+      "yaw": -1.570796,
+      "scale": 1.0,
+      "halfWidth": 8.0,
+      "halfLength": 8.5,
+      "height": 30.0
+    },
+    {
+      "templateId": "b7_office_tower",
+      "name": "Corporate Financial Center",
+      "x": -20.5,
+      "y": 0,
+      "z": 658,
+      "yaw": 1.570796,
+      "scale": 1.0,
+      "halfWidth": 8.0,
+      "halfLength": 8.0,
+      "height": 36.0
+    },
+    {
+      "templateId": "city-core-set",
+      "name": "Midtown Commercial Complex",
+      "x": 20.5,
+      "y": 0,
+      "z": 658,
+      "yaw": -1.570796,
+      "scale": 1.0,
+      "halfWidth": 12.0,
+      "halfLength": 12.0,
+      "height": 40.0
+    },
+    {
+      "templateId": "street-frontage-set",
+      "name": "Historic Frontage Block",
+      "x": -20.5,
+      "y": 0,
+      "z": 682,
+      "yaw": 1.570796,
+      "scale": 1.0,
+      "halfWidth": 10.5,
+      "halfLength": 10.0,
+      "height": 32.0
+    },
+    {
+      "templateId": "b5_green_bakery",
+      "name": "Green Bakery & Pastries",
+      "x": 20.5,
+      "y": 0,
+      "z": 682,
+      "yaw": -1.570796,
+      "scale": 1.0,
+      "halfWidth": 7.5,
+      "halfLength": 8.0,
+      "height": 28.0
+    },
+    {
+      "templateId": "b3_brick_cafe",
+      "name": "Brick Cafe & Roastery",
+      "x": -20.5,
+      "y": 0,
+      "z": 706,
+      "yaw": 1.570796,
+      "scale": 1.0,
+      "halfWidth": 7.0,
+      "halfLength": 8.0,
+      "height": 24.0
+    },
+    {
+      "templateId": "b1_blue_corner_shop",
+      "name": "Blue Corner Supermart",
+      "x": 20.5,
+      "y": 0,
+      "z": 706,
+      "yaw": -1.570796,
+      "scale": 1.0,
+      "halfWidth": 7.5,
+      "halfLength": 8.0,
+      "height": 28.0
+    },
+    {
+      "templateId": "b2_pink_tower",
+      "name": "Skyline Tower Hotel",
+      "x": -20.5,
+      "y": 0,
+      "z": 730,
+      "yaw": 1.570796,
+      "scale": 1.0,
+      "halfWidth": 7.5,
+      "halfLength": 8.0,
+      "height": 32.0
+    },
+    {
+      "templateId": "b4_music_store",
+      "name": "Neon Music & Records",
+      "x": 20.5,
+      "y": 0,
+      "z": 730,
+      "yaw": -1.570796,
+      "scale": 1.0,
+      "halfWidth": 7.0,
+      "halfLength": 8.0,
+      "height": 26.0
+    },
+    {
+      "templateId": "b6_apartment_mart",
+      "name": "Grand Plaza Apartments",
+      "x": -20.5,
+      "y": 0,
+      "z": 754,
+      "yaw": 1.570796,
+      "scale": 1.0,
+      "halfWidth": 8.0,
+      "halfLength": 8.5,
+      "height": 30.0
+    },
+    {
+      "templateId": "b7_office_tower",
+      "name": "Corporate Financial Center",
+      "x": 20.5,
+      "y": 0,
+      "z": 754,
+      "yaw": -1.570796,
+      "scale": 1.0,
+      "halfWidth": 8.0,
+      "halfLength": 8.0,
+      "height": 36.0
+    },
+    {
+      "templateId": "city-core-set",
+      "name": "Midtown Commercial Complex",
+      "x": -20.5,
+      "y": 0,
+      "z": 778,
+      "yaw": 1.570796,
+      "scale": 1.0,
+      "halfWidth": 12.0,
+      "halfLength": 12.0,
+      "height": 40.0
+    },
+    {
+      "templateId": "street-frontage-set",
+      "name": "Historic Frontage Block",
+      "x": 20.5,
+      "y": 0,
+      "z": 778,
+      "yaw": -1.570796,
+      "scale": 1.0,
+      "halfWidth": 10.5,
+      "halfLength": 10.0,
+      "height": 32.0
+    },
+    {
+      "templateId": "b5_green_bakery",
+      "name": "Green Bakery & Pastries",
+      "x": -20.5,
+      "y": 0,
+      "z": 818,
+      "yaw": 1.570796,
+      "scale": 1.0,
+      "halfWidth": 7.5,
+      "halfLength": 8.0,
+      "height": 28.0
+    },
+    {
+      "templateId": "b3_brick_cafe",
+      "name": "Brick Cafe & Roastery",
+      "x": 20.5,
+      "y": 0,
+      "z": 818,
+      "yaw": -1.570796,
+      "scale": 1.0,
+      "halfWidth": 7.0,
+      "halfLength": 8.0,
+      "height": 24.0
+    },
+    {
+      "templateId": "b1_blue_corner_shop",
+      "name": "Blue Corner Supermart",
+      "x": -20.5,
+      "y": 0,
+      "z": 842,
+      "yaw": 1.570796,
+      "scale": 1.0,
+      "halfWidth": 7.5,
+      "halfLength": 8.0,
+      "height": 28.0
+    },
+    {
+      "templateId": "b2_pink_tower",
+      "name": "Skyline Tower Hotel",
+      "x": 20.5,
+      "y": 0,
+      "z": 842,
+      "yaw": -1.570796,
+      "scale": 1.0,
+      "halfWidth": 7.5,
+      "halfLength": 8.0,
+      "height": 32.0
+    },
+    {
+      "templateId": "b4_music_store",
+      "name": "Neon Music & Records",
+      "x": -20.5,
+      "y": 0,
+      "z": 866,
+      "yaw": 1.570796,
+      "scale": 1.0,
+      "halfWidth": 7.0,
+      "halfLength": 8.0,
+      "height": 26.0
+    },
+    {
+      "templateId": "b6_apartment_mart",
+      "name": "Grand Plaza Apartments",
+      "x": 20.5,
+      "y": 0,
+      "z": 866,
+      "yaw": -1.570796,
+      "scale": 1.0,
+      "halfWidth": 8.0,
+      "halfLength": 8.5,
+      "height": 30.0
+    },
+    {
+      "templateId": "b7_office_tower",
+      "name": "Corporate Financial Center",
+      "x": -20.5,
+      "y": 0,
+      "z": 890,
+      "yaw": 1.570796,
+      "scale": 1.0,
+      "halfWidth": 8.0,
+      "halfLength": 8.0,
+      "height": 36.0
+    },
+    {
+      "templateId": "city-core-set",
+      "name": "Midtown Commercial Complex",
+      "x": 20.5,
+      "y": 0,
+      "z": 890,
+      "yaw": -1.570796,
+      "scale": 1.0,
+      "halfWidth": 12.0,
+      "halfLength": 12.0,
+      "height": 40.0
+    },
+    {
+      "templateId": "street-frontage-set",
+      "name": "Historic Frontage Block",
+      "x": -20.5,
+      "y": 0,
+      "z": 914,
+      "yaw": 1.570796,
+      "scale": 1.0,
+      "halfWidth": 10.5,
+      "halfLength": 10.0,
+      "height": 32.0
+    },
+    {
+      "templateId": "b5_green_bakery",
+      "name": "Green Bakery & Pastries",
+      "x": 20.5,
+      "y": 0,
+      "z": 914,
+      "yaw": -1.570796,
+      "scale": 1.0,
+      "halfWidth": 7.5,
+      "halfLength": 8.0,
+      "height": 28.0
+    },
+    {
+      "templateId": "b3_brick_cafe",
+      "name": "Brick Cafe & Roastery",
+      "x": -20.5,
+      "y": 0,
+      "z": 938,
+      "yaw": 1.570796,
+      "scale": 1.0,
+      "halfWidth": 7.0,
+      "halfLength": 8.0,
+      "height": 24.0
+    },
+    {
+      "templateId": "b1_blue_corner_shop",
+      "name": "Blue Corner Supermart",
+      "x": 20.5,
+      "y": 0,
+      "z": 938,
+      "yaw": -1.570796,
+      "scale": 1.0,
+      "halfWidth": 7.5,
+      "halfLength": 8.0,
+      "height": 28.0
+    },
+    {
+      "templateId": "b2_pink_tower",
+      "name": "Skyline Tower Hotel",
+      "x": -20.5,
+      "y": 0,
+      "z": 978,
+      "yaw": 1.570796,
+      "scale": 1.0,
+      "halfWidth": 7.5,
+      "halfLength": 8.0,
+      "height": 32.0
+    },
+    {
+      "templateId": "b4_music_store",
+      "name": "Neon Music & Records",
+      "x": 20.5,
+      "y": 0,
+      "z": 978,
+      "yaw": -1.570796,
+      "scale": 1.0,
+      "halfWidth": 7.0,
+      "halfLength": 8.0,
+      "height": 26.0
+    },
+    {
+      "templateId": "b6_apartment_mart",
+      "name": "Grand Plaza Apartments",
+      "x": -20.5,
+      "y": 0,
+      "z": 1002,
+      "yaw": 1.570796,
+      "scale": 1.0,
+      "halfWidth": 8.0,
+      "halfLength": 8.5,
+      "height": 30.0
+    },
+    {
+      "templateId": "b7_office_tower",
+      "name": "Corporate Financial Center",
+      "x": 20.5,
+      "y": 0,
+      "z": 1002,
+      "yaw": -1.570796,
+      "scale": 1.0,
+      "halfWidth": 8.0,
+      "halfLength": 8.0,
+      "height": 36.0
+    },
+    {
+      "templateId": "city-core-set",
+      "name": "Midtown Commercial Complex",
+      "x": -20.5,
+      "y": 0,
+      "z": 1026,
+      "yaw": 1.570796,
+      "scale": 1.0,
+      "halfWidth": 12.0,
+      "halfLength": 12.0,
+      "height": 40.0
+    },
+    {
+      "templateId": "street-frontage-set",
+      "name": "Historic Frontage Block",
+      "x": 20.5,
+      "y": 0,
+      "z": 1026,
+      "yaw": -1.570796,
+      "scale": 1.0,
+      "halfWidth": 10.5,
+      "halfLength": 10.0,
+      "height": 32.0
+    },
+    {
+      "templateId": "b5_green_bakery",
+      "name": "Green Bakery & Pastries",
+      "x": -20.5,
+      "y": 0,
+      "z": 1050,
+      "yaw": 1.570796,
+      "scale": 1.0,
+      "halfWidth": 7.5,
+      "halfLength": 8.0,
+      "height": 28.0
+    },
+    {
+      "templateId": "b3_brick_cafe",
+      "name": "Brick Cafe & Roastery",
+      "x": 20.5,
+      "y": 0,
+      "z": 1050,
+      "yaw": -1.570796,
+      "scale": 1.0,
+      "halfWidth": 7.0,
+      "halfLength": 8.0,
+      "height": 24.0
+    },
+    {
+      "templateId": "b1_blue_corner_shop",
+      "name": "Blue Corner Supermart",
+      "x": -20.5,
+      "y": 0,
+      "z": 1074,
+      "yaw": 1.570796,
+      "scale": 1.0,
+      "halfWidth": 7.5,
+      "halfLength": 8.0,
+      "height": 28.0
+    },
+    {
+      "templateId": "b2_pink_tower",
+      "name": "Skyline Tower Hotel",
+      "x": 20.5,
+      "y": 0,
+      "z": 1074,
+      "yaw": -1.570796,
+      "scale": 1.0,
+      "halfWidth": 7.5,
+      "halfLength": 8.0,
+      "height": 32.0
+    },
+    {
+      "templateId": "b4_music_store",
+      "name": "Neon Music & Records",
+      "x": -20.5,
+      "y": 0,
+      "z": 1098,
+      "yaw": 1.570796,
+      "scale": 1.0,
+      "halfWidth": 7.0,
+      "halfLength": 8.0,
+      "height": 26.0
+    },
+    {
+      "templateId": "b6_apartment_mart",
+      "name": "Grand Plaza Apartments",
+      "x": 20.5,
+      "y": 0,
+      "z": 1098,
+      "yaw": -1.570796,
+      "scale": 1.0,
+      "halfWidth": 8.0,
+      "halfLength": 8.5,
+      "height": 30.0
+    },
+    {
+      "templateId": "b7_office_tower",
+      "name": "Corporate Financial Center",
+      "x": -20.5,
+      "y": 0,
+      "z": 1138,
+      "yaw": 1.570796,
+      "scale": 1.0,
+      "halfWidth": 8.0,
+      "halfLength": 8.0,
+      "height": 36.0
+    },
+    {
+      "templateId": "city-core-set",
+      "name": "Midtown Commercial Complex",
+      "x": 20.5,
+      "y": 0,
+      "z": 1138,
+      "yaw": -1.570796,
+      "scale": 1.0,
+      "halfWidth": 12.0,
+      "halfLength": 12.0,
+      "height": 40.0
+    },
+    {
+      "templateId": "street-frontage-set",
+      "name": "Historic Frontage Block",
+      "x": -20.5,
+      "y": 0,
+      "z": 1162,
+      "yaw": 1.570796,
+      "scale": 1.0,
+      "halfWidth": 10.5,
+      "halfLength": 10.0,
+      "height": 32.0
+    },
+    {
+      "templateId": "b5_green_bakery",
+      "name": "Green Bakery & Pastries",
+      "x": 20.5,
+      "y": 0,
+      "z": 1162,
+      "yaw": -1.570796,
+      "scale": 1.0,
+      "halfWidth": 7.5,
+      "halfLength": 8.0,
+      "height": 28.0
+    },
+    {
+      "templateId": "b3_brick_cafe",
+      "name": "Brick Cafe & Roastery",
+      "x": -20.5,
+      "y": 0,
+      "z": 1186,
+      "yaw": 1.570796,
+      "scale": 1.0,
+      "halfWidth": 7.0,
+      "halfLength": 8.0,
+      "height": 24.0
+    },
+    {
+      "templateId": "b1_blue_corner_shop",
+      "name": "Blue Corner Supermart",
+      "x": 20.5,
+      "y": 0,
+      "z": 1186,
+      "yaw": -1.570796,
+      "scale": 1.0,
+      "halfWidth": 7.5,
+      "halfLength": 8.0,
+      "height": 28.0
+    },
+    {
+      "templateId": "b2_pink_tower",
+      "name": "Skyline Tower Hotel",
+      "x": -20.5,
+      "y": 0,
+      "z": 1210,
+      "yaw": 1.570796,
+      "scale": 1.0,
+      "halfWidth": 7.5,
+      "halfLength": 8.0,
+      "height": 32.0
+    },
+    {
+      "templateId": "b4_music_store",
+      "name": "Neon Music & Records",
+      "x": 20.5,
+      "y": 0,
+      "z": 1210,
+      "yaw": -1.570796,
+      "scale": 1.0,
+      "halfWidth": 7.0,
+      "halfLength": 8.0,
+      "height": 26.0
+    },
+    {
+      "templateId": "b6_apartment_mart",
+      "name": "Grand Plaza Apartments",
+      "x": -20.5,
+      "y": 0,
+      "z": 1234,
+      "yaw": 1.570796,
+      "scale": 1.0,
+      "halfWidth": 8.0,
+      "halfLength": 8.5,
+      "height": 30.0
+    },
+    {
+      "templateId": "b7_office_tower",
+      "name": "Corporate Financial Center",
+      "x": 20.5,
+      "y": 0,
+      "z": 1234,
+      "yaw": -1.570796,
+      "scale": 1.0,
+      "halfWidth": 8.0,
+      "halfLength": 8.0,
+      "height": 36.0
+    },
+    {
+      "templateId": "city-core-set",
+      "name": "Midtown Commercial Complex",
+      "x": -20.5,
+      "y": 0,
+      "z": 1258,
+      "yaw": 1.570796,
+      "scale": 1.0,
+      "halfWidth": 12.0,
+      "halfLength": 12.0,
+      "height": 40.0
+    },
+    {
+      "templateId": "street-frontage-set",
+      "name": "Historic Frontage Block",
+      "x": 20.5,
+      "y": 0,
+      "z": 1258,
+      "yaw": -1.570796,
+      "scale": 1.0,
+      "halfWidth": 10.5,
+      "halfLength": 10.0,
+      "height": 32.0
+    }
+  ],
+  "trees": [
+    {
+      "propId": "trees-pack",
+      "x": -12.5,
+      "y": 0,
+      "z": 22,
+      "yaw": 0,
+      "scale": 0.85
+    },
+    {
+      "propId": "trees-pack",
+      "x": 12.5,
+      "y": 0,
+      "z": 22,
+      "yaw": 0,
+      "scale": 0.85
+    },
+    {
+      "propId": "trees-pack",
+      "x": -12.5,
+      "y": 0,
+      "z": 70,
+      "yaw": 0,
+      "scale": 0.85
+    },
+    {
+      "propId": "trees-pack",
+      "x": 12.5,
+      "y": 0,
+      "z": 70,
+      "yaw": 0,
+      "scale": 0.85
+    },
+    {
+      "propId": "trees-pack",
+      "x": -12.5,
+      "y": 0,
+      "z": 118,
+      "yaw": 0,
+      "scale": 0.85
+    },
+    {
+      "propId": "trees-pack",
+      "x": 12.5,
+      "y": 0,
+      "z": 118,
+      "yaw": 0,
+      "scale": 0.85
+    },
+    {
+      "propId": "trees-pack",
+      "x": -12.5,
+      "y": 0,
+      "z": 502,
+      "yaw": 0,
+      "scale": 0.85
+    },
+    {
+      "propId": "trees-pack",
+      "x": 12.5,
+      "y": 0,
+      "z": 502,
+      "yaw": 0,
+      "scale": 0.85
+    },
+    {
+      "propId": "trees-pack",
+      "x": -12.5,
+      "y": 0,
+      "z": 550,
+      "yaw": 0,
+      "scale": 0.85
+    },
+    {
+      "propId": "trees-pack",
+      "x": 12.5,
+      "y": 0,
+      "z": 550,
+      "yaw": 0,
+      "scale": 0.85
+    },
+    {
+      "propId": "trees-pack",
+      "x": -12.5,
+      "y": 0,
+      "z": 598,
+      "yaw": 0,
+      "scale": 0.85
+    },
+    {
+      "propId": "trees-pack",
+      "x": 12.5,
+      "y": 0,
+      "z": 598,
+      "yaw": 0,
+      "scale": 0.85
+    },
+    {
+      "propId": "trees-pack",
+      "x": -12.5,
+      "y": 0,
+      "z": 982,
+      "yaw": 0,
+      "scale": 0.85
+    },
+    {
+      "propId": "trees-pack",
+      "x": 12.5,
+      "y": 0,
+      "z": 982,
+      "yaw": 0,
+      "scale": 0.85
+    },
+    {
+      "propId": "trees-pack",
+      "x": -12.5,
+      "y": 0,
+      "z": 1030,
+      "yaw": 0,
+      "scale": 0.85
+    },
+    {
+      "propId": "trees-pack",
+      "x": 12.5,
+      "y": 0,
+      "z": 1030,
+      "yaw": 0,
+      "scale": 0.85
+    },
+    {
+      "propId": "trees-pack",
+      "x": -12.5,
+      "y": 0,
+      "z": 1078,
+      "yaw": 0,
+      "scale": 0.85
+    },
+    {
+      "propId": "trees-pack",
+      "x": 12.5,
+      "y": 0,
+      "z": 1078,
+      "yaw": 0,
+      "scale": 0.85
+    },
+    {
+      "propId": "trees-pack",
+      "x": -150,
+      "y": 0,
+      "z": 400,
+      "yaw": 120,
+      "scale": 1.0
+    },
+    {
+      "propId": "trees-pack",
+      "x": -115,
+      "y": 0,
+      "z": 400,
+      "yaw": 80,
+      "scale": 1.0
+    },
+    {
+      "propId": "trees-pack",
+      "x": -80,
+      "y": 0,
+      "z": 400,
+      "yaw": 40,
+      "scale": 1.0
+    },
+    {
+      "propId": "trees-pack",
+      "x": -150,
+      "y": 0,
+      "z": 435,
+      "yaw": 270,
+      "scale": 1.0
+    },
+    {
+      "propId": "trees-pack",
+      "x": -115,
+      "y": 0,
+      "z": 435,
+      "yaw": 15,
+      "scale": 1.0
+    },
+    {
+      "propId": "trees-pack",
+      "x": -80,
+      "y": 0,
+      "z": 435,
+      "yaw": 120,
+      "scale": 1.0
+    },
+    {
+      "propId": "trees-pack",
+      "x": -150,
+      "y": 0,
+      "z": 470,
+      "yaw": 60,
+      "scale": 1.0
+    },
+    {
+      "propId": "trees-pack",
+      "x": -115,
+      "y": 0,
+      "z": 470,
+      "yaw": 310,
+      "scale": 1.0
+    },
+    {
+      "propId": "trees-pack",
+      "x": -80,
+      "y": 0,
+      "z": 470,
+      "yaw": 200,
+      "scale": 1.0
+    },
+    {
+      "propId": "trees-pack",
+      "x": -150,
+      "y": 0,
+      "z": 505,
+      "yaw": 210,
+      "scale": 1.0
+    },
+    {
+      "propId": "trees-pack",
+      "x": -115,
+      "y": 0,
+      "z": 505,
+      "yaw": 245,
+      "scale": 1.0
+    },
+    {
+      "propId": "trees-pack",
+      "x": -80,
+      "y": 0,
+      "z": 505,
+      "yaw": 280,
+      "scale": 1.0
+    },
+    {
+      "propId": "trees-pack",
+      "x": -150,
+      "y": 0,
+      "z": 540,
+      "yaw": 0,
+      "scale": 1.0
+    },
+    {
+      "propId": "trees-pack",
+      "x": -115,
+      "y": 0,
+      "z": 540,
+      "yaw": 180,
+      "scale": 1.0
+    },
+    {
+      "propId": "trees-pack",
+      "x": -80,
+      "y": 0,
+      "z": 540,
+      "yaw": 0,
+      "scale": 1.0
+    },
+    {
+      "propId": "trees-pack",
+      "x": -150,
+      "y": 0,
+      "z": 575,
+      "yaw": 150,
+      "scale": 1.0
+    },
+    {
+      "propId": "trees-pack",
+      "x": -115,
+      "y": 0,
+      "z": 575,
+      "yaw": 115,
+      "scale": 1.0
+    },
+    {
+      "propId": "trees-pack",
+      "x": -80,
+      "y": 0,
+      "z": 575,
+      "yaw": 80,
+      "scale": 1.0
+    }
+  ],
+  "lights": [
+    {
+      "propId": "street-lamp",
+      "x": 8.6,
+      "y": 0,
+      "z": -80,
+      "yaw": -1.570796,
+      "scale": 1.0
+    },
+    {
+      "propId": "street-lamp",
+      "x": -8.6,
+      "y": 0,
+      "z": -80,
+      "yaw": 1.570796,
+      "scale": 1.0
+    },
+    {
+      "propId": "street-lamp",
+      "x": 8.6,
+      "y": 0,
+      "z": -40,
+      "yaw": -1.570796,
+      "scale": 1.0
+    },
+    {
+      "propId": "street-lamp",
+      "x": -8.6,
+      "y": 0,
+      "z": -40,
+      "yaw": 1.570796,
+      "scale": 1.0
+    },
+    {
+      "propId": "street-lamp",
+      "x": 8.6,
+      "y": 0,
+      "z": 0,
+      "yaw": -1.570796,
+      "scale": 1.0
+    },
+    {
+      "propId": "street-lamp",
+      "x": -8.6,
+      "y": 0,
+      "z": 0,
+      "yaw": 1.570796,
+      "scale": 1.0
+    },
+    {
+      "propId": "street-lamp",
+      "x": 8.6,
+      "y": 0,
+      "z": 40,
+      "yaw": -1.570796,
+      "scale": 1.0
+    },
+    {
+      "propId": "street-lamp",
+      "x": -8.6,
+      "y": 0,
+      "z": 40,
+      "yaw": 1.570796,
+      "scale": 1.0
+    },
+    {
+      "propId": "street-lamp",
+      "x": 8.6,
+      "y": 0,
+      "z": 80,
+      "yaw": -1.570796,
+      "scale": 1.0
+    },
+    {
+      "propId": "street-lamp",
+      "x": -8.6,
+      "y": 0,
+      "z": 80,
+      "yaw": 1.570796,
+      "scale": 1.0
+    },
+    {
+      "propId": "street-lamp",
+      "x": 8.6,
+      "y": 0,
+      "z": 120,
+      "yaw": -1.570796,
+      "scale": 1.0
+    },
+    {
+      "propId": "street-lamp",
+      "x": -8.6,
+      "y": 0,
+      "z": 120,
+      "yaw": 1.570796,
+      "scale": 1.0
+    },
+    {
+      "propId": "street-lamp",
+      "x": 8.6,
+      "y": 0,
+      "z": 160,
+      "yaw": -1.570796,
+      "scale": 1.0
+    },
+    {
+      "propId": "street-lamp",
+      "x": -8.6,
+      "y": 0,
+      "z": 160,
+      "yaw": 1.570796,
+      "scale": 1.0
+    },
+    {
+      "propId": "street-lamp",
+      "x": 8.6,
+      "y": 0,
+      "z": 200,
+      "yaw": -1.570796,
+      "scale": 1.0
+    },
+    {
+      "propId": "street-lamp",
+      "x": -8.6,
+      "y": 0,
+      "z": 200,
+      "yaw": 1.570796,
+      "scale": 1.0
+    },
+    {
+      "propId": "street-lamp",
+      "x": 8.6,
+      "y": 0,
+      "z": 240,
+      "yaw": -1.570796,
+      "scale": 1.0
+    },
+    {
+      "propId": "street-lamp",
+      "x": -8.6,
+      "y": 0,
+      "z": 240,
+      "yaw": 1.570796,
+      "scale": 1.0
+    },
+    {
+      "propId": "street-lamp",
+      "x": 8.6,
+      "y": 0,
+      "z": 280,
+      "yaw": -1.570796,
+      "scale": 1.0
+    },
+    {
+      "propId": "street-lamp",
+      "x": -8.6,
+      "y": 0,
+      "z": 280,
+      "yaw": 1.570796,
+      "scale": 1.0
+    },
+    {
+      "propId": "street-lamp",
+      "x": 8.6,
+      "y": 0,
+      "z": 320,
+      "yaw": -1.570796,
+      "scale": 1.0
+    },
+    {
+      "propId": "street-lamp",
+      "x": -8.6,
+      "y": 0,
+      "z": 320,
+      "yaw": 1.570796,
+      "scale": 1.0
+    },
+    {
+      "propId": "street-lamp",
+      "x": 8.6,
+      "y": 0,
+      "z": 360,
+      "yaw": -1.570796,
+      "scale": 1.0
+    },
+    {
+      "propId": "street-lamp",
+      "x": -8.6,
+      "y": 0,
+      "z": 360,
+      "yaw": 1.570796,
+      "scale": 1.0
+    },
+    {
+      "propId": "street-lamp",
+      "x": 8.6,
+      "y": 0,
+      "z": 400,
+      "yaw": -1.570796,
+      "scale": 1.0
+    },
+    {
+      "propId": "street-lamp",
+      "x": -8.6,
+      "y": 0,
+      "z": 400,
+      "yaw": 1.570796,
+      "scale": 1.0
+    },
+    {
+      "propId": "street-lamp",
+      "x": 8.6,
+      "y": 0,
+      "z": 440,
+      "yaw": -1.570796,
+      "scale": 1.0
+    },
+    {
+      "propId": "street-lamp",
+      "x": -8.6,
+      "y": 0,
+      "z": 440,
+      "yaw": 1.570796,
+      "scale": 1.0
+    },
+    {
+      "propId": "street-lamp",
+      "x": 8.6,
+      "y": 0,
+      "z": 480,
+      "yaw": -1.570796,
+      "scale": 1.0
+    },
+    {
+      "propId": "street-lamp",
+      "x": -8.6,
+      "y": 0,
+      "z": 480,
+      "yaw": 1.570796,
+      "scale": 1.0
+    },
+    {
+      "propId": "street-lamp",
+      "x": 8.6,
+      "y": 0,
+      "z": 520,
+      "yaw": -1.570796,
+      "scale": 1.0
+    },
+    {
+      "propId": "street-lamp",
+      "x": -8.6,
+      "y": 0,
+      "z": 520,
+      "yaw": 1.570796,
+      "scale": 1.0
+    },
+    {
+      "propId": "street-lamp",
+      "x": 8.6,
+      "y": 0,
+      "z": 560,
+      "yaw": -1.570796,
+      "scale": 1.0
+    },
+    {
+      "propId": "street-lamp",
+      "x": -8.6,
+      "y": 0,
+      "z": 560,
+      "yaw": 1.570796,
+      "scale": 1.0
+    },
+    {
+      "propId": "street-lamp",
+      "x": 8.6,
+      "y": 0,
+      "z": 600,
+      "yaw": -1.570796,
+      "scale": 1.0
+    },
+    {
+      "propId": "street-lamp",
+      "x": -8.6,
+      "y": 0,
+      "z": 600,
+      "yaw": 1.570796,
+      "scale": 1.0
+    },
+    {
+      "propId": "street-lamp",
+      "x": 8.6,
+      "y": 0,
+      "z": 640,
+      "yaw": -1.570796,
+      "scale": 1.0
+    },
+    {
+      "propId": "street-lamp",
+      "x": -8.6,
+      "y": 0,
+      "z": 640,
+      "yaw": 1.570796,
+      "scale": 1.0
+    },
+    {
+      "propId": "street-lamp",
+      "x": 8.6,
+      "y": 0,
+      "z": 680,
+      "yaw": -1.570796,
+      "scale": 1.0
+    },
+    {
+      "propId": "street-lamp",
+      "x": -8.6,
+      "y": 0,
+      "z": 680,
+      "yaw": 1.570796,
+      "scale": 1.0
+    },
+    {
+      "propId": "street-lamp",
+      "x": 8.6,
+      "y": 0,
+      "z": 720,
+      "yaw": -1.570796,
+      "scale": 1.0
+    },
+    {
+      "propId": "street-lamp",
+      "x": -8.6,
+      "y": 0,
+      "z": 720,
+      "yaw": 1.570796,
+      "scale": 1.0
+    },
+    {
+      "propId": "street-lamp",
+      "x": 8.6,
+      "y": 0,
+      "z": 760,
+      "yaw": -1.570796,
+      "scale": 1.0
+    },
+    {
+      "propId": "street-lamp",
+      "x": -8.6,
+      "y": 0,
+      "z": 760,
+      "yaw": 1.570796,
+      "scale": 1.0
+    },
+    {
+      "propId": "street-lamp",
+      "x": 8.6,
+      "y": 0,
+      "z": 800,
+      "yaw": -1.570796,
+      "scale": 1.0
+    },
+    {
+      "propId": "street-lamp",
+      "x": -8.6,
+      "y": 0,
+      "z": 800,
+      "yaw": 1.570796,
+      "scale": 1.0
+    },
+    {
+      "propId": "street-lamp",
+      "x": 8.6,
+      "y": 0,
+      "z": 840,
+      "yaw": -1.570796,
+      "scale": 1.0
+    },
+    {
+      "propId": "street-lamp",
+      "x": -8.6,
+      "y": 0,
+      "z": 840,
+      "yaw": 1.570796,
+      "scale": 1.0
+    },
+    {
+      "propId": "street-lamp",
+      "x": 8.6,
+      "y": 0,
+      "z": 880,
+      "yaw": -1.570796,
+      "scale": 1.0
+    },
+    {
+      "propId": "street-lamp",
+      "x": -8.6,
+      "y": 0,
+      "z": 880,
+      "yaw": 1.570796,
+      "scale": 1.0
+    },
+    {
+      "propId": "street-lamp",
+      "x": 8.6,
+      "y": 0,
+      "z": 920,
+      "yaw": -1.570796,
+      "scale": 1.0
+    },
+    {
+      "propId": "street-lamp",
+      "x": -8.6,
+      "y": 0,
+      "z": 920,
+      "yaw": 1.570796,
+      "scale": 1.0
+    },
+    {
+      "propId": "street-lamp",
+      "x": 8.6,
+      "y": 0,
+      "z": 960,
+      "yaw": -1.570796,
+      "scale": 1.0
+    },
+    {
+      "propId": "street-lamp",
+      "x": -8.6,
+      "y": 0,
+      "z": 960,
+      "yaw": 1.570796,
+      "scale": 1.0
+    },
+    {
+      "propId": "street-lamp",
+      "x": 8.6,
+      "y": 0,
+      "z": 1000,
+      "yaw": -1.570796,
+      "scale": 1.0
+    },
+    {
+      "propId": "street-lamp",
+      "x": -8.6,
+      "y": 0,
+      "z": 1000,
+      "yaw": 1.570796,
+      "scale": 1.0
+    },
+    {
+      "propId": "street-lamp",
+      "x": 8.6,
+      "y": 0,
+      "z": 1040,
+      "yaw": -1.570796,
+      "scale": 1.0
+    },
+    {
+      "propId": "street-lamp",
+      "x": -8.6,
+      "y": 0,
+      "z": 1040,
+      "yaw": 1.570796,
+      "scale": 1.0
+    },
+    {
+      "propId": "street-lamp",
+      "x": 8.6,
+      "y": 0,
+      "z": 1080,
+      "yaw": -1.570796,
+      "scale": 1.0
+    },
+    {
+      "propId": "street-lamp",
+      "x": -8.6,
+      "y": 0,
+      "z": 1080,
+      "yaw": 1.570796,
+      "scale": 1.0
+    },
+    {
+      "propId": "street-lamp",
+      "x": 8.6,
+      "y": 0,
+      "z": 1120,
+      "yaw": -1.570796,
+      "scale": 1.0
+    },
+    {
+      "propId": "street-lamp",
+      "x": -8.6,
+      "y": 0,
+      "z": 1120,
+      "yaw": 1.570796,
+      "scale": 1.0
+    },
+    {
+      "propId": "street-lamp",
+      "x": 8.6,
+      "y": 0,
+      "z": 1160,
+      "yaw": -1.570796,
+      "scale": 1.0
+    },
+    {
+      "propId": "street-lamp",
+      "x": -8.6,
+      "y": 0,
+      "z": 1160,
+      "yaw": 1.570796,
+      "scale": 1.0
+    },
+    {
+      "propId": "street-lamp",
+      "x": 8.6,
+      "y": 0,
+      "z": 1200,
+      "yaw": -1.570796,
+      "scale": 1.0
+    },
+    {
+      "propId": "street-lamp",
+      "x": -8.6,
+      "y": 0,
+      "z": 1200,
+      "yaw": 1.570796,
+      "scale": 1.0
+    },
+    {
+      "propId": "street-lamp",
+      "x": 8.6,
+      "y": 0,
+      "z": 1240,
+      "yaw": -1.570796,
+      "scale": 1.0
+    },
+    {
+      "propId": "street-lamp",
+      "x": -8.6,
+      "y": 0,
+      "z": 1240,
+      "yaw": 1.570796,
+      "scale": 1.0
+    },
+    {
+      "propId": "street-lamp",
+      "x": 8.6,
+      "y": 0,
+      "z": 1280,
+      "yaw": -1.570796,
+      "scale": 1.0
+    },
+    {
+      "propId": "street-lamp",
+      "x": -8.6,
+      "y": 0,
+      "z": 1280,
+      "yaw": 1.570796,
+      "scale": 1.0
+    }
+  ],
+  "props": [
+    {
+      "propId": "fountain",
+      "x": -85.0,
+      "y": 0,
+      "z": 500.0,
+      "yaw": 0,
+      "scale": 1.2
+    },
+    {
+      "propId": "gazebo",
+      "x": -115.0,
+      "y": 0,
+      "z": 500.0,
+      "yaw": 0,
+      "scale": 1.2
+    },
+    {
+      "propId": "bench",
+      "x": -85.0,
+      "y": 0,
+      "z": 488.0,
+      "yaw": 0,
+      "scale": 1.0
+    },
+    {
+      "propId": "bench",
+      "x": -85.0,
+      "y": 0,
+      "z": 512.0,
+      "yaw": 0,
+      "scale": 1.0
+    },
+    {
+      "propId": "barn",
+      "x": 90.0,
+      "y": 0,
+      "z": -320.0,
+      "yaw": 0,
+      "scale": 1.1
+    },
+    {
+      "propId": "silo",
+      "x": 110.0,
+      "y": 0,
+      "z": -335.0,
+      "yaw": 0,
+      "scale": 1.1
+    },
+    {
+      "propId": "windmill",
+      "x": 65.0,
+      "y": 0,
+      "z": -280.0,
+      "yaw": 0,
+      "scale": 1.1
+    },
+    {
+      "propId": "hay-bale",
+      "x": 78.0,
+      "y": 0,
+      "z": -310.0,
+      "yaw": 0,
+      "scale": 1.0
+    },
+    {
+      "propId": "finish",
+      "x": 0.0,
+      "y": 0,
+      "z": 1200.0,
+      "yaw": 0,
+      "scale": 1.0
+    }
+  ]
+}

@@ -1,0 +1,88 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'com.kazisayed.deliverit3d'
+    compileSdk 35
+
+    defaultConfig {
+        applicationId 'com.kazisayed.deliverit3d'
+        minSdk 26
+        targetSdk 35
+        versionCode 2
+        versionName '2.0'
+        ndk {
+            abiFilters 'arm64-v8a', 'armeabi-v7a', 'x86_64'
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    sourceSets.main.jniLibs.srcDirs = ['build/generated/jniLibs']
+
+    androidResources {
+        noCompress 'glb', 'ktx', 'ogg', 'wav'
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+        }
+        debug {
+            minifyEnabled false
+        }
+    }
+
+    packaging {
+        resources.excludes += ['META-INF/INDEX.LIST', 'META-INF/io.netty.versions.properties']
+    }
+}
+
+configurations {
+    natives
+}
+
+configurations.configureEach {
+    exclude group: 'com.google.guava', module: 'listenablefuture'
+    resolutionStrategy {
+        force 'androidx.core:core:1.13.1'
+        force 'androidx.core:core-ktx:1.13.1'
+    }
+}
+
+tasks.withType(com.android.build.gradle.internal.tasks.CheckAarMetadataTask).configureEach {
+    enabled = false
+}
+
+dependencies {
+    implementation 'com.badlogicgames.gdx:gdx:1.14.2'
+    implementation 'com.badlogicgames.gdx:gdx-backend-android:1.14.2'
+    implementation 'com.github.mgsx-dev.gdx-gltf:gltf:2.3.0'
+    implementation 'org.iq80.leveldb:leveldb:0.12'
+    for (abi in ['arm64-v8a', 'armeabi-v7a', 'x86_64']) {
+        natives "com.badlogicgames.gdx:gdx-platform:1.14.2:natives-$abi"
+    }
+}
+
+tasks.register('copyAndroidNatives') {
+    inputs.files configurations.natives
+    outputs.dir layout.buildDirectory.dir('generated/jniLibs')
+    doLast {
+        configurations.natives.files.each { jar ->
+            def abi = ['arm64-v8a', 'armeabi-v7a', 'x86_64'].find { jar.name.contains(it) }
+            copy {
+                from zipTree(jar)
+                include '**/*.so'
+                into layout.buildDirectory.dir("generated/jniLibs/$abi")
+            }
+        }
+    }
+}
+
+tasks.named('preBuild').configure {
+    dependsOn 'copyAndroidNatives'
+}
