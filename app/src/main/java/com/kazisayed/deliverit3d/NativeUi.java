@@ -8,7 +8,7 @@ import android.graphics.drawable.Drawable;
 import android.view.*;
 import android.view.animation.*;
 import android.widget.*;
-import java.util.Locale;
+import java.util.*;
 import java.util.function.Consumer;
 
 /**
@@ -54,6 +54,8 @@ public final class NativeUi extends FrameLayout {
     // Loading Screen Elements
     private LowPolyProgressBar loadingBar;
     private TextView loadingPercent;
+    private LoadingAtmosphereView loadingAtmosphere;
+    private final List<Animator> loadingAnimators = new ArrayList<>();
 
     /** Geometric chamfered polygon drawable for low-poly cards, buttons and badges. */
     public static final class ChamferedDrawable extends Drawable {
@@ -108,6 +110,159 @@ public final class NativeUi extends FrameLayout {
 
         @Override public void setAlpha(int alpha) { p.setAlpha(alpha); }
         @Override public void setColorFilter(ColorFilter colorFilter) { p.setColorFilter(colorFilter); }
+        @Override public int getOpacity() { return PixelFormat.TRANSLUCENT; }
+    }
+
+    /**
+     * Tactile multi-layered button drawable.
+     * Features:
+     * - Multi-layer shadows: Deep ambient drop shadow + sharp directional contact shadow.
+     * - Chamfered modern button geometry with smooth lighting gradients.
+     * - Top-edge specular highlight rim for physical 3D depth.
+     * - Interactive press state: shadows compress and face drops down.
+     */
+    public static final class TactileButtonDrawable extends Drawable {
+        private final boolean primary;
+        private final float strokeWidth;
+        private final float chamfer;
+        private boolean pressed = false;
+
+        private final Paint shadowPaint1 = new Paint(Paint.ANTI_ALIAS_FLAG);
+        private final Paint shadowPaint2 = new Paint(Paint.ANTI_ALIAS_FLAG);
+        private final Paint fillPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        private final Paint strokePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        private final Paint highlightPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+
+        private final Path facePath = new Path();
+        private final Path shadowPath1 = new Path();
+        private final Path shadowPath2 = new Path();
+        private final Path highlightPath = new Path();
+
+        public TactileButtonDrawable(boolean primary, float strokeWidth, float chamfer) {
+            this.primary = primary;
+            this.strokeWidth = strokeWidth;
+            this.chamfer = chamfer;
+
+            fillPaint.setStyle(Paint.Style.FILL);
+            strokePaint.setStyle(Paint.Style.STROKE);
+            strokePaint.setStrokeWidth(strokeWidth);
+
+            highlightPaint.setStyle(Paint.Style.STROKE);
+            highlightPaint.setStrokeWidth(Math.max(1f, strokeWidth * 0.9f));
+            highlightPaint.setColor(primary ? 0x66FFFFFF : 0x48FFFFFF);
+
+            shadowPaint1.setStyle(Paint.Style.FILL);
+            shadowPaint1.setColor(0x40000000);
+
+            shadowPaint2.setStyle(Paint.Style.FILL);
+            shadowPaint2.setColor(0x65000000);
+        }
+
+        public void setPressed(boolean p) {
+            if (this.pressed != p) {
+                this.pressed = p;
+                onBoundsChange(getBounds());
+                invalidateSelf();
+            }
+        }
+
+        @Override
+        protected void onBoundsChange(Rect bounds) {
+            super.onBoundsChange(bounds);
+            if (bounds.width() <= 0 || bounds.height() <= 0) return;
+
+            facePath.reset();
+            shadowPath1.reset();
+            shadowPath2.reset();
+            highlightPath.reset();
+
+            // Margin for shadow expansion
+            float mx = 10f;
+            float my = 8f;
+
+            float pressY = pressed ? 2.5f : 0f;
+
+            float l = bounds.left + mx;
+            float t = bounds.top + my + pressY;
+            float r = bounds.right - mx;
+            float b = bounds.bottom - my - (pressed ? 1.5f : 5f) + pressY;
+
+            float ch = Math.min(chamfer, Math.min((r - l) * 0.45f, (b - t) * 0.45f));
+
+            // 1. Build Face Path
+            buildChamferedPath(facePath, l, t, r, b, ch);
+
+            // 2. Build Shadow Layer 1 (Deep ambient shadow, offset + blur)
+            float s1Dy = pressed ? 2f : 6f;
+            buildChamferedPath(shadowPath1, l, t + s1Dy, r, b + s1Dy, ch);
+            shadowPaint1.setShadowLayer(pressed ? 4f : 14f, 0, s1Dy * 0.5f, 0x55000000);
+
+            // 3. Build Shadow Layer 2 (Directional ground contact shadow)
+            float s2Dy = pressed ? 1f : 2.5f;
+            buildChamferedPath(shadowPath2, l, t + s2Dy, r, b + s2Dy, ch);
+            shadowPaint2.setShadowLayer(pressed ? 2f : 6f, 0, s2Dy, 0x85000000);
+
+            // 4. Build Top Highlight Bevel Path
+            highlightPath.moveTo(l + ch, t + strokeWidth * 0.5f);
+            highlightPath.lineTo(r - ch, t + strokeWidth * 0.5f);
+
+            // 5. Linear Gradient for Face and Stroke
+            if (primary) {
+                LinearGradient grad = new LinearGradient(
+                        0, t, 0, b,
+                        new int[]{0xFFFFFFFF, 0xFFE6EEF6, 0xFFD4DFE8},
+                        new float[]{0f, 0.60f, 1f},
+                        Shader.TileMode.CLAMP
+                );
+                fillPaint.setShader(grad);
+                strokePaint.setShader(null);
+                strokePaint.setColor(0x28000000);
+            } else {
+                LinearGradient grad = new LinearGradient(
+                        0, t, 0, b,
+                        new int[]{0xEE222E3E, 0xF6151E2A, 0xFC0D131C},
+                        new float[]{0f, 0.55f, 1f},
+                        Shader.TileMode.CLAMP
+                );
+                fillPaint.setShader(grad);
+
+                LinearGradient strokeGrad = new LinearGradient(
+                        0, t, 0, b,
+                        new int[]{0x58FFFFFF, 0x28FFFFFF, 0x14FFFFFF},
+                        new float[]{0f, 0.5f, 1f},
+                        Shader.TileMode.CLAMP
+                );
+                strokePaint.setShader(strokeGrad);
+            }
+        }
+
+        @Override
+        public void draw(Canvas canvas) {
+            // Layer 1: Ambient Drop Shadow
+            canvas.drawPath(shadowPath1, shadowPaint1);
+
+            // Layer 2: Directional Contact Shadow
+            canvas.drawPath(shadowPath2, shadowPaint2);
+
+            // Layer 3: Button Face Fill
+            canvas.drawPath(facePath, fillPaint);
+
+            // Layer 4: Contour Stroke
+            canvas.drawPath(facePath, strokePaint);
+
+            // Layer 5: Top Specular Edge Highlight
+            canvas.drawPath(highlightPath, highlightPaint);
+        }
+
+        @Override public void setAlpha(int alpha) {
+            fillPaint.setAlpha(alpha);
+            strokePaint.setAlpha(alpha);
+            shadowPaint1.setAlpha(alpha);
+            shadowPaint2.setAlpha(alpha);
+        }
+        @Override public void setColorFilter(ColorFilter colorFilter) {
+            fillPaint.setColorFilter(colorFilter);
+        }
         @Override public int getOpacity() { return PixelFormat.TRANSLUCENT; }
     }
 
@@ -306,6 +461,156 @@ public final class NativeUi extends FrameLayout {
             canvas.drawPath(d2, pStroke);
 
             canvas.restore();
+        }
+    }
+
+    /**
+     * Atmospheric motion canvas view for the loading screen.
+     * Renders real-time drifting neon rain streaks and floating bokeh light embers.
+     */
+    public static final class LoadingAtmosphereView extends View {
+        private static final int RAIN_COUNT = 45;
+        private static final int BOKEH_COUNT = 16;
+
+        private static final class RainDrop {
+            float x, y, len, speed, alpha, width;
+            int color;
+        }
+
+        private static final class BokehEmber {
+            float x, y, radius, speedX, speedY, phase, baseAlpha;
+            int color;
+        }
+
+        private final RainDrop[] rain = new RainDrop[RAIN_COUNT];
+        private final BokehEmber[] embers = new BokehEmber[BOKEH_COUNT];
+        private final Paint rainPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        private final Paint emberPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        private ValueAnimator loopAnimator;
+        private long lastNanos = 0;
+
+        public LoadingAtmosphereView(Context context) {
+            super(context);
+            rainPaint.setStyle(Paint.Style.STROKE);
+            rainPaint.setStrokeCap(Paint.Cap.ROUND);
+            emberPaint.setStyle(Paint.Style.FILL);
+            initParticles();
+        }
+
+        private void initParticles() {
+            Random rnd = new Random(42);
+            int[] rainColors = {0xAAFFFFFF, 0x8898C8FF, 0x77FFD590, 0x66FF88BB};
+            for (int i = 0; i < RAIN_COUNT; i++) {
+                RainDrop r = new RainDrop();
+                r.x = rnd.nextFloat();
+                r.y = rnd.nextFloat();
+                r.len = 16f + rnd.nextFloat() * 28f;
+                r.speed = 1.2f + rnd.nextFloat() * 1.8f;
+                r.width = 1.0f + rnd.nextFloat() * 1.2f;
+                r.alpha = 0.25f + rnd.nextFloat() * 0.55f;
+                r.color = rainColors[rnd.nextInt(rainColors.length)];
+                rain[i] = r;
+            }
+
+            int[] emberColors = {0x66FFD080, 0x5590D0FF, 0x44FFA0D0, 0x50FFFFFF};
+            for (int i = 0; i < BOKEH_COUNT; i++) {
+                BokehEmber e = new BokehEmber();
+                e.x = rnd.nextFloat();
+                e.y = rnd.nextFloat();
+                e.radius = 3.5f + rnd.nextFloat() * 7f;
+                e.speedX = (rnd.nextFloat() - 0.5f) * 0.04f;
+                e.speedY = -(0.03f + rnd.nextFloat() * 0.06f);
+                e.phase = rnd.nextFloat() * 6.28f;
+                e.baseAlpha = 0.20f + rnd.nextFloat() * 0.40f;
+                e.color = emberColors[rnd.nextInt(emberColors.length)];
+                embers[i] = e;
+            }
+        }
+
+        public void start() {
+            if (loopAnimator != null && loopAnimator.isRunning()) return;
+            lastNanos = System.nanoTime();
+            loopAnimator = ValueAnimator.ofFloat(0f, 1f);
+            loopAnimator.setDuration(1000);
+            loopAnimator.setRepeatCount(ValueAnimator.INFINITE);
+            loopAnimator.setRepeatMode(ValueAnimator.RESTART);
+            loopAnimator.setInterpolator(new LinearInterpolator());
+            loopAnimator.addUpdateListener(a -> {
+                long now = System.nanoTime();
+                float dt = lastNanos > 0 ? (now - lastNanos) / 1_000_000_000f : 0.016f;
+                lastNanos = now;
+                dt = Math.min(0.05f, Math.max(0.001f, dt));
+                updateParticles(dt);
+                invalidate();
+            });
+            loopAnimator.start();
+        }
+
+        public void stop() {
+            if (loopAnimator != null) {
+                loopAnimator.cancel();
+                loopAnimator = null;
+            }
+        }
+
+        @Override
+        protected void onDetachedFromWindow() {
+            super.onDetachedFromWindow();
+            stop();
+        }
+
+        private void updateParticles(float dt) {
+            for (RainDrop r : rain) {
+                r.y += r.speed * dt;
+                r.x -= r.speed * 0.25f * dt;
+                if (r.y > 1.05f) {
+                    r.y = -0.05f;
+                    r.x = (float) Math.random() * 1.2f;
+                }
+                if (r.x < -0.05f) r.x = 1.05f;
+            }
+
+            for (BokehEmber e : embers) {
+                e.phase += dt * 1.5f;
+                e.y += e.speedY * dt;
+                e.x += (float) (Math.sin(e.phase) * 0.03f) * dt + e.speedX * dt;
+                if (e.y < -0.05f) {
+                    e.y = 1.05f;
+                    e.x = (float) Math.random();
+                }
+                if (e.x < -0.05f) e.x = 1.05f;
+                else if (e.x > 1.05f) e.x = -0.05f;
+            }
+        }
+
+        @Override
+        protected void onDraw(Canvas canvas) {
+            super.onDraw(canvas);
+            int w = getWidth();
+            int h = getHeight();
+            if (w <= 0 || h <= 0) return;
+
+            // Draw rain streaks
+            for (RainDrop r : rain) {
+                float sx = r.x * w;
+                float sy = r.y * h;
+                float ex = sx - r.len * 0.35f;
+                float ey = sy + r.len;
+                rainPaint.setColor(r.color);
+                rainPaint.setStrokeWidth(r.width);
+                rainPaint.setAlpha((int) (r.alpha * 255));
+                canvas.drawLine(sx, sy, ex, ey, rainPaint);
+            }
+
+            // Draw floating bokeh embers
+            for (BokehEmber e : embers) {
+                float cx = e.x * w;
+                float cy = e.y * h;
+                float pulse = 0.75f + 0.25f * (float) Math.sin(e.phase);
+                emberPaint.setColor(e.color);
+                emberPaint.setAlpha((int) (e.baseAlpha * pulse * 255));
+                canvas.drawCircle(cx, cy, e.radius * pulse, emberPaint);
+            }
         }
     }
 
@@ -548,33 +853,32 @@ public final class NativeUi extends FrameLayout {
         Button b = new Button(getContext());
         b.setText(label);
         b.setAllCaps(false);
-        b.setTextSize(14f);
+        b.setTextSize(13.5f);
+        b.setLetterSpacing(0.06f);
         b.setTypeface(Typeface.create("sans-serif-bold", Typeface.NORMAL));
-        b.setTextColor(primary ? 0xFF0B111A : COLOR_WHITE);
-        b.setBackground(new ChamferedDrawable(
-                primary ? COLOR_BTN_PRIMARY_FILL : COLOR_BTN_FILL,
-                primary ? 0 : COLOR_BTN_STROKE,
-                px(1.2f),
-                px(12)
-        ));
+        b.setTextColor(primary ? 0xFF0D141E : 0xFFF0F4F8);
+        TactileButtonDrawable bg = new TactileButtonDrawable(primary, px(1.2f), px(10));
+        b.setBackground(bg);
         b.setMinHeight(px(48));
-        b.setPadding(px(18), px(10), px(18), px(10));
+        b.setPadding(px(22), px(11), px(22), px(11));
         b.setOnTouchListener((v, event) -> {
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
-                    v.animate().scaleX(0.95f).scaleY(0.95f).setDuration(80).start();
+                    bg.setPressed(true);
+                    v.animate().scaleX(0.965f).scaleY(0.965f).setDuration(70).start();
                     break;
                 case MotionEvent.ACTION_UP:
                 case MotionEvent.ACTION_CANCEL:
+                    bg.setPressed(false);
                     v.animate().scaleX(1.0f).scaleY(1.0f).setDuration(160)
-                            .setInterpolator(new OvershootInterpolator(1.5f)).start();
+                            .setInterpolator(new OvershootInterpolator(1.4f)).start();
                     break;
             }
             return false;
         });
         b.setOnClickListener(v -> {
-            activity.feedback(12);
-            action.run();
+            activity.feedback(15);
+            if (action != null) action.run();
         });
         return b;
     }
@@ -650,7 +954,7 @@ public final class NativeUi extends FrameLayout {
         invalidate();
     }
 
-    /** Standard mobile game loading screen overlay (clean title, low-poly loading bar, percentage only). */
+    /** Standard mobile game loading screen overlay with cinematic motion background and real-time atmosphere. */
     private void showLoadingScreen() {
         removeActivePanel();
         section = "loading";
@@ -658,6 +962,74 @@ public final class NativeUi extends FrameLayout {
         FrameLayout loadingLayout = new FrameLayout(getContext());
         loadingLayout.setBackgroundColor(COLOR_OVERLAY_DARK);
 
+        // 1. Cinematic Background Image with Ken Burns camera pan/zoom motion
+        ImageView bgView = new ImageView(getContext());
+        bgView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+        try (java.io.InputStream is = getContext().getAssets().open("loading_bg.jpg")) {
+            Bitmap bmp = BitmapFactory.decodeStream(is);
+            if (bmp != null) bgView.setImageBitmap(bmp);
+        } catch (Exception ignored) {}
+
+        bgView.setScaleX(1.08f);
+        bgView.setScaleY(1.08f);
+
+        ObjectAnimator zoomAnim = ObjectAnimator.ofFloat(bgView, "scaleX", 1.06f, 1.18f);
+        zoomAnim.setDuration(11000);
+        zoomAnim.setRepeatMode(ValueAnimator.REVERSE);
+        zoomAnim.setRepeatCount(ValueAnimator.INFINITE);
+        zoomAnim.setInterpolator(new AccelerateDecelerateInterpolator());
+        zoomAnim.addUpdateListener(a -> bgView.setScaleY((float) a.getAnimatedValue()));
+        zoomAnim.start();
+        loadingAnimators.add(zoomAnim);
+
+        ObjectAnimator panXAnim = ObjectAnimator.ofFloat(bgView, "translationX", -px(26), px(26));
+        panXAnim.setDuration(15000);
+        panXAnim.setRepeatMode(ValueAnimator.REVERSE);
+        panXAnim.setRepeatCount(ValueAnimator.INFINITE);
+        panXAnim.setInterpolator(new AccelerateDecelerateInterpolator());
+        panXAnim.start();
+        loadingAnimators.add(panXAnim);
+
+        ObjectAnimator panYAnim = ObjectAnimator.ofFloat(bgView, "translationY", -px(12), px(12));
+        panYAnim.setDuration(9500);
+        panYAnim.setRepeatMode(ValueAnimator.REVERSE);
+        panYAnim.setRepeatCount(ValueAnimator.INFINITE);
+        panYAnim.setInterpolator(new AccelerateDecelerateInterpolator());
+        panYAnim.start();
+        loadingAnimators.add(panYAnim);
+
+        loadingLayout.addView(bgView, new LayoutParams(-1, -1));
+
+        // 2. Moody Vignette Scrim (Ensures text & loading bar pop with maximum legibility)
+        View scrim = new View(getContext());
+        scrim.setBackground(new Drawable() {
+            @Override
+            public void draw(Canvas canvas) {
+                Rect b = getBounds();
+                if (b.width() <= 0 || b.height() <= 0) return;
+                RadialGradient rad = new RadialGradient(
+                        b.exactCenterX(), b.exactCenterY(),
+                        Math.max(b.width(), b.height()) * 0.68f,
+                        new int[]{0x65070B10, 0xBD06080D, 0xF5030508},
+                        new float[]{0f, 0.65f, 1f},
+                        Shader.TileMode.CLAMP
+                );
+                Paint p = new Paint(Paint.ANTI_ALIAS_FLAG);
+                p.setShader(rad);
+                canvas.drawRect(b, p);
+            }
+            @Override public void setAlpha(int alpha) {}
+            @Override public void setColorFilter(ColorFilter colorFilter) {}
+            @Override public int getOpacity() { return PixelFormat.TRANSLUCENT; }
+        });
+        loadingLayout.addView(scrim, new LayoutParams(-1, -1));
+
+        // 3. Real-Time Atmospheric Rain & Bokeh Motion Overlay
+        loadingAtmosphere = new LoadingAtmosphereView(getContext());
+        loadingAtmosphere.start();
+        loadingLayout.addView(loadingAtmosphere, new LayoutParams(-1, -1));
+
+        // 4. Center UI Box
         LinearLayout box = new LinearLayout(getContext());
         box.setOrientation(LinearLayout.VERTICAL);
         box.setGravity(Gravity.CENTER);
@@ -666,12 +1038,13 @@ public final class NativeUi extends FrameLayout {
         TextView title = makeText("NIGHT RIDER", 32, COLOR_WHITE, true);
         title.setLetterSpacing(0.20f);
         title.setGravity(Gravity.CENTER);
-        ObjectAnimator titlePulse = ObjectAnimator.ofFloat(title, "alpha", 0.72f, 1.0f);
+        ObjectAnimator titlePulse = ObjectAnimator.ofFloat(title, "alpha", 0.76f, 1.0f);
         titlePulse.setDuration(1400);
         titlePulse.setRepeatMode(ValueAnimator.REVERSE);
         titlePulse.setRepeatCount(ValueAnimator.INFINITE);
         titlePulse.setInterpolator(new AccelerateDecelerateInterpolator());
         titlePulse.start();
+        loadingAnimators.add(titlePulse);
         box.addView(title);
 
         // Subtitle with subtle breathing animation
@@ -679,12 +1052,13 @@ public final class NativeUi extends FrameLayout {
         sub.setLetterSpacing(0.24f);
         sub.setGravity(Gravity.CENTER);
         sub.setPadding(0, px(4), 0, px(16));
-        ObjectAnimator subPulse = ObjectAnimator.ofFloat(sub, "alpha", 0.50f, 0.90f);
+        ObjectAnimator subPulse = ObjectAnimator.ofFloat(sub, "alpha", 0.55f, 0.95f);
         subPulse.setDuration(1600);
         subPulse.setRepeatMode(ValueAnimator.REVERSE);
         subPulse.setRepeatCount(ValueAnimator.INFINITE);
         subPulse.setInterpolator(new AccelerateDecelerateInterpolator());
         subPulse.start();
+        loadingAnimators.add(subPulse);
         box.addView(sub);
 
         // Rotating Low-Poly Geometric Beacon Accent
@@ -869,10 +1243,12 @@ public final class NativeUi extends FrameLayout {
         Button backBtn = new Button(getContext());
         backBtn.setText("◀  BACK");
         backBtn.setTextSize(12f);
+        backBtn.setLetterSpacing(0.04f);
         backBtn.setTypeface(Typeface.create("sans-serif-bold", Typeface.BOLD));
-        backBtn.setTextColor(COLOR_WHITE);
-        backBtn.setBackground(new ChamferedDrawable(COLOR_BTN_FILL, COLOR_BTN_STROKE, px(1.2f), px(10)));
-        backBtn.setPadding(px(16), px(6), px(16), px(6));
+        backBtn.setTextColor(0xFFF0F4F8);
+        TactileButtonDrawable backDrawable = new TactileButtonDrawable(false, px(1.2f), px(9));
+        backBtn.setBackground(backDrawable);
+        backBtn.setPadding(px(16), px(7), px(16), px(7));
         Runnable closeAction = () -> {
             activity.feedback(10);
             fullScreen.animate()
@@ -888,12 +1264,14 @@ public final class NativeUi extends FrameLayout {
         backBtn.setOnTouchListener((v, event) -> {
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
-                    v.animate().scaleX(0.94f).scaleY(0.94f).setDuration(80).start();
+                    backDrawable.setPressed(true);
+                    v.animate().scaleX(0.95f).scaleY(0.95f).setDuration(70).start();
                     break;
                 case MotionEvent.ACTION_UP:
                 case MotionEvent.ACTION_CANCEL:
-                    v.animate().scaleX(1.0f).scaleY(1.0f).setDuration(140)
-                            .setInterpolator(new OvershootInterpolator(1.4f)).start();
+                    backDrawable.setPressed(false);
+                    v.animate().scaleX(1.0f).scaleY(1.0f).setDuration(150)
+                            .setInterpolator(new OvershootInterpolator(1.3f)).start();
                     break;
             }
             return false;
@@ -1157,6 +1535,14 @@ public final class NativeUi extends FrameLayout {
     }
 
     private void removeActivePanel() {
+        if (loadingAtmosphere != null) {
+            loadingAtmosphere.stop();
+            loadingAtmosphere = null;
+        }
+        for (Animator a : loadingAnimators) {
+            a.cancel();
+        }
+        loadingAnimators.clear();
         if (activePanel != null) {
             removeView(activePanel);
             activePanel = null;

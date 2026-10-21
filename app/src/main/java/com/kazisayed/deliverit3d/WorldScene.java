@@ -281,8 +281,8 @@ public final class WorldScene implements AutoCloseable {
             for (Object3D o : c.objects) {
                 float d = Vector2.dst2(x, z, o.x, o.z);
                 if (d > 230 * 230 || !camera.frustum.sphereInFrustum(o.x, o.y, o.z, o.radius)) continue;
-                if (o.far != null && d > 110 * 110) out.add(o.far);
-                else if (o.far != null || d < 150 * 150) out.add(o.near);
+                if (o.far != null && d > 205 * 205) out.add(o.far);
+                else out.add(o.near);
             }
         }
         if (assets.mountain != null) {

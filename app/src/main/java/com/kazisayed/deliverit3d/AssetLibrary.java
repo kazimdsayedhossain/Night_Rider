@@ -48,23 +48,52 @@ public final class AssetLibrary implements AutoCloseable {
     public final Map<String,Template> props=new LinkedHashMap<>();
     public final Map<String,Template> vehicles=new LinkedHashMap<>();public final Map<String,Model> couriers=new LinkedHashMap<>();public Model deliveryBicycle;public Template mountain;
     private final List<SceneAsset> owned=new ArrayList<>();private int stage;public String status="Preparing city assets";
+    private static com.badlogic.gdx.graphics.Texture buildingFacadeTexture;
+
+    private static com.badlogic.gdx.graphics.Texture getFallbackFacade() {
+        if (buildingFacadeTexture == null) {
+            try {
+                if (Gdx.files != null && Gdx.files.internal("textures/facade-ceramic-v1.png").exists()) {
+                    buildingFacadeTexture = new com.badlogic.gdx.graphics.Texture(Gdx.files.internal("textures/facade-ceramic-v1.png"), true);
+                    buildingFacadeTexture.setFilter(com.badlogic.gdx.graphics.Texture.TextureFilter.MipMapLinearLinear, com.badlogic.gdx.graphics.Texture.TextureFilter.Linear);
+                    buildingFacadeTexture.setWrap(com.badlogic.gdx.graphics.Texture.TextureWrap.Repeat, com.badlogic.gdx.graphics.Texture.TextureWrap.Repeat);
+                }
+            } catch (Exception ignored) {}
+        }
+        return buildingFacadeTexture;
+    }
 
     public static void illuminateWindows(ModelInstance instance){
         if(instance==null||instance.materials==null)return;
+        com.badlogic.gdx.graphics.Texture fallback = getFallbackFacade();
         for(com.badlogic.gdx.graphics.g3d.Material m:instance.materials){
             if(m==null||m.id==null)continue;
             String id=m.id.toLowerCase();
-            if(id.contains("glass")||id.contains("window")||id.contains("shop")||id.contains("glow")||id.contains("emit")||id.contains("bulb")||id.contains("sign")||id.contains(".006")||id.contains(".007")||id.contains(".010")){
-                m.set(net.mgsx.gltf.scene3d.attributes.PBRColorAttribute.createBaseColorFactor(new Color(1f,.82f,.42f,1f)));
+            if(id.contains("emit_bulb")||id.contains("window")||id.contains(".006")||id.contains(".007")||id.contains(".010")){
+                // Illuminated window panes with warm golden glow
+                m.set(net.mgsx.gltf.scene3d.attributes.PBRColorAttribute.createBaseColorFactor(new Color(1f,.88f,.55f,1f)));
                 m.set(com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute.createEmissive(new Color(1.35f,.86f,.35f,1f)));
-                m.set(net.mgsx.gltf.scene3d.attributes.PBRFloatAttribute.createRoughness(.1f));
+                m.set(net.mgsx.gltf.scene3d.attributes.PBRFloatAttribute.createRoughness(.15f));
+            } else if(id.contains("glass_curtain")||(id.contains("glass")&&!id.contains("shop"))){
+                // Glass curtain / window panes
+                m.set(net.mgsx.gltf.scene3d.attributes.PBRColorAttribute.createBaseColorFactor(new Color(.92f,.88f,.78f,1f)));
+                m.set(com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute.createEmissive(new Color(.95f,.72f,.35f,1f)));
+                m.set(net.mgsx.gltf.scene3d.attributes.PBRFloatAttribute.createRoughness(.12f));
+            } else if(id.contains("shop")||id.contains("sign")||id.contains("neon")||id.contains("glow")){
+                // Storefront windows, signs, and advertisements: retain high-res texture and add warm illumination
+                m.set(net.mgsx.gltf.scene3d.attributes.PBRColorAttribute.createBaseColorFactor(Color.WHITE));
+                m.set(com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute.createEmissive(new Color(.65f,.58f,.45f,1f)));
+                m.set(net.mgsx.gltf.scene3d.attributes.PBRFloatAttribute.createRoughness(.30f));
             } else {
-                // All buildings with dark walls (charcoal / dark slate / graphite facade)
-                // with soft minimum luminance so sides and back walls are never pitch black
-                m.set(net.mgsx.gltf.scene3d.attributes.PBRColorAttribute.createBaseColorFactor(new Color(.18f,.20f,.24f,1f)));
-                m.set(com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute.createEmissive(new Color(.045f,.055f,.070f,1f)));
+                // Building walls, bricks, concrete trim, awnings, doors, roof tiles, parapets:
+                // Ensure base texture is preserved at full contrast with crisp color factor
+                if(!m.has(net.mgsx.gltf.scene3d.attributes.PBRTextureAttribute.BaseColorTexture) && fallback != null){
+                    m.set(net.mgsx.gltf.scene3d.attributes.PBRTextureAttribute.createBaseColorTexture(fallback));
+                }
+                m.set(net.mgsx.gltf.scene3d.attributes.PBRColorAttribute.createBaseColorFactor(new Color(.94f,.95f,.98f,1f)));
+                m.set(com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute.createEmissive(new Color(.050f,.058f,.070f,1f)));
                 m.set(net.mgsx.gltf.scene3d.attributes.PBRFloatAttribute.createRoughness(.65f));
-                m.set(net.mgsx.gltf.scene3d.attributes.PBRFloatAttribute.createMetallic(.05f));
+                m.set(net.mgsx.gltf.scene3d.attributes.PBRFloatAttribute.createMetallic(.04f));
             }
         }
     }
@@ -319,5 +348,8 @@ public final class AssetLibrary implements AutoCloseable {
     }
     public Template getProp(String id){return props.get(id);}
     public float progress(){return Math.min(1,stage/40f);}
-    @Override public void close(){for(SceneAsset a:owned)a.dispose();}
+    @Override public void close(){
+        for(SceneAsset a:owned)a.dispose();
+        if(buildingFacadeTexture!=null){buildingFacadeTexture.dispose();buildingFacadeTexture=null;}
+    }
 }
