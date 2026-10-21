@@ -118,17 +118,15 @@ public final class WorldScene implements AutoCloseable {
                 if (t == null) t = assets.pickBuilding(0);
                 if (t == null) continue;
                 float fit = b.scale;
-                float hw = t != null ? t.width * 0.5f : b.halfWidth;
-                float hl = t != null ? t.length * 0.5f : b.halfLength;
+                // Buildings are rotated 90 deg around Y: local Z (depth) is along world X, local X (facade width) is along world Z
+                float halfDepth = t != null ? t.length * 0.5f * fit : b.halfLength * fit;
+                float halfAlong = t != null ? t.width * 0.5f * fit : b.halfWidth * fit;
                 float s = Math.signum(b.x);
                 if (s == 0) s = 1;
-                // Ensure building front edge is strictly behind sidewalk (8.5m) and verge ramp (11.0m)
-                float posX = b.x;
-                if (Math.abs(posX) - hw < 13.0f) {
-                    posX = s * (13.0f + hw);
-                }
-                float actualHw = Math.max(b.halfWidth, hw);
-                float actualHl = Math.max(b.halfLength, hl);
+                // Place building center so front wall sits securely behind sidewalk (8.5m) and verge (11.5m)
+                float posX = s * Math.max(Math.abs(b.x), 11.5f + halfDepth);
+                float actualHw = halfDepth;
+                float actualHl = halfAlong;
 
                 Object3D o = new Object3D();
                 o.near = t.create(posX, b.y, b.z, b.yaw * MathUtils.radiansToDegrees, fit);
@@ -139,10 +137,10 @@ public final class WorldScene implements AutoCloseable {
                 c.objects.add(o);
                 c.colliders.add(new Collision.Box(posX, b.z, actualHw, actualHl, 0, "building"));
 
-                // Add lush bushes and shrubs strictly in the building's garden and along its sides (verge 12.5m+, clear of sidewalk)
-                float bx = s * Math.max(12.5f, Math.abs(posX) - actualHw * 0.4f);
+                // Add decorative shrubs strictly in the front garden along the verge (11.0m), flanking the entrance
+                float bx = s * 11.0f;
                 if (assets.shrubs != null && !assets.shrubs.isEmpty()) {
-                    for (float dz : new float[]{-actualHl * 0.75f, -actualHl * 0.25f, actualHl * 0.25f, actualHl * 0.75f}) {
+                    for (float dz : new float[]{-actualHl * 0.65f, actualHl * 0.65f}) {
                         AssetLibrary.Template st = assets.shrubs.get((int)Math.abs(posX * 7 + dz * 13) % assets.shrubs.size());
                         addProp(c, st, new CityLayout.Prop("shrub", bx, 0f, b.z + dz, (int)(posX * 19 + dz * 31) % 360, 0.95f, 0), 3.5f);
                     }

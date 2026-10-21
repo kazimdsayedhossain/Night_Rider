@@ -186,17 +186,16 @@ public final class AssetLibrary implements AutoCloseable {
             case 7 -> {
                 SceneAsset a=load("world/city-architecture.glb");
                 for(SceneModel s:a.scenes){
-                    ModelInstance mi=new ModelInstance(s.model);illuminateWindows(mi);
                     boolean isHouse = s.name.startsWith("house");
+                    if(isHouse) continue; // Skip 3-sided folded-paper house shells
+                    ModelInstance mi=new ModelInstance(s.model);illuminateWindows(mi);
                     boolean isFactory = s.name.contains("factory");
                     boolean isClinic = s.name.contains("clinic");
                     boolean isHousing = s.name.contains("housing");
-                    boolean zUp = isHouse || isHousing;
-                    float footprint = isFactory ? 26f : isHousing ? 26f : isHouse ? 22f : 24f;
-                    float heightLimit = isFactory ? 42f : isHousing ? 38f : isHouse ? 30f : 36f;
-                    float hScale = isFactory ? 1.8f : isHousing ? 1.6f : isHouse ? 1.45f : isClinic ? 1.8f : 1.25f;
-                    Template t = new Template(mi, footprint, heightLimit, 18.0f, 0, zUp, true, hScale);
-                    if(isHouse) houses.add(t);
+                    float footprint = isFactory ? 26f : isHousing ? 26f : 24f;
+                    float heightLimit = isFactory ? 42f : isHousing ? 38f : 36f;
+                    float hScale = isFactory ? 1.8f : isHousing ? 1.6f : isClinic ? 1.8f : 1.25f;
+                    Template t = new Template(mi, footprint, heightLimit, 18.0f, 0, false, true, hScale);
                     buildings.add(t);
                     namedBuildings.put(s.name, t);
                 }
@@ -385,57 +384,15 @@ public final class AssetLibrary implements AutoCloseable {
     private void prop(String id,String file,float footprint,float height,float maxScale,float yaw,boolean centerXZ){prop(id,file,footprint,height,maxScale,yaw,centerXZ,1.0f);}
     public Template getBuilding(String id){
         if(id == null) return pickBuilding(0);
-        switch(id) {
-            case "b1_blue_corner_shop": {
-                Template t = namedBuildings.get("house-01");
-                if (t != null) return t;
-                break;
-            }
-            case "b2_pink_tower": {
-                Template t = namedBuildings.get("house-02");
-                if (t != null) return t;
-                break;
-            }
-            case "b3_brick_cafe": {
-                Template t = namedBuildings.get("house-03");
-                if (t != null) return t;
-                break;
-            }
-            case "b4_music_store": {
-                Template t = namedBuildings.get("house-04");
-                if (t != null) return t;
-                break;
-            }
-            case "b5_green_bakery": {
-                Template t = namedBuildings.get("house-05");
-                if (t != null) return t;
-                break;
-            }
-            case "b6_apartment_mart": {
-                Template t = namedBuildings.get("house-06");
-                if (t != null) return t;
-                break;
-            }
-            case "b7_office_tower": {
-                Template t = namedBuildings.get("house-07");
-                if (t != null) return t;
-                break;
-            }
-            case "street-frontage-set": {
-                Template t = namedBuildings.get("landmark-housing");
-                if (t == null) t = namedBuildings.get("house-08");
-                if (t != null) return t;
-                break;
-            }
-            case "city-core-set": {
-                Template t = namedBuildings.get("landmark-factory");
-                if (t == null) t = namedBuildings.get("house-09");
-                if (t != null) return t;
-                break;
-            }
-        }
         Template t=namedBuildings.get(id);
         if(t!=null)return t;
+        if("city-core-set".equals(id)) {
+            t = namedBuildings.get("b7_office_tower");
+            if (t != null) return t;
+        } else if("street-frontage-set".equals(id)) {
+            t = namedBuildings.get("b6_apartment_mart");
+            if (t != null) return t;
+        }
         t=props.get(id);
         if(t!=null)return t;
         if(!buildings.isEmpty())return buildings.get(0);
