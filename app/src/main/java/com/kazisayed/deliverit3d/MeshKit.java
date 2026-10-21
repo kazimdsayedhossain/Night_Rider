@@ -13,7 +13,7 @@ import java.util.*;
 public final class MeshKit implements AutoCloseable {
     public static final long ATTR=VertexAttributes.Usage.Position|VertexAttributes.Usage.Normal|VertexAttributes.Usage.TextureCoordinates;
     private final List<Model> owned=new ArrayList<>();private final List<Texture> textures=new ArrayList<>();
-    public final Material asphalt,sidewalk,grass,earth,stone,steel,rubber,ivory,amber,skin,jacket,trousers,glass,water,wood,lamp,parcel,snow,lightPool,gravel,headBeam,bikeHeadBeam,puddle,haloMat,lampStreak,tailStreak,brakeStreak,headStreak;
+    public final Material asphalt,sidewalk,grass,earth,stone,steel,rubber,ivory,amber,skin,jacket,trousers,glass,water,wood,lamp,parcel,snow,lightPool,gravel,headBeam,bikeHeadBeam,puddle,carGroundRefl,haloMat,lampStreak,tailStreak,brakeStreak,headStreak;
     public final Model cube,sphere,cylinder;private final Map<Material,Model> cubes=new IdentityHashMap<>(),spheres=new IdentityHashMap<>();
     public MeshKit(){
         // Rain-slicked wet asphalt: dark wet tint, moderately glossy, with patchy roughness
@@ -41,10 +41,10 @@ public final class MeshKit implements AutoCloseable {
         trousers=material("283136",.92f,0);
         glass=material("354a55",.13f,.45f);
         water=new Material(
-            PBRColorAttribute.createBaseColorFactor(new Color(.20f,.60f,.68f,1f)),
+            PBRColorAttribute.createBaseColorFactor(new Color(.28f,.72f,.85f,1f)),
             PBRTextureAttribute.createBaseColorTexture(waterTexture()),
-            PBRFloatAttribute.createMetallic(.12f),
-            PBRFloatAttribute.createRoughness(.08f)
+            PBRFloatAttribute.createMetallic(.18f),
+            PBRFloatAttribute.createRoughness(.05f)
         );
         addWaterRoughness(water);
         wood=material("6c5945",.94f,0);
@@ -52,22 +52,32 @@ public final class MeshKit implements AutoCloseable {
         parcel=material("bb925b",1,0);
         snow=material("e4e7e5",.83f,0);
         lamp=material("ffe4b0",.3f,0);
-        lamp.set(ColorAttribute.createEmissive(new Color(2.0f,1.45f,.72f,1f)));
+        lamp.set(ColorAttribute.createEmissive(new Color(3.0f,2.18f,1.08f,1f)));
 
         // ---- Light decals (same shapes / opacities as the Three.js reference) -----------------------------------
         // All of them are unlit + additive (ONE,ONE) with the intensity baked into the texture RGB, so overlapping
         // pools/beams add up like real light instead of PBR-shading a flat quad and stacking alpha.
         // Palette follows the JS materials: lamp pool 0xffd2a0 @ .22, bike beam @ .26, car beam @ .14,
         // halo 0xffbd7c @ .38, lamp streak 0xffc890 @ .42, tail 0xff2a18 @ .5 (brake .85), head 0xffeccc @ .18.
-        lightPool=glow(poolTexture(.24f,new float[]{1f,.82f,.63f}));
+        lightPool=glow(poolTexture(.36f,new float[]{1f,.82f,.63f}));
         bikeHeadBeam=glow(bikeBeamTexture(.26f));
         headBeam=glow(carBeamTexture(.17f));
-        haloMat=glow(haloTexture(.38f,new float[]{1f,.74f,.49f}));
+        haloMat=glow(haloTexture(.57f,new float[]{1f,.74f,.49f}));
         float[] single=streakLuma(new float[]{.5f},3), dual=streakLuma(new float[]{.2f,.8f},11);
-        lampStreak=glow(tint(single,.42f,new float[]{1f,.78f,.56f}));
+        lampStreak=glow(tint(single,.63f,new float[]{1f,.78f,.56f}));
         tailStreak=glow(tint(dual,.50f,new float[]{1f,.165f,.094f}));
         brakeStreak=glow(tint(dual,.85f,new float[]{1f,.165f,.094f}));
         headStreak=glow(tint(dual,.18f,new float[]{1f,.925f,.80f}));
+
+        // ---- Wet Asphalt Vehicle Ground Reflection: soft contact shadow + glossy wet road reflection sheen -------
+        carGroundRefl=new Material(
+            PBRTextureAttribute.createBaseColorTexture(carReflTexture()),
+            new BlendingAttribute(GL20.GL_SRC_ALPHA,GL20.GL_ONE_MINUS_SRC_ALPHA,.82f),
+            new DepthTestAttribute(GL20.GL_LEQUAL,false),
+            new IntAttribute(IntAttribute.CullFace,0),
+            PBRFloatAttribute.createMetallic(.18f),
+            PBRFloatAttribute.createRoughness(.12f)
+        );
 
         // ---- Puddles: dark, feathered, only slightly glossier than the wet road (JS roadPuddleMaterial) ---------
         // A near-mirror puddle reflects one flat patch of sky glow as a bright oval, so it stays dark & semi-opaque.
@@ -264,40 +274,57 @@ public final class MeshKit implements AutoCloseable {
         }
         return upload(p,false);
     }
+    /** Wet asphalt contact reflection underneath vehicles: feathered dark footprint with glossy wet specular sheen */
+    private Texture carReflTexture(){
+        final int W=256,H=512;Pixmap p=pixmap(W,H);
+        for(int y=0;y<H;y++)for(int x=0;x<W;x++){
+            float dx=(x+.5f-W/2f)/(W/2f),dy=(y+.5f-H/2f)/(H/2f);
+            float d=(float)Math.sqrt(dx*dx+dy*dy);
+            if(d>=1.0f)continue;
+            float falloff=1f-smooth(0.32f,1.0f,d);
+            int a=b8(falloff*0.75f);
+            p.drawPixel(x,y,(a>0)?((0x06<<24)|(0x0a<<16)|(0x14<<8)|a):0);
+        }
+        return upload(p,false);
+    }
     private Texture waterTexture(){
-        final int S=256;Pixmap p=pixmap(S,S);
+        final int S=512;Pixmap p=pixmap(S,S);
         final float pi2=(float)(Math.PI*2.0);
         for(int y=0;y<S;y++)for(int x=0;x<S;x++){
             float u=x/(float)S, v=y/(float)S;
             float ax=u*pi2, ay=v*pi2;
-            // Primary diagonal swell
+            // Primary deep swells
             float w1=(float)(Math.sin(ax*2f+ay)*Math.cos(ay*2f-ax));
             // Secondary crossing wave ripples
             float w2=(float)(Math.sin(ax*4f-ay*3f+1.2f)*Math.cos(ax*3f+ay*4f-0.7f));
-            // Finer capillary ripples
+            // Finer surface capillary ripples
             float w3=(float)(Math.sin(ax*8f+ay*6f+2.5f)*Math.sin(ax*6f-ay*8f));
-            // Shallow refracted caustic webs
+            float w4=(float)(Math.sin(ax*12f-ay*10f)*Math.cos(ax*10f+ay*12f)*0.5f);
+            // Shallow refracted caustic web patterns
             float c1=(float)Math.abs(Math.sin(ax*4f+Math.cos(ay*3f)));
             float c2=(float)Math.abs(Math.cos(ay*4f+Math.sin(ax*3f)));
             float caustic=(float)Math.pow(1.0-Math.min(1.0,c1*c2),2.4);
+            float c3=(float)Math.abs(Math.sin(ax*8f+Math.cos(ay*6f)));
+            float c4=(float)Math.abs(Math.cos(ay*8f+Math.sin(ax*6f)));
+            float fineCaustic=(float)Math.pow(1.0-Math.min(1.0,c3*c4),2.0)*0.5f;
 
-            float h=0.50f+0.25f*w1+0.18f*w2+0.10f*w3+0.14f*(caustic-0.28f);
+            float h=0.48f+0.22f*w1+0.16f*w2+0.09f*w3+0.05f*w4+0.16f*(caustic-0.28f)+0.08f*(fineCaustic-0.15f);
             h=clamp01(h);
 
             // Aquatic palette: deep emerald/teal abyss -> turquoise shallow -> aqua crest -> white foam tips
             float r,g,b;
-            if(h<0.38f){
-                float t=h/0.38f;
-                r=lerp(0.06f,0.12f,t); g=lerp(0.24f,0.44f,t); b=lerp(0.36f,0.56f,t);
-            }else if(h<0.75f){
-                float t=(h-0.38f)/(0.75f-0.38f);
-                r=lerp(0.12f,0.34f,t); g=lerp(0.44f,0.72f,t); b=lerp(0.56f,0.82f,t);
-            }else if(h<0.89f){
-                float t=(h-0.75f)/(0.89f-0.75f);
-                r=lerp(0.34f,0.68f,t); g=lerp(0.72f,0.91f,t); b=lerp(0.82f,0.96f,t);
+            if(h<0.35f){
+                float t=h/0.35f;
+                r=lerp(0.03f,0.08f,t); g=lerp(0.18f,0.38f,t); b=lerp(0.30f,0.52f,t);
+            }else if(h<0.72f){
+                float t=(h-0.35f)/(0.72f-0.35f);
+                r=lerp(0.08f,0.28f,t); g=lerp(0.38f,0.68f,t); b=lerp(0.52f,0.80f,t);
+            }else if(h<0.87f){
+                float t=(h-0.72f)/(0.87f-0.72f);
+                r=lerp(0.28f,0.62f,t); g=lerp(0.68f,0.88f,t); b=lerp(0.80f,0.95f,t);
             }else{
-                float t=(h-0.89f)/(1.0f-0.89f);
-                r=lerp(0.68f,0.92f,t); g=lerp(0.91f,0.98f,t); b=lerp(0.96f,1.0f,t);
+                float t=(h-0.87f)/(1.0f-0.87f);
+                r=lerp(0.62f,0.92f,t); g=lerp(0.88f,0.98f,t); b=lerp(0.95f,1.0f,t);
             }
             p.drawPixel(x,y,(b8(r)<<24)|(b8(g)<<16)|(b8(b)<<8)|255);
         }
@@ -316,10 +343,10 @@ public final class MeshKit implements AutoCloseable {
             float caustic=(float)Math.pow(1.0-Math.min(1.0,c1*c2),2.4);
             float h=clamp01(0.50f+0.28f*w1+0.20f*w2+0.16f*(caustic-0.28f));
 
-            // Wave crests and caustic edges have glass-smooth mirror reflections (G=roughness multiplier)
+            // Mirror-smooth water on crests and caustic edges (G=roughness multiplier)
             // Metallic is higher on crests to reflect the sky and lamps sharply (B=metallic multiplier)
-            float roughMult=h>0.62f?lerp(0.85f,0.22f,(h-0.62f)/0.38f):lerp(1.15f,0.85f,h/0.62f);
-            float metalMult=h>0.62f?lerp(1.0f,1.45f,(h-0.62f)/0.38f):1.0f;
+            float roughMult=h>0.58f?lerp(0.70f,0.15f,(h-0.58f)/0.42f):lerp(1.10f,0.70f,h/0.58f);
+            float metalMult=h>0.58f?lerp(1.0f,1.60f,(h-0.58f)/0.42f):1.0f;
             q.drawPixel(x,y,(255<<24)|(b8(clamp01(roughMult))<<16)|(b8(clamp01(metalMult*0.5f))<<8)|255);
         }
         PBRTextureAttribute a=PBRTextureAttribute.createMetallicRoughnessTexture(upload(q,true));

@@ -16,6 +16,9 @@ public final class TrafficSim {
     private static final int MAX_CROSS = 4;
     private static final float LANE = 2.2f;
 
+    /** Set to false to disable all traffic vehicles on the road. */
+    public static boolean ENABLE_VEHICLES = true;
+
     public record Profile(float cruise, float max, float accel, float brake, float gap, float headway, float horn, float yield) {}
     private static final Map<String, Profile> PROFILES = new HashMap<>();
     static {
@@ -70,14 +73,16 @@ public final class TrafficSim {
 
     public TrafficSim(LevelData level, Listener listener) {
         this.profile = level.traffic; this.length = level.length; this.listener = listener;
-        for (int i = 0; i < profile.lanePool(); i++) {
-            String type = TYPES[i % TYPES.length];
-            boolean fwd = i % 2 == 0;
-            float startZ = fwd ? 70 + (i / 2) * 52 : 110 + (i / 2) * 52;
-            Vehicle v = make(type, fwd ? 1 : -1, i, 0.94f + ((i + 1) * 37 % 13) / 100f);
-            v.cross = false; v.roadX = 0; v.laneX = fwd ? LANE : -LANE; v.x = v.laneX; v.z = startZ;
-            v.yaw = fwd ? 0 : (float) Math.PI; v.sync();
-            lane.add(v); listener.spawned(v);
+        if (ENABLE_VEHICLES) {
+            for (int i = 0; i < profile.lanePool(); i++) {
+                String type = TYPES[i % TYPES.length];
+                boolean fwd = i % 2 == 0;
+                float startZ = fwd ? 70 + (i / 2) * 52 : 110 + (i / 2) * 52;
+                Vehicle v = make(type, fwd ? 1 : -1, i, 0.94f + ((i + 1) * 37 % 13) / 100f);
+                v.cross = false; v.roadX = 0; v.laneX = fwd ? LANE : -LANE; v.x = v.laneX; v.z = startZ;
+                v.yaw = fwd ? 0 : (float) Math.PI; v.sync();
+                lane.add(v); listener.spawned(v);
+            }
         }
     }
 
@@ -119,6 +124,15 @@ public final class TrafficSim {
 
     // ------------------------------------------------------------ main update
     public void update(float dt, float px, float pz, float playerSpeedZ, float playerYaw) {
+        if (!ENABLE_VEHICLES) {
+            if (!lane.isEmpty() || !cross.isEmpty()) {
+                for (Vehicle v : lane) listener.removed(v);
+                for (Vehicle v : cross) listener.removed(v);
+                lane.clear();
+                cross.clear();
+            }
+            return;
+        }
         time += dt;
         syncSpawners(px, pz);
         recenterLanes(px);

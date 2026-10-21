@@ -20,7 +20,7 @@ public final class TrafficSystem {
             case "muscle_car" -> "barracuda"; case "scooter", "bicycle" -> "scooter"; case "truck" -> "truck"; default -> "cuda";
         };
     }
-    private static final class View { ModelInstance model, beam, tail, head; AssetLibrary.Template template; boolean braking; }
+    private static final class View { ModelInstance model, beam, tail, head, groundRefl; AssetLibrary.Template template; boolean braking; }
 
     public final TrafficSim sim;
     private final AssetLibrary assets;
@@ -63,6 +63,7 @@ public final class TrafficSystem {
         float beamWidth = twoWheeler ? 2.4f : Math.max(3.4f, t.width * 1.8f);
         float beamLength = twoWheeler ? 13.0f : 17.0f;
         view.beam = kit.decal(twoWheeler ? kit.bikeHeadBeam : kit.headBeam, 0, 0, 0, beamWidth, beamLength);
+        view.groundRefl = kit.decal(kit.carGroundRefl, 0, 0, 0, t.width * (twoWheeler ? 1.6f : 1.35f), t.length * (twoWheeler ? 1.4f : 1.25f));
         if (!twoWheeler) {   // wet-road smears: red behind (brighter when braking), warm white ahead (JS vehicle streaks)
             view.tail = kit.streak(kit.tailStreak);
             view.head = kit.streak(kit.headStreak);
@@ -91,6 +92,11 @@ public final class TrafficSystem {
             float ahead = v.halfLength + (twoWheeler ? 5.8f : 8.2f);
             w.beam.transform.setToTranslation(v.x + (float) Math.sin(v.yaw) * ahead, y + .036f, v.z + (float) Math.cos(v.yaw) * ahead)
                 .rotate(Vector3.Y, v.yaw * MathUtils.radiansToDegrees).scale(beamWidth, 1f, beamLength);
+            if (w.groundRefl != null) {
+                w.groundRefl.transform.setToTranslation(v.x, y + .037f, v.z)
+                    .rotate(Vector3.Y, v.yaw * MathUtils.radiansToDegrees)
+                    .scale(w.template.width * (twoWheeler ? 1.6f : 1.35f), 1f, w.template.length * (twoWheeler ? 1.4f : 1.25f));
+            }
             if (w.tail != null) {
                 float sw = w.template.width * 1.1f, sin = (float) Math.sin(v.yaw), cos = (float) Math.cos(v.yaw), deg = v.yaw * MathUtils.radiansToDegrees;
                 boolean brake = v.brakeLight > .5f;
@@ -128,9 +134,11 @@ public final class TrafficSystem {
         for (Map.Entry<TrafficSim.Vehicle, View> e : views.entrySet()) {
             TrafficSim.Vehicle v = e.getKey();
             if (Vector2.dst2(x, z, v.x, v.z) < 190 * 190 && camera.frustum.sphereInFrustum(v.x, 2, v.z, v.halfLength + 8)) {
-                out.add(e.getValue().model);
+                View w = e.getValue();
+                if (w.groundRefl != null) out.add(w.groundRefl);
+                out.add(w.model);
                 if (night && kit.night() > .02f) {
-                    View w = e.getValue();
+                    /* w already defined */
                     out.add(w.beam);
                     if (w.tail != null) { out.add(w.tail); out.add(w.head); }
                 }

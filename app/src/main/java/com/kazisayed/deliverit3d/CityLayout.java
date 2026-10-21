@@ -58,7 +58,7 @@ public final class CityLayout {
     }
 
     private static float uvScale(Layer l) {
-        return switch (l) { case ASPHALT -> 4f; case SIDEWALK -> 2.2f; case GRASS -> 6f; case VERGE -> 3f; case CURB -> 1.5f; case STONE -> 2f; case WATER -> 12f; case GRAVEL -> 1.5f; default -> 1f; };
+        return switch (l) { case ASPHALT -> 4f; case SIDEWALK -> 3.5f / 6.0f; case GRASS -> 6f; case VERGE -> 3f; case CURB -> 1.5f; case STONE -> 2f; case WATER -> 8.5f; case GRAVEL -> 1.5f; default -> 1f; };
     }
 
     /** Builder for one tile. All coordinates are world coordinates. */
@@ -229,7 +229,7 @@ public final class CityLayout {
     private static void asphalt(B b, WorldGrid.Config cfg) {
         b.avenueTop(Layer.ASPHALT, b.ox - CURB_FACE, b.ox + CURB_FACE, b.oz - HALF, b.oz + HALF, 0f);
 
-        // Water puddles / glossy rain-water spots on the road surface in wheel ruts and depressions
+        // Water puddles / glossy rain-water spots on the road surface and sidewalks
         if (!WorldGrid.isRiverRow(b.cz)) {
             boolean junction = cfg.hasEast() || cfg.hasWest();
             for (float zl = -66f; zl <= 66f; zl += 20f) {
@@ -243,6 +243,27 @@ public final class CityLayout {
                 float rl = 2.4f + (Math.abs(h * 31) % 15) / 8f;  // 2.4m to 4.2m half length
                 float ey = b.elev(pz) + 0.038f;
                 b.decalQuad(Layer.PUDDLE, px, ey, pz, rw, rl);
+            }
+            // Sidewalk water spots and wet puddle reflections
+            for (float zl = -64f; zl <= 64f; zl += 18f) {
+                if (junction && Math.abs(zl) < 14f) continue;
+                int hW = hash(b.cx, b.cz, (int) (zl * 11 + 3));
+                int hE = hash(b.cx, b.cz, (int) (zl * 13 + 7));
+                // West sidewalk (5.0m..8.5m from road center, center 6.6m)
+                float pzW = b.oz + zl + (hW % 3);
+                float pxW = b.ox - 6.6f + (hW % 3) * 0.22f;
+                float rwW = 0.9f + (Math.abs(hW) % 5) * 0.12f;
+                float rlW = 1.4f + (Math.abs(hW) % 6) * 0.18f;
+                float eyW = b.elev(pzW) + STEP + 0.024f;
+                b.decalQuad(Layer.PUDDLE, pxW, eyW, pzW, rwW, rlW);
+
+                // East sidewalk
+                float pzE = b.oz + zl + (hE % 3);
+                float pxE = b.ox + 6.6f + (hE % 3) * 0.22f;
+                float rwE = 0.9f + (Math.abs(hE) % 5) * 0.12f;
+                float rlE = 1.4f + (Math.abs(hE) % 6) * 0.18f;
+                float eyE = b.elev(pzE) + STEP + 0.024f;
+                b.decalQuad(Layer.PUDDLE, pxE, eyE, pzE, rwE, rlE);
             }
             if (junction) {
                 // Cross street puddles near cross-walks
@@ -406,21 +427,21 @@ public final class CityLayout {
                 if (Math.abs(Math.abs(rx - b.ox) - 48f) < 23f && Math.abs(Math.abs(rz - b.oz) - 38f) < 17f) continue;
 
                 int rTier = hash(r, 41, b.cx) % 4;
-                float scale = (rTier == 0) ? 0.45f + (hash(r, 7, b.cz) % 25) / 100f
-                            : (rTier == 1) ? 1.05f + (hash(r, 11, b.cz) % 35) / 100f
-                            : (rTier == 2) ? 1.65f + (hash(r, 13, b.cz) % 45) / 100f
-                            : 2.35f + (hash(r, 17, b.cz) % 50) / 100f;
+                float scale = (rTier == 0) ? 0.35f + (hash(r, 7, b.cz) % 15) / 100f
+                            : (rTier == 1) ? 0.52f + (hash(r, 11, b.cz) % 18) / 100f
+                            : (rTier == 2) ? 0.72f + (hash(r, 13, b.cz) % 18) / 100f
+                            : 0.92f + (hash(r, 17, b.cz) % 18) / 100f; // Max scale ~1.10m, no oversized rocks
                 float yaw = hash(r, b.cx, b.cz) % 360;
                 float pitch = (hash(r, 29, b.cx) % 38) - 19f;
                 float roll = (hash(r, 31, b.cz) % 38) - 19f;
-                float ry = (rTier == 3) ? -0.10f : 0f; // Embed large monoliths slightly in ground
+                float ry = 0f;
                 b.t.props.add(new Prop("rock", rx, ry, rz, yaw, pitch, roll, scale, r));
 
-                // For large monoliths (tier 3), place 1-2 small satellite rocks beside them (rock garden / outcropping)
+                // Small decorative satellite stone beside tier 3 accent rocks
                 if (rTier == 3) {
-                    float satX = rx + ((hash(r, 5, 2) % 20) - 10) * 0.22f;
-                    float satZ = rz + ((hash(r, 7, 3) % 20) - 10) * 0.22f;
-                    float satScale = 0.50f + (hash(r, 9, 4) % 30) / 100f;
+                    float satX = rx + ((hash(r, 5, 2) % 20) - 10) * 0.15f;
+                    float satZ = rz + ((hash(r, 7, 3) % 20) - 10) * 0.15f;
+                    float satScale = 0.32f + (hash(r, 9, 4) % 18) / 100f;
                     b.t.props.add(new Prop("rock", satX, 0f, satZ, (yaw + 75) % 360, -pitch * 0.7f, roll * 0.8f, satScale, r + 100));
                 }
             }
@@ -477,19 +498,19 @@ public final class CityLayout {
             float yaw = hash(k, (int) Math.abs(cx), 7) % 360;
 
             if (tier == 0) {
-                // Tier 0: Small river pebble clusters right at the water line
-                scale = 0.40f + (hash(k, 13, 9) % 30) / 100f;
+                // Tier 0: Small river pebbles right at the water line
+                scale = 0.30f + (hash(k, 13, 9) % 15) / 100f;
                 radOffset = -0.5f + (hash(k, 2, 8) % 15) / 10f; // slightly emergent from water
                 ry = WATER_Y + 0.08f;
             } else if (tier == 1 || tier == 2) {
                 // Tier 1 & 2: Medium shoreline stones along grassy bank
-                scale = 0.95f + (hash(k, 13, 9) % 45) / 100f;
+                scale = 0.52f + (hash(k, 13, 9) % 20) / 100f;
                 radOffset = 1.2f + (hash(k, 4, 6) % 25) / 10f;
                 ry = 0f;
             } else {
-                // Tier 3: Grand scenic accent boulders
-                scale = 1.95f + (hash(k, 13, 9) % 55) / 100f;
-                radOffset = 2.4f + (hash(k, 7, 3) % 22) / 10f;
+                // Tier 3: Scenic accent pond stones (capped to ~1.0m max, no giant monoliths)
+                scale = 0.82f + (hash(k, 13, 9) % 22) / 100f;
+                radOffset = 2.0f + (hash(k, 7, 3) % 20) / 10f;
                 ry = 0f;
             }
             float rx = cx + (float) Math.cos(angle) * (rw + radOffset);
@@ -556,23 +577,6 @@ public final class CityLayout {
                                 B.p(b.ox - pw, -0.6f, pz + pl), B.p(b.ox - pw, -2.5f, pz + pl), -1, 0, 0);
             b.quad(Layer.STONE, B.p(b.ox + pw, -2.5f, pz + pl), B.p(b.ox + pw, -0.6f, pz + pl),
                                 B.p(b.ox + pw, -0.6f, pz - pl), B.p(b.ox + pw, -2.5f, pz - pl), 1, 0, 0);
-        }
-
-        // River boulders along the river banks and around pier footings
-        for (int k = 0; k < 28; k++) {
-            int side = (k % 2 == 0) ? -1 : 1;
-            float rDist = 13f + (hash(k, b.cz, 17) % 58);
-            float rx = b.ox + side * rDist;
-            float rz = (k < 14) ? z0 + 3.0f + (hash(k, b.cx, 31) % 16) : z1 - 3.0f - (hash(k, b.cx, 31) % 16);
-            float yaw = hash(k, b.cx, b.cz) % 360;
-            float pitch = (hash(k, 19, b.cz) % 36) - 18f;
-            float roll = (hash(k, 23, b.cx) % 36) - 18f;
-            int tier = hash(k, 37, 7) % 3;
-            float scale = (tier == 0) ? 0.45f + (hash(k, 5, 9) % 25) / 100f
-                        : (tier == 1) ? 1.05f + (hash(k, 5, 9) % 35) / 100f
-                        : 2.10f + (hash(k, 5, 9) % 45) / 100f;
-            float ry = (tier == 0) ? WATER_Y + 0.05f : (tier == 1) ? WATER_Y + 0.15f : 0f;
-            b.t.props.add(new Prop("rock", rx, ry, rz, yaw, pitch, roll, scale, k));
         }
     }
 

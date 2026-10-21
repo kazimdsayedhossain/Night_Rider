@@ -26,26 +26,29 @@ public final class WeatherSystem implements AutoCloseable {
         // Key directional moonlight from one angle
         sun.direction.set(-.35f,-Math.max(.25f,Math.abs(sunHeight)),-.25f).nor();sun.color.set(.45f,.52f,.65f,1).mul(.45f+day*.55f);sun.color.a=1;
         // Soft diffused wrap-around moonlight from opposite angle so side and back building walls are never black
-        moonFill.direction.set(.35f,-.42f,.30f).nor();moonFill.color.set(.35f,.42f,.55f,1).mul(.32f+day*.38f);moonFill.color.a=1;
+        moonFill.direction.set(.42f,-.38f,.35f).nor();moonFill.color.set(.45f,.55f,.68f,1).mul(.45f+day*.40f);moonFill.color.a=1;
         // night factor drives every emitted-light decal (lamp pools/halos/streaks, headlight beams)
         float night=1f-Rules.clamp(day*1.7f,0,1);kit.setNight(night);
         // with the night IBL attached it supplies ambient fill across all surfaces and orientations
-        scene.setAmbientLight((ibl?.38f:.42f)+day*.30f);scene.environment.set(ColorAttribute.createFog(sky));scene.environment.set(FogAttribute.createFog(65f,210f,1.25f));
+        scene.setAmbientLight((ibl?.46f:.52f)+day*.30f);scene.environment.set(ColorAttribute.createFog(sky));scene.environment.set(FogAttribute.createFog(65f,210f,1.25f));
         // wet road: darker, tinted, glossy but patchy (roughness map in MeshKit); dries out in clear weather
         float wet=Rules.clamp(rain+snow*.25f,0,1);
         ((PBRFloatAttribute)kit.asphalt.get(PBRFloatAttribute.Roughness)).value=Rules.lerp(.80f,.38f,wet);
         ((PBRFloatAttribute)kit.asphalt.get(PBRFloatAttribute.Metallic)).value=Rules.lerp(.02f,.08f,wet);
         ((PBRColorAttribute)kit.asphalt.get(PBRColorAttribute.BaseColorFactor)).color.set(Color.WHITE).lerp(tmpA.set(.66f,.70f,.73f,1f),wet);
-        ((PBRFloatAttribute)kit.sidewalk.get(PBRFloatAttribute.Roughness)).value=Rules.lerp(.80f,.46f,wet);   // slightly reflective, wet walkways
+        ((PBRFloatAttribute)kit.sidewalk.get(PBRFloatAttribute.Roughness)).value=Rules.lerp(.70f,.24f,wet); ((PBRFloatAttribute)kit.sidewalk.get(PBRFloatAttribute.Metallic)).value=Rules.lerp(.04f,.16f,wet);   // slightly reflective, wet walkways
         ((PBRColorAttribute)kit.sidewalk.get(PBRColorAttribute.BaseColorFactor)).color.set(Color.WHITE).lerp(tmpA.set(.84f,.87f,.90f,1f),wet);
         ((com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute)kit.puddle.get(com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute.Type)).opacity=.62f*Rules.clamp(rain*1.4f,0,1);
-        // dynamic water surface ripples: gently scroll UV offset across river and park ponds
+        // dynamic water surface ripples: dual UV scrolling across river and park ponds
         PBRTextureAttribute waterTex=(PBRTextureAttribute)kit.water.get(PBRTextureAttribute.BaseColorTexture);
         if(waterTex!=null){
-            waterTex.offsetU=(waterTex.offsetU+dt*0.028f)%1.0f;
-            waterTex.offsetV=(waterTex.offsetV+dt*0.018f)%1.0f;
+            waterTex.offsetU=(waterTex.offsetU+dt*0.040f)%1.0f;
+            waterTex.offsetV=(waterTex.offsetV+dt*0.024f)%1.0f;
             PBRTextureAttribute waterMR=(PBRTextureAttribute)kit.water.get(PBRTextureAttribute.MetallicRoughnessTexture);
-            if(waterMR!=null){waterMR.offsetU=waterTex.offsetU;waterMR.offsetV=waterTex.offsetV;}
+            if(waterMR!=null){
+                waterMR.offsetU=(waterMR.offsetU+dt*0.028f)%1.0f;
+                waterMR.offsetV=(waterMR.offsetV-dt*0.016f)%1.0f;
+            }
         }
         headlight.position.set(x,1.05f+WorldGrid.elevation(x,z),z);headlight.direction.set((float)Math.sin(yaw),-.16f,(float)Math.cos(yaw)).nor();headlight.intensity=headlights?(day<.5f||rain>.3f?34:7):0;
     }

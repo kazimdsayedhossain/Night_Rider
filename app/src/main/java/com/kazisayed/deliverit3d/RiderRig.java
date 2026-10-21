@@ -11,7 +11,7 @@ public final class RiderRig implements AutoCloseable {
     private final MeshKit kit;private final AssetLibrary assets;private final ModelCache frame=new ModelCache();
     private final List<ModelInstance> body=new ArrayList<>();private final Matrix4 root=new Matrix4();
     private final ModelInstance[] wheels=new ModelInstance[2],arms=new ModelInstance[4],legs=new ModelInstance[4],feet=new ModelInstance[2],hands=new ModelInstance[2];
-    private ModelInstance torso,head,hat,bag,vehicle,detailedBike,detailedCourier;private final ModelInstance headlightBeam;private final ModelInstance[] cargo=new ModelInstance[4];private AssetLibrary.Template vehicleTemplate;
+    private ModelInstance torso,head,hat,bag,vehicle,detailedBike,detailedCourier;private final ModelInstance headlightBeam,groundRefl,tailStreak;private final ModelInstance[] cargo=new ModelInstance[4];private AssetLibrary.Template vehicleTemplate;
     private final Vector3 mount=new Vector3(0,.90f,-.14f);private float phase,spin;private String selected="";private boolean detailed;
     public RiderRig(MeshKit kit,AssetLibrary assets){this.kit=kit;this.assets=assets;
         List<ModelInstance> pieces=new ArrayList<>();Vector3 rear=new Vector3(0,.34f,-.62f),front=new Vector3(0,.34f,.62f),crank=new Vector3(0,.34f,0),saddle=new Vector3(0,.87f,-.2f),fork=new Vector3(0,.86f,.42f);
@@ -26,6 +26,8 @@ public final class RiderRig implements AutoCloseable {
         if(assets.deliveryBicycle!=null)detailedBike=new ModelInstance(assets.deliveryBicycle);
         for(int i=0;i<cargo.length;i++)cargo[i]=kit.box(kit.parcel,0,0,0,.30f,.22f,.35f);
         headlightBeam=kit.decal(kit.bikeHeadBeam,0,0,0,3.4f,13.0f);
+        groundRefl=kit.decal(kit.carGroundRefl,0,0,0,1.3f,2.4f);
+        tailStreak=kit.streak(kit.tailStreak);
     }
     private void tube(List<ModelInstance> p,Vector3 a,Vector3 b,float width){p.add(kit.bone(kit.steel,a,b,width));}
     public void equip(String id,String headwear){
@@ -52,6 +54,8 @@ public final class RiderRig implements AutoCloseable {
         headlightBeam.transform.setToTranslation(x+sin*lead,WorldGrid.elevation(x,z)+.038f,z+cos*lead)
             .rotate(Vector3.Y,yaw*MathUtils.radiansToDegrees)
             .scale(3.4f,1f,12.5f);
+        groundRefl.transform.setToTranslation(x,WorldGrid.elevation(x,z)+.037f,z).rotate(Vector3.Y,yaw*MathUtils.radiansToDegrees).scale(1.3f,1f,2.4f);
+        tailStreak.transform.setToTranslation(x-sin*0.8f,WorldGrid.elevation(x,z)+.039f,z-cos*0.8f).rotate(Vector3.Y,yaw*MathUtils.radiansToDegrees+180f).scale(1.1f,1f,3.8f);
         for(int i=0;i<cargo.length;i++)cargo[i].transform.set(root).translate(0,.78f+i*.225f,-.66f).scale(.32f,.22f,.38f);
         if(detailed&&detailedBike!=null){
             detailedBike.transform.set(root);
@@ -78,6 +82,8 @@ public final class RiderRig implements AutoCloseable {
     /** Frame vertices are cached in local space; wrapper applies the cyclist's world transform. */
     public void collect(Array<RenderableProvider> out,int inventory){
         out.add(headlightBeam);
+        out.add(groundRefl);
+        out.add(tailStreak);
         if(detailed&&detailedBike!=null){
             out.add(detailedBike);
             if(detailedCourier!=null)out.add(detailedCourier);

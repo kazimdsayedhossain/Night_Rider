@@ -58,6 +58,13 @@ public final class AssetLibrary implements AutoCloseable {
                 m.set(net.mgsx.gltf.scene3d.attributes.PBRColorAttribute.createBaseColorFactor(new Color(1f,.82f,.42f,1f)));
                 m.set(com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute.createEmissive(new Color(1.35f,.86f,.35f,1f)));
                 m.set(net.mgsx.gltf.scene3d.attributes.PBRFloatAttribute.createRoughness(.1f));
+            } else {
+                // All buildings with dark walls (charcoal / dark slate / graphite facade)
+                // with soft minimum luminance so sides and back walls are never pitch black
+                m.set(net.mgsx.gltf.scene3d.attributes.PBRColorAttribute.createBaseColorFactor(new Color(.18f,.20f,.24f,1f)));
+                m.set(com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute.createEmissive(new Color(.045f,.055f,.070f,1f)));
+                m.set(net.mgsx.gltf.scene3d.attributes.PBRFloatAttribute.createRoughness(.65f));
+                m.set(net.mgsx.gltf.scene3d.attributes.PBRFloatAttribute.createMetallic(.05f));
             }
         }
     }
@@ -160,7 +167,17 @@ public final class AssetLibrary implements AutoCloseable {
             case 19 -> vehicle("guzzi","moto-guzzi",2.25f,-90);
             case 20 -> vehicle("bogdan","bogdan-bus",7.2f,180);
             case 21 -> vehicle("cuda","plymouth-hemi-cuda-1971",4.65f,0);
-            case 22 -> {SceneAsset a=load("generated/delivery-bicycle.glb");deliveryBicycle=a.scene.model;}
+            case 22 -> {
+                SceneAsset a=load("generated/delivery-bicycle.glb");
+                deliveryBicycle=a.scene.model;
+                for(com.badlogic.gdx.graphics.g3d.Material m:deliveryBicycle.materials){
+                    String mid=m.id==null?"":m.id.toLowerCase();
+                    if(!mid.contains("tire")&&!mid.contains("rubber")){
+                        m.set(PBRFloatAttribute.createRoughness(.14f));
+                        m.set(PBRFloatAttribute.createMetallic(.48f));
+                    }
+                }
+            }
             case 23 -> {SceneAsset a=load("generated/courier-cap.glb");couriers.put("cap",a.scene.model);}
             case 24 -> {SceneAsset a=load("generated/courier-helmet.glb");couriers.put("helmet",a.scene.model);}
             case 25 -> {SceneAsset a=load("generated/courier-crown.glb");couriers.put("crown",a.scene.model);}
@@ -261,7 +278,26 @@ public final class AssetLibrary implements AutoCloseable {
         }
         for(com.badlogic.gdx.graphics.g3d.model.Node c:n.getChildren())stripNode(mi,c);
     }
-    private void vehicle(String id,String file,float size,float yaw){SceneAsset a=load("vehicles/"+file+".glb");vehicles.put(id,new Template(new ModelInstance(a.scene.model),size,8,1000,yaw,false,true));}
+    private void vehicle(String id,String file,float size,float yaw){
+        SceneAsset a=load("vehicles/"+file+".glb");
+        ModelInstance mi=new ModelInstance(a.scene.model);
+        for(int idx=0;idx<mi.materials.size;idx++){
+            com.badlogic.gdx.graphics.g3d.Material m=mi.materials.get(idx);
+            String mid=m.id==null?"":m.id.toLowerCase();
+            if(mid.contains("glass")||mid.contains("wind")||mid.contains("window")){
+                m.set(PBRFloatAttribute.createRoughness(.04f));
+                m.set(PBRFloatAttribute.createMetallic(.40f));
+            }else if(mid.contains("tire")||mid.contains("rubber")||mid.contains("wheel")){
+                m.set(PBRFloatAttribute.createRoughness(.85f));
+                m.set(PBRFloatAttribute.createMetallic(.02f));
+            }else{
+                // High-gloss automotive clearcoat finish for vehicle paint reflections
+                m.set(PBRFloatAttribute.createRoughness(.12f));
+                m.set(PBRFloatAttribute.createMetallic(.45f));
+            }
+        }
+        vehicles.put(id,new Template(mi,size,8,1000,yaw,false,true));
+    }
     private void prop(String id,String file,float footprint,float height,float maxScale,float yaw,boolean centerXZ,float heightScale){SceneAsset a=load(file);props.put(id,new Template(new ModelInstance(a.scene.model),footprint,height,maxScale,yaw,false,centerXZ,heightScale));}
     private void prop(String id,String file,float footprint,float height,float maxScale,float yaw,boolean centerXZ){prop(id,file,footprint,height,maxScale,yaw,centerXZ,1.0f);}
     public Template getBuilding(String id){
