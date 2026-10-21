@@ -42,4 +42,5 @@ public final class MainActivity extends AndroidApplication implements DispatchGa
     @Override protected void onDestroy(){main.removeCallbacks(refresh);if(tilt!=null)tilt.close();if(audio!=null)audio.close();super.onDestroy();}
     @Override public void onBackPressed(){if(ui!=null&&ui.closePanel())return;if(game!=null&&game.snapshot.state()==DispatchGame.State.PLAYING)command("pause");else if(game!=null&&game.snapshot.state()==DispatchGame.State.PAUSED)command("resume");else super.onBackPressed();}
     @Override public void feedback(int ms){if(!saves.flag("native-haptics",true))return;Vibrator vibrator=(Vibrator)getSystemService(VIBRATOR_SERVICE);if(vibrator==null||!vibrator.hasVibrator())return;if(Build.VERSION.SDK_INT>=26)vibrator.vibrate(VibrationEffect.createOneShot(ms,VibrationEffect.DEFAULT_AMPLITUDE));else vibrator.vibrate(ms);}
+    @Override public void playCue(String name){if(audio!=null)audio.cue(name);}
 }

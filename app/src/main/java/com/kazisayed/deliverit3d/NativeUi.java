@@ -878,6 +878,7 @@ public final class NativeUi extends FrameLayout {
         });
         b.setOnClickListener(v -> {
             activity.feedback(15);
+            activity.playCue("ui_click");
             if (action != null) action.run();
         });
         return b;
@@ -1251,6 +1252,7 @@ public final class NativeUi extends FrameLayout {
         backBtn.setPadding(px(16), px(7), px(16), px(7));
         Runnable closeAction = () -> {
             activity.feedback(10);
+            activity.playCue("ui_click");
             fullScreen.animate()
                     .alpha(0f)
                     .scaleX(0.97f)
@@ -1426,6 +1428,7 @@ public final class NativeUi extends FrameLayout {
         ));
         sw.setOnCheckedChangeListener((b, checked) -> {
             activity.feedback(10);
+            activity.playCue("ui_toggle");
             saves.put(key, checked);
             activity.applySettings();
             row.animate().scaleX(1.025f).scaleY(1.025f).setDuration(70).withEndAction(() -> {

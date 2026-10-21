@@ -15,7 +15,7 @@ import java.util.*;
 /** The native application owns simulation, lifecycle, rendering, progression and persistence. */
 public final class DispatchGame extends ApplicationAdapter {
     public enum State {LOADING,MENU,PLAYING,PAUSED,RESULT,ERROR}
-    public interface Host {void feedback(int milliseconds);}
+    public interface Host {void feedback(int milliseconds); default void playCue(String name){}}
     public record Marker(float x,float z,int type){}
     public record Snapshot(State state,String status,float loading,int level,String district,float time,int delivered,int quota,int inventory,int cash,int tickets,int score,int combo,float progress,float speed,float x,float z,float yaw,float steering,String target,float distance,float bearing,String weather,float hour,int fps,int width,int height,boolean won,int stars,String notice,List<Marker> markers){}
     public volatile Snapshot snapshot;public final PlayerInput input;public final SaveStore saves;private final TiltController tilt;private final GameAudio audio;private final Host host;
@@ -62,7 +62,13 @@ public final class DispatchGame extends ApplicationAdapter {
         camera.position.lerp(target,1-(float)Math.exp(-dt*6.5f));camera.up.set(Vector3.Y);camera.lookAt(x+sin*14.0f,1.1f+WorldGrid.elevation(x,z),z+cos*14.0f);camera.fieldOfView=50.0f;camera.update();
         Gdx.gl.glViewport(0,0,Gdx.graphics.getBackBufferWidth(),Gdx.graphics.getBackBufferHeight());Gdx.gl.glClearColor(weather.sky.r,weather.sky.g,weather.sky.b,1);Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT|GL20.GL_DEPTH_BUFFER_BIT);
         Array<RenderableProvider> visible=scene.getRenderableProviders();visible.clear();world.collect(camera,x,z,visible);traffic.collect(camera,x,z,visible);rider.collect(visible,inventory);collectMarkers(visible);scene.update(dt);scene.renderColors();weather.render(camera,x,z);
-        audio.state(state==State.PLAYING?speed:0,weather.rain,1);hudClock+=dt;if(hudClock>=.08f){hudClock=0;publish();}
+        audio.state(state == State.PLAYING ? speed : 0,
+                    state == State.PLAYING ? throttle : 0,
+                    state == State.PLAYING && input.brake && speed > 2.0f,
+                    weather != null ? weather.rain : 0,
+                    vehicleId != null ? vehicleId : "bike",
+                    state == State.PLAYING);
+        hudClock+=dt;if(hudClock>=.08f){hudClock=0;publish();}
     }catch(Throwable error){fail(error);}}
     private void loadLevel(int number){
         level=new LevelData(number);combo.reset();combo.window=level.comboWindow;
@@ -113,7 +119,7 @@ public final class DispatchGame extends ApplicationAdapter {
         }
         if(state!=State.PLAYING)return;
         traffic.update(dt,x,z,speed,yaw);
-        if(traffic.nearMiss(x,z,yaw,speed)){award(25,Rules.SCORE_NEAR_MISS,0);combo.extend(Rules.NEAR_MISS_COMBO_EXTEND);announce("Close pass · +25");}
+        if(traffic.nearMiss(x,z,yaw,speed)){award(25,Rules.SCORE_NEAR_MISS,0);combo.extend(Rules.NEAR_MISS_COMBO_EXTEND);audio.cue("combo");announce("Close pass · +25");}
         for(LevelData.Customer c:level.customers){
             if(c.collected)continue;float distance=Vector2.dst(x,z,c.x,c.z);Rules.Approach.Result r=c.approach.update(distance,speed);
             if(inventory>0&&r.fire()){Rules.Rating rating=Rules.rate(r.best());c.collected=true;delivered++;inventory--;combo.hit();
@@ -122,7 +128,7 @@ public final class DispatchGame extends ApplicationAdapter {
         }
         for(LevelData.Depot d:level.depots)if(!d.collected&&inventory<Rules.CAPACITY&&Vector2.dst2(x,z,d.x,d.z)<16){d.collected=true;inventory=Rules.CAPACITY;audio.cue("delivery");announce("Bag restocked · "+Rules.CAPACITY+" parcels");}
         for(LevelData.Coin c:level.coins)if(!c.collected&&Vector2.dst2(x,z,c.x,c.z)<1.5f){c.collected=true;award(10,Rules.SCORE_COIN,0);audio.cue("coin");}
-        if(checkpoint<level.checkpoints.length&&z>=level.checkpoints[checkpoint]){checkpoint++;award(Rules.checkpointCash(level.number),Rules.CHECKPOINT_SCORE,Rules.CHECKPOINT_TIME);announce("Checkpoint · +"+Rules.CHECKPOINT_TIME+" seconds");}
+        if(checkpoint<level.checkpoints.length&&z>=level.checkpoints[checkpoint]){checkpoint++;award(Rules.checkpointCash(level.number),Rules.CHECKPOINT_SCORE,Rules.CHECKPOINT_TIME);audio.cue("checkpoint");announce("Checkpoint · +"+Rules.CHECKPOINT_TIME+" seconds");}
         if(Math.abs(x)<7){
             int row=Math.round((z+10)/WorldGrid.TILE);float until=row*WorldGrid.TILE-z;boolean red=traffic.red(row);
             if(red&&until>8&&until<22&&Math.abs(speed)<.6f){stoppedTime+=dt;if(stoppedTime>1.2f&&respected.add(row)){award(35,Rules.SCORE_RED_LIGHT_OBEYED,2);announce("Safe stop · +2 seconds");}}else stoppedTime=0;
