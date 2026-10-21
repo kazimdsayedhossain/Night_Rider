@@ -34,6 +34,7 @@ public final class LevelData {
     public static final class Customer extends Point {
         public final int reward, shirt; public final String side, item;
         public final Rules.Approach approach = new Rules.Approach();
+        public float celebrateTime;
         Customer(float x, float z, String n, int r, int shirt, String side, String item) { super(x, z, n); reward = r; this.shirt = shirt; this.side = side; this.item = item; }
     }
     public static final class Depot extends Point { Depot(float x, float z, String n) { super(x, z, n); } }

@@ -7,11 +7,11 @@ public final class Rules {
     private Rules() {}
 
     public static final int CAPACITY = 4;
-    public static final float DELIVERY_RADIUS = 5.8f;
-    public static final float DELIVERY_BEST_POSSIBLE = 3.05f;
-    public static final float DELIVERY_PASS_MARGIN = 0.35f;
-    public static final float DELIVERY_STOP_SPEED = 1.2f;
-    public static final float NEAR_MISS_COMBO_EXTEND = 1.5f;
+    public static final float DELIVERY_RADIUS = 8.6f;
+    public static final float DELIVERY_BEST_POSSIBLE = 4.0f;
+    public static final float DELIVERY_PASS_MARGIN = 0.45f;
+    public static final float DELIVERY_STOP_SPEED = 1.4f;
+    public static final float NEAR_MISS_COMBO_EXTEND = 2.0f;
     public static final int FEVER_AT = 3;
     public static final int TIME_CAP_HEADROOM = 35;
     public static final int CHECKPOINT_TIME = 5;
@@ -26,8 +26,8 @@ public final class Rules {
     // ---- delivery ratings
     public record Rating(String id, String label, float maxDist, int cash, int score, int time) {}
     public static final Rating[] RATINGS = {
-        new Rating("PERFECT", "PERFECT!", 3.8f, 150, 350, 5),
-        new Rating("GREAT", "GREAT!", 4.6f, 100, 200, 4),
+        new Rating("PERFECT", "PERFECT!", 4.2f, 150, 350, 5),
+        new Rating("GREAT", "GREAT!", 6.4f, 100, 200, 4),
         new Rating("GOOD", "GOOD!", Float.POSITIVE_INFINITY, 50, 100, 3)
     };
     public static Rating rate(float closest) {

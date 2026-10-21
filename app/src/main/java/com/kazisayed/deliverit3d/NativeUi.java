@@ -1198,12 +1198,29 @@ public final class NativeUi extends FrameLayout {
                 // Clean header without verbose paragraphs
                 modalHeader(panel, won ? "SHIFT COMPLETE" : "ROUTE TERMINATED", won ? "Route Mastered!" : "Courier Down", "");
 
+                if (won) {
+                    int stars = Math.max(1, Math.min(3, data.stars()));
+                    TextView starRow = new TextView(getContext());
+                    String starStr = switch (stars) {
+                        case 3 -> "★  ★  ★";
+                        case 2 -> "★  ★  ☆";
+                        default -> "★  ☆  ☆";
+                    };
+                    starRow.setText(starStr);
+                    starRow.setTextSize(26);
+                    starRow.setTextColor(0xFFFFA826);
+                    starRow.setGravity(Gravity.CENTER);
+                    starRow.setPadding(0, px(4), 0, px(6));
+                    panel.addView(starRow);
+                }
+
                 LinearLayout stats = new LinearLayout(getContext());
                 stats.setOrientation(LinearLayout.HORIZONTAL);
-                stats.setPadding(0, px(10), 0, px(4));
+                stats.setPadding(0, px(8), 0, px(4));
                 addStatTile(stats, "Delivered", data.delivered() + " / " + data.quota(), won ? COLOR_WHITE : COLOR_SILVER);
+                addStatTile(stats, "Time Left", String.format(Locale.US, "%d:%02d", (int) data.time() / 60, (int) data.time() % 60), won ? COLOR_WHITE : COLOR_SILVER);
                 addStatTile(stats, "Score", String.format(Locale.US, "%,d", data.score()), COLOR_WHITE);
-                addStatTile(stats, "Wallet", "$" + String.format(Locale.US, "%,d", data.cash()), COLOR_SILVER);
+                addStatTile(stats, "Tickets", "+" + Math.max(1, data.stars()) + " ★", 0xFFFFA826);
                 panel.addView(stats);
 
                 addModalAction(panel, won ? "NEXT ROUTE ▶" : "RETRY SHIFT ↺", true, () -> activity.command(won ? "next" : "restart"));
@@ -1614,6 +1631,50 @@ public final class NativeUi extends FrameLayout {
         paint.setStyle(Paint.Style.FILL);
         paint.setColor(COLOR_SILVER);
         canvas.drawText(Math.round(data.distance()) + "m", 253, 36, paint);
+
+        // 1b. Top-Center: COMBO & FEVER MODE BADGE
+        if (data.combo() > 0) {
+            float comboW = 126, comboH = 36;
+            float comboX = 312;
+            boolean fever = data.fever();
+            int strokeColor = fever ? 0xDDFFA826 : 0x45FFFFFF;
+            int fillColor = fever ? 0x2A33220A : 0x220B111A;
+
+            paint.setStyle(Paint.Style.FILL);
+            paint.setColor(fillColor);
+            drawChamferedRect(canvas, comboX, 14, comboX + comboW, 14 + comboH, 8, paint);
+
+            paint.setStyle(Paint.Style.STROKE);
+            paint.setStrokeWidth(fever ? 1.6f : 1.2f);
+            paint.setColor(strokeColor);
+            drawChamferedRect(canvas, comboX, 14, comboX + comboW, 14 + comboH, 8, paint);
+
+            paint.setStyle(Paint.Style.FILL);
+            paint.setTypeface(Typeface.create("sans-serif-black", Typeface.BOLD));
+            paint.setTextSize(11);
+            paint.setColor(fever ? 0xFFFFA826 : COLOR_WHITE);
+            String label = fever ? "⚡ FEVER x" + data.combo() : "COMBO x" + data.combo();
+            canvas.drawText(label, comboX + 10, 29, paint);
+
+            paint.setTypeface(Typeface.create("sans-serif-bold", Typeface.BOLD));
+            paint.setTextSize(9);
+            paint.setColor(fever ? 0xEEFFE4A0 : COLOR_SILVER);
+            float m = Rules.multiplier(data.combo());
+            String multStr = String.format(Locale.US, "%.2fx", m);
+            float mw = paint.measureText(multStr);
+            canvas.drawText(multStr, comboX + comboW - 10 - mw, 29, paint);
+
+            float barX = comboX + 8, barY = 38, barW = comboW - 16, barH = 5;
+            paint.setStyle(Paint.Style.FILL);
+            paint.setColor(0x22FFFFFF);
+            canvas.drawRect(barX, barY, barX + barW, barY + barH, paint);
+
+            float fillW = Math.max(0, Math.min(barW, barW * data.comboFraction()));
+            if (fillW > 0) {
+                paint.setColor(fever ? 0xFFFFA826 : 0xCCFFFFFF);
+                canvas.drawRect(barX, barY, barX + fillW, barY + barH, paint);
+            }
+        }
 
         // 2. Top-Right: Low-Poly Radar Minimap
         drawRadarMap(canvas, w - 48, 48, 34);
