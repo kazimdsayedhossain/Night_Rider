@@ -1,10 +1,12 @@
 package com.kazisayed.deliverit3d;
 
+import android.animation.*;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.*;
 import android.graphics.drawable.Drawable;
 import android.view.*;
+import android.view.animation.*;
 import android.widget.*;
 import java.util.Locale;
 import java.util.function.Consumer;
@@ -109,20 +111,71 @@ public final class NativeUi extends FrameLayout {
         @Override public int getOpacity() { return PixelFormat.TRANSLUCENT; }
     }
 
-    /** Low-poly horizontal progress bar with chamfered track and fill. */
+    /** Low-poly horizontal progress bar with chamfered track, smooth interpolation, and animated sheen sweep. */
     public static final class LowPolyProgressBar extends View {
-        private float progress = 0f;
+        private float targetProgress = 0f;
+        private float displayProgress = 0f;
+        private float sheenPhase = 0f;
         private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        private final Paint sheenPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        private final Path clipPath = new Path();
         private final float chamfer;
+        private ValueAnimator progressAnim;
+        private ValueAnimator sheenAnim;
+        private Consumer<Float> onProgressUpdate;
 
         public LowPolyProgressBar(Context context, float chamfer) {
             super(context);
             this.chamfer = chamfer;
+            initSheen();
+        }
+
+        public void setOnProgressUpdate(Consumer<Float> callback) {
+            this.onProgressUpdate = callback;
+        }
+
+        private void initSheen() {
+            sheenAnim = ValueAnimator.ofFloat(0f, 1f);
+            sheenAnim.setDuration(1600);
+            sheenAnim.setRepeatMode(ValueAnimator.RESTART);
+            sheenAnim.setRepeatCount(ValueAnimator.INFINITE);
+            sheenAnim.setInterpolator(new LinearInterpolator());
+            sheenAnim.addUpdateListener(a -> {
+                sheenPhase = (float) a.getAnimatedValue();
+                invalidate();
+            });
+            sheenAnim.start();
         }
 
         public void setProgress(float p) {
-            this.progress = Math.max(0f, Math.min(1f, p));
-            invalidate();
+            float clamped = Math.max(0f, Math.min(1f, p));
+            if (Math.abs(clamped - targetProgress) < 0.001f) return;
+            targetProgress = clamped;
+            if (progressAnim != null && progressAnim.isRunning()) {
+                progressAnim.cancel();
+            }
+            progressAnim = ValueAnimator.ofFloat(displayProgress, targetProgress);
+            progressAnim.setDuration(360);
+            progressAnim.setInterpolator(new DecelerateInterpolator());
+            progressAnim.addUpdateListener(a -> {
+                displayProgress = (float) a.getAnimatedValue();
+                if (onProgressUpdate != null) {
+                    onProgressUpdate.accept(displayProgress);
+                }
+                invalidate();
+            });
+            progressAnim.start();
+        }
+
+        public float getDisplayProgress() {
+            return displayProgress;
+        }
+
+        @Override
+        protected void onDetachedFromWindow() {
+            super.onDetachedFromWindow();
+            if (progressAnim != null) progressAnim.cancel();
+            if (sheenAnim != null) sheenAnim.cancel();
         }
 
         @Override
@@ -142,12 +195,117 @@ public final class NativeUi extends FrameLayout {
             drawChamferedRect(canvas, 0.6f, 0.6f, w - 0.6f, h - 0.6f, ch, paint);
 
             // 2. Active fill
-            if (progress > 0.01f) {
-                float fillW = Math.max(ch * 2, w * progress);
+            if (displayProgress > 0.008f) {
+                float fillW = Math.max(ch * 2, w * displayProgress);
                 paint.setStyle(Paint.Style.FILL);
                 paint.setColor(0xEEFFFFFF);
-                drawChamferedRect(canvas, 1.5f, 1.5f, fillW - 1.5f, h - 1.5f, Math.max(1f, ch - 1f), paint);
+                float inCh = Math.max(1f, ch - 1f);
+                drawChamferedRect(canvas, 1.5f, 1.5f, fillW - 1.5f, h - 1.5f, inCh, paint);
+
+                // 3. Shimmer sheen sweep across fill
+                buildChamferedPath(clipPath, 1.5f, 1.5f, fillW - 1.5f, h - 1.5f, inCh);
+                canvas.save();
+                canvas.clipPath(clipPath);
+
+                float sheenX = -fillW * 0.3f + (fillW * 1.6f) * sheenPhase;
+                float sheenBand = Math.max(fillW * 0.35f, 40f);
+                LinearGradient grad = new LinearGradient(
+                    sheenX - sheenBand, 0, sheenX + sheenBand, 0,
+                    new int[]{0x00FFFFFF, 0x44FFFFFF, 0xAAFFFFFF, 0x44FFFFFF, 0x00FFFFFF},
+                    new float[]{0f, 0.3f, 0.5f, 0.7f, 1.0f},
+                    Shader.TileMode.CLAMP
+                );
+                sheenPaint.setShader(grad);
+                canvas.drawRect(sheenX - sheenBand, 0, sheenX + sheenBand, h, sheenPaint);
+                canvas.restore();
             }
+        }
+    }
+
+    /** Low-poly rotating geometric beacon accent for loading screen. */
+    public static final class LowPolyBeacon extends View {
+        private float angle = 0f;
+        private float pulse = 1f;
+        private final Paint pStroke = new Paint(Paint.ANTI_ALIAS_FLAG);
+        private final Paint pFill = new Paint(Paint.ANTI_ALIAS_FLAG);
+        private ValueAnimator rotateAnim;
+        private ValueAnimator pulseAnim;
+
+        public LowPolyBeacon(Context context) {
+            super(context);
+            pStroke.setStyle(Paint.Style.STROKE);
+            pStroke.setStrokeWidth(1.8f);
+            pStroke.setColor(0x88FFFFFF);
+
+            pFill.setStyle(Paint.Style.FILL);
+            pFill.setColor(0x24FFFFFF);
+
+            rotateAnim = ValueAnimator.ofFloat(0f, 360f);
+            rotateAnim.setDuration(3000);
+            rotateAnim.setRepeatCount(ValueAnimator.INFINITE);
+            rotateAnim.setRepeatMode(ValueAnimator.RESTART);
+            rotateAnim.setInterpolator(new LinearInterpolator());
+            rotateAnim.addUpdateListener(a -> {
+                angle = (float) a.getAnimatedValue();
+                invalidate();
+            });
+            rotateAnim.start();
+
+            pulseAnim = ValueAnimator.ofFloat(0.88f, 1.12f);
+            pulseAnim.setDuration(1400);
+            pulseAnim.setRepeatCount(ValueAnimator.INFINITE);
+            pulseAnim.setRepeatMode(ValueAnimator.REVERSE);
+            pulseAnim.setInterpolator(new AccelerateDecelerateInterpolator());
+            pulseAnim.addUpdateListener(a -> {
+                pulse = (float) a.getAnimatedValue();
+                invalidate();
+            });
+            pulseAnim.start();
+        }
+
+        @Override
+        protected void onDetachedFromWindow() {
+            super.onDetachedFromWindow();
+            if (rotateAnim != null) rotateAnim.cancel();
+            if (pulseAnim != null) pulseAnim.cancel();
+        }
+
+        @Override
+        protected void onDraw(Canvas canvas) {
+            float cx = getWidth() / 2f;
+            float cy = getHeight() / 2f;
+            float r = Math.min(cx, cy) * 0.72f * pulse;
+
+            canvas.save();
+            canvas.rotate(angle, cx, cy);
+
+            // Outer rotating chamfered rhombus
+            Path d1 = new Path();
+            d1.moveTo(cx, cy - r);
+            d1.lineTo(cx + r * 0.75f, cy);
+            d1.lineTo(cx, cy + r);
+            d1.lineTo(cx - r * 0.75f, cy);
+            d1.close();
+            pStroke.setColor(0x66FFFFFF);
+            pFill.setColor(0x18FFFFFF);
+            canvas.drawPath(d1, pFill);
+            canvas.drawPath(d1, pStroke);
+
+            // Inner counter-rotating diamond
+            canvas.rotate(-angle * 2.2f, cx, cy);
+            Path d2 = new Path();
+            float ir = r * 0.52f;
+            d2.moveTo(cx, cy - ir);
+            d2.lineTo(cx + ir * 0.75f, cy);
+            d2.lineTo(cx, cy + ir);
+            d2.lineTo(cx - ir * 0.75f, cy);
+            d2.close();
+            pFill.setColor(0x40FFFFFF);
+            pStroke.setColor(0xDDFFFFFF);
+            canvas.drawPath(d2, pFill);
+            canvas.drawPath(d2, pStroke);
+
+            canvas.restore();
         }
     }
 
@@ -309,8 +467,8 @@ public final class NativeUi extends FrameLayout {
 
     private int px(float n) { return Math.round(n * dp); }
 
-    private static void drawChamferedRect(Canvas c, float l, float t, float r, float b, float ch, Paint p) {
-        Path path = new Path();
+    public static void buildChamferedPath(Path path, float l, float t, float r, float b, float ch) {
+        path.reset();
         ch = Math.min(ch, Math.min((r - l) * 0.45f, (b - t) * 0.45f));
         path.moveTo(l + ch, t);
         path.lineTo(r - ch, t);
@@ -321,6 +479,11 @@ public final class NativeUi extends FrameLayout {
         path.lineTo(l, b - ch);
         path.lineTo(l, t + ch);
         path.close();
+    }
+
+    private static void drawChamferedRect(Canvas c, float l, float t, float r, float b, float ch, Paint p) {
+        Path path = new Path();
+        buildChamferedPath(path, l, t, r, b, ch);
         c.drawPath(path, p);
     }
 
@@ -396,6 +559,19 @@ public final class NativeUi extends FrameLayout {
         ));
         b.setMinHeight(px(48));
         b.setPadding(px(18), px(10), px(18), px(10));
+        b.setOnTouchListener((v, event) -> {
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_DOWN:
+                    v.animate().scaleX(0.95f).scaleY(0.95f).setDuration(80).start();
+                    break;
+                case MotionEvent.ACTION_UP:
+                case MotionEvent.ACTION_CANCEL:
+                    v.animate().scaleX(1.0f).scaleY(1.0f).setDuration(160)
+                            .setInterpolator(new OvershootInterpolator(1.5f)).start();
+                    break;
+            }
+            return false;
+        });
         b.setOnClickListener(v -> {
             activity.feedback(12);
             action.run();
@@ -486,20 +662,38 @@ public final class NativeUi extends FrameLayout {
         box.setOrientation(LinearLayout.VERTICAL);
         box.setGravity(Gravity.CENTER);
 
-        // Title
+        // Title with smooth breathing glow animation
         TextView title = makeText("NIGHT RIDER", 32, COLOR_WHITE, true);
         title.setLetterSpacing(0.20f);
         title.setGravity(Gravity.CENTER);
+        ObjectAnimator titlePulse = ObjectAnimator.ofFloat(title, "alpha", 0.72f, 1.0f);
+        titlePulse.setDuration(1400);
+        titlePulse.setRepeatMode(ValueAnimator.REVERSE);
+        titlePulse.setRepeatCount(ValueAnimator.INFINITE);
+        titlePulse.setInterpolator(new AccelerateDecelerateInterpolator());
+        titlePulse.start();
         box.addView(title);
 
-        // Subtitle
+        // Subtitle with subtle breathing animation
         TextView sub = makeText("COURIER DELIVERY ARCADE", 11, COLOR_MUTED, true);
         sub.setLetterSpacing(0.24f);
         sub.setGravity(Gravity.CENTER);
-        sub.setPadding(0, px(4), 0, px(32));
+        sub.setPadding(0, px(4), 0, px(16));
+        ObjectAnimator subPulse = ObjectAnimator.ofFloat(sub, "alpha", 0.50f, 0.90f);
+        subPulse.setDuration(1600);
+        subPulse.setRepeatMode(ValueAnimator.REVERSE);
+        subPulse.setRepeatCount(ValueAnimator.INFINITE);
+        subPulse.setInterpolator(new AccelerateDecelerateInterpolator());
+        subPulse.start();
         box.addView(sub);
 
-        // Low-Poly Loading Bar (Chamfered track & fill)
+        // Rotating Low-Poly Geometric Beacon Accent
+        LowPolyBeacon beacon = new LowPolyBeacon(getContext());
+        LinearLayout.LayoutParams beaconParam = new LinearLayout.LayoutParams(px(28), px(28));
+        beaconParam.bottomMargin = px(18);
+        box.addView(beacon, beaconParam);
+
+        // Low-Poly Loading Bar (Chamfered track & fill with animated sheen sweep)
         loadingBar = new LowPolyProgressBar(getContext(), px(4));
         LinearLayout.LayoutParams barParam = new LinearLayout.LayoutParams(px(280), px(8));
         box.addView(loadingBar, barParam);
@@ -509,6 +703,12 @@ public final class NativeUi extends FrameLayout {
         loadingPercent.setGravity(Gravity.CENTER);
         loadingPercent.setPadding(0, px(12), 0, 0);
         box.addView(loadingPercent);
+
+        loadingBar.setOnProgressUpdate(p -> {
+            if (loadingPercent != null) {
+                loadingPercent.setText(Math.round(p * 100) + "%");
+            }
+        });
 
         LayoutParams centerParam = new LayoutParams(-2, -2, Gravity.CENTER);
         loadingLayout.addView(box, centerParam);
@@ -673,9 +873,30 @@ public final class NativeUi extends FrameLayout {
         backBtn.setTextColor(COLOR_WHITE);
         backBtn.setBackground(new ChamferedDrawable(COLOR_BTN_FILL, COLOR_BTN_STROKE, px(1.2f), px(10)));
         backBtn.setPadding(px(16), px(6), px(16), px(6));
-        backBtn.setOnClickListener(v -> {
+        Runnable closeAction = () -> {
             activity.feedback(10);
-            showState(lastState);
+            fullScreen.animate()
+                    .alpha(0f)
+                    .scaleX(0.97f)
+                    .scaleY(0.97f)
+                    .setDuration(160)
+                    .setInterpolator(new AccelerateInterpolator())
+                    .withEndAction(() -> showState(lastState))
+                    .start();
+        };
+        backBtn.setOnClickListener(v -> closeAction.run());
+        backBtn.setOnTouchListener((v, event) -> {
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_DOWN:
+                    v.animate().scaleX(0.94f).scaleY(0.94f).setDuration(80).start();
+                    break;
+                case MotionEvent.ACTION_UP:
+                case MotionEvent.ACTION_CANCEL:
+                    v.animate().scaleX(1.0f).scaleY(1.0f).setDuration(140)
+                            .setInterpolator(new OvershootInterpolator(1.4f)).start();
+                    break;
+            }
+            return false;
         });
         RelativeLayout.LayoutParams backParam = new RelativeLayout.LayoutParams(-2, px(38));
         backParam.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
@@ -743,7 +964,7 @@ public final class NativeUi extends FrameLayout {
         body.addView(twoCols, new LinearLayout.LayoutParams(-1, -2));
 
         // Bottom Done Action
-        Button doneBtn = makeChamferedButton("DONE  ✓", true, () -> showState(lastState));
+        Button doneBtn = makeChamferedButton("DONE  ✓", true, closeAction::run);
         LinearLayout.LayoutParams doneParam = new LinearLayout.LayoutParams(px(240), px(44));
         doneParam.gravity = Gravity.CENTER_HORIZONTAL;
         doneParam.topMargin = px(10);
@@ -754,6 +975,26 @@ public final class NativeUi extends FrameLayout {
 
         activePanel = fullScreen;
         addView(fullScreen, new LayoutParams(-1, -1));
+
+        // Smooth staggered entrance animation
+        fullScreen.setAlpha(0f);
+        fullScreen.animate().alpha(1f).setDuration(260).setInterpolator(new DecelerateInterpolator()).start();
+
+        header.setTranslationY(-px(24));
+        header.setAlpha(0f);
+        header.animate().translationY(0).alpha(1f).setDuration(300).setInterpolator(new DecelerateInterpolator()).start();
+
+        colLeft.setTranslationX(-px(28));
+        colLeft.setAlpha(0f);
+        colLeft.animate().translationX(0).alpha(1f).setDuration(360).setStartDelay(50).setInterpolator(new DecelerateInterpolator()).start();
+
+        colRight.setTranslationX(px(28));
+        colRight.setAlpha(0f);
+        colRight.animate().translationX(0).alpha(1f).setDuration(360).setStartDelay(110).setInterpolator(new DecelerateInterpolator()).start();
+
+        doneBtn.setTranslationY(px(24));
+        doneBtn.setAlpha(0f);
+        doneBtn.animate().translationY(0).alpha(1f).setDuration(340).setStartDelay(170).setInterpolator(new OvershootInterpolator(1.25f)).start();
     }
 
     private LinearLayout addSettingCard(LinearLayout parent, String sectionTitle) {
@@ -809,6 +1050,9 @@ public final class NativeUi extends FrameLayout {
             activity.feedback(10);
             saves.put(key, checked);
             activity.applySettings();
+            row.animate().scaleX(1.025f).scaleY(1.025f).setDuration(70).withEndAction(() -> {
+                row.animate().scaleX(1.0f).scaleY(1.0f).setDuration(130).setInterpolator(new OvershootInterpolator(1.3f)).start();
+            }).start();
         });
         row.addView(sw, new LinearLayout.LayoutParams(-2, -2));
 
@@ -860,8 +1104,14 @@ public final class NativeUi extends FrameLayout {
                     activity.applySettings();
                 }
             }
-            @Override public void onStartTrackingTouch(SeekBar b) {}
-            @Override public void onStopTrackingTouch(SeekBar b) {}
+            @Override
+            public void onStartTrackingTouch(SeekBar b) {
+                badge.animate().scaleX(1.22f).scaleY(1.22f).setDuration(110).setInterpolator(new OvershootInterpolator(1.4f)).start();
+            }
+            @Override
+            public void onStopTrackingTouch(SeekBar b) {
+                badge.animate().scaleX(1.0f).scaleY(1.0f).setDuration(160).setInterpolator(new DecelerateInterpolator()).start();
+            }
         });
 
         LinearLayout.LayoutParams sliderParam = new LinearLayout.LayoutParams(-1, px(32));
