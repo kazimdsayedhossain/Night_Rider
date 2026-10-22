@@ -66,12 +66,18 @@ public final class DispatchGame extends ApplicationAdapter {
             publish();return;
         }
         if(state==State.ERROR)return;
-        if(state==State.PLAYING){accumulator+=dt;while(accumulator>=1f/60){update(1f/60);accumulator-=1f/60;if(state!=State.PLAYING){accumulator=0;break;}}}
+        if(state==State.PLAYING){
+            float simDt=Math.min(dt,0.033f);
+            update(simDt);
+        }
         if(noticeTime>0){noticeTime-=dt;if(noticeTime<=0)notice="";}
-        world.stream(x,z);if(traffic!=null)traffic.setNight(weather.hour>=18.5f||weather.hour<6f||weather.rain>.4f);weather.update(state==State.PLAYING?dt:0,x,z,yaw);{float rawElev=WorldGrid.elevation(x,z);smoothElev=smoothElev+(rawElev-smoothElev)*(1f-(float)Math.exp(-dt*10f));}rider.update(state==State.PLAYING?dt:0,x,z,yaw,speed,steering,inventory,smoothElev);
+        world.stream(x,z);if(traffic!=null)traffic.setNight(weather.hour>=18.5f||weather.hour<6f||weather.rain>.4f);weather.update(state==State.PLAYING?dt:0,x,z,yaw);
+        float rawElev=WorldGrid.elevation(x,z);
+        smoothElev=smoothElev+(rawElev-smoothElev)*(1f-(float)Math.exp(-dt*12f));
+        rider.update(state==State.PLAYING?dt:0,x,z,yaw,speed,steering,inventory,smoothElev);
         float back=5.8f+Math.min(2.0f,Math.abs(speed)*.10f),sin=(float)Math.sin(yaw),cos=(float)Math.cos(yaw);
-        Vector3 target=new Vector3(x-sin*back,WorldGrid.elevation(x,z)+3.2f,z-cos*back);
-        camera.position.lerp(target,1-(float)Math.exp(-dt*6.5f));camera.up.set(Vector3.Y);camera.lookAt(x+sin*14.0f,1.1f+WorldGrid.elevation(x,z),z+cos*14.0f);camera.fieldOfView=50.0f;camera.update();
+        Vector3 target=new Vector3(x-sin*back,smoothElev+3.2f,z-cos*back);
+        camera.position.lerp(target,1-(float)Math.exp(-dt*6.5f));camera.up.set(Vector3.Y);camera.lookAt(x+sin*14.0f,1.1f+smoothElev,z+cos*14.0f);camera.fieldOfView=50.0f;camera.update();
         Gdx.gl.glViewport(0,0,Gdx.graphics.getBackBufferWidth(),Gdx.graphics.getBackBufferHeight());Gdx.gl.glClearColor(weather.sky.r,weather.sky.g,weather.sky.b,1);Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT|GL20.GL_DEPTH_BUFFER_BIT);
         Array<RenderableProvider> visible=scene.getRenderableProviders();visible.clear();world.collect(camera,x,z,visible);traffic.collect(camera,x,z,visible);rider.collect(visible,inventory);collectMarkers(visible);scene.update(dt);scene.renderColors();weather.render(camera,x,z);
         audio.state(state == State.PLAYING ? speed : 0,
@@ -126,8 +132,11 @@ public final class DispatchGame extends ApplicationAdapter {
         runClock+=dt;time-=dt;invulnerable=Math.max(0,invulnerable-dt);
         if(combo.tick(dt)!=null)announce("Chain lost");
         if(time<=0){time=0;finish(false,"Shift time is up");return;}
-        float manual=input.left?-1:input.right?1:input.touchSteer,targetSteer=Math.abs(manual)>.01f?manual:input.tilt?tilt.steering():0;
-        steering=Rules.lerp(steering,targetSteer,1-(float)Math.exp(-dt*18));throttle=Rules.lerp(throttle,input.pedal?1:0,1-(float)Math.exp(-dt*12));
+        float manual=input.left?-1:input.right?1:input.touchSteer;
+        float targetSteer=Math.abs(manual)>.01f?manual:(input.tilt?tilt.steering():0);
+        if(Math.abs(targetSteer)<.015f) targetSteer=0;
+        steering=Rules.lerp(steering,targetSteer,1-(float)Math.exp(-dt*16));
+        if(Math.abs(steering)<.004f) steering=0;throttle=Rules.lerp(throttle,input.pedal?1:0,1-(float)Math.exp(-dt*12));
         float grip=(weather.rain>.4f?.84f:weather.snow>.4f?.68f:1)*(vehicleId.equals("scooter")?1.18f:vehicleId.equals("superbike")?.92f:1);
         float vehicleSpeed=vehicleId.equals("superbike")?1.24f:vehicleId.equals("gold")?1.12f:vehicleId.equals("scooter")?.92f:1;
         float maximum=level.speed*(combo.fever()?1.25f:1)*vehicleSpeed*(weather.rain>.4f?.92f:weather.snow>.4f?.82f:1)*(WorldGrid.road(x,z)?1:.68f);

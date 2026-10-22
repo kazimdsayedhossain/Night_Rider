@@ -48,9 +48,10 @@ public final class TiltController implements SensorEventListener,AutoCloseable {
         if(Math.hypot(x,y)/length<.22){initialized=false;filteredAngle=0;publish("flat",0);return;}
         rawAngle=Math.toDegrees(Math.atan2(-x,y));if(centerPending)captureCenter();
         double target=((rawAngle-centerAngle+180)%360+360)%360-180;target=Math.max(-80,Math.min(80,target));
-        double blend=!initialized||dt>.3?1:1-Math.exp(-dt/.065);filteredAngle+=blend*(target-filteredAngle);initialized=true;
-        double n=Math.max(0,Math.min(1,(Math.abs(filteredAngle)-2.5)/(45/sensitivity-2.5)));
-        publish("ready",(float)(Math.signum(filteredAngle)*Math.pow(n,1.35)*(inverted?-1:1)));
+        double blend=!initialized||dt>.3?1:1-Math.exp(-dt/.085);filteredAngle+=blend*(target-filteredAngle);initialized=true;
+        double deadzone=4.5;
+        double n=Math.max(0,Math.min(1,(Math.abs(filteredAngle)-deadzone)/(45/sensitivity-deadzone)));
+        publish("ready",(float)(Math.signum(filteredAngle)*Math.pow(n,1.4)*(inverted?-1:1)));
     }
     @Override public void onAccuracyChanged(Sensor s,int accuracy){}
     @Override public void close(){worker.post(()->{wanted=false;unregister();thread.quitSafely();});}

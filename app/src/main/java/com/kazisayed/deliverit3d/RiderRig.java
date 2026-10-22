@@ -48,7 +48,9 @@ public final class RiderRig implements AutoCloseable {
     private static Vector3 elbow(Vector3 a,Vector3 b,float l1,float l2,Vector3 pole){Vector3 axis=new Vector3(b).sub(a);float distance=Rules.clamp(axis.len(),.01f,l1+l2-.002f);axis.nor();float along=(l1*l1-l2*l2+distance*distance)/(2*distance);float height=(float)Math.sqrt(Math.max(.0001f,l1*l1-along*along));Vector3 bend=new Vector3(pole).mulAdd(axis,-pole.dot(axis)).nor();return new Vector3(a).mulAdd(axis,along).mulAdd(bend,height);}
     public void update(float dt,float x,float z,float yaw,float speed,float steering,int inventory,float elev){
         phase+=Math.min(14,Math.abs(speed)*1.55f)*dt;spin+=speed/.34f*dt;
-        float lean=-steering*Math.min(Math.abs(speed)*.022f,.24f);root.idt().translate(x,elev,z).rotate(Vector3.Y,yaw*MathUtils.radiansToDegrees).rotate(Vector3.Z,lean*MathUtils.radiansToDegrees);
+        float targetLean=-steering*Math.min(Math.abs(speed)*.022f,.24f);
+        smoothLean=smoothLean+(targetLean-smoothLean)*(1f-(float)Math.exp(-dt*12f));
+        root.idt().translate(x,elev,z).rotate(Vector3.Y,yaw*MathUtils.radiansToDegrees).rotate(Vector3.Z,smoothLean*MathUtils.radiansToDegrees);
         float sin=(float)Math.sin(yaw),cos=(float)Math.cos(yaw);
         float lead=5.8f;
         headlightBeam.transform.setToTranslation(x+sin*lead,elev+.038f,z+cos*lead)
@@ -60,10 +62,10 @@ public final class RiderRig implements AutoCloseable {
         if(detailed&&detailedBike!=null){
             detailedBike.transform.set(root);
             Node front=detailedBike.getNode("bicycle-front-wheel",true),rear=detailedBike.getNode("bicycle-rear-wheel",true),steer=detailedBike.getNode("bicycle-steer-group",true),crank=detailedBike.getNode("bicycle-crank-group",true);
-            if(front!=null)front.rotation.setEulerAngles(-steering*26,spin*MathUtils.radiansToDegrees,0);
-            if(rear!=null)rear.rotation.setEulerAngles(0,spin*MathUtils.radiansToDegrees,0);
-            if(steer!=null)steer.rotation.setEulerAngles(-steering*26,0,0);
-            if(crank!=null)crank.rotation.setEulerAngles(0,phase*MathUtils.radiansToDegrees,0);
+            if(steer!=null)steer.rotation.set(Vector3.X,12.605f).mul(new Quaternion(Vector3.Y,-steering*26f));
+            if(front!=null)front.rotation.set(Vector3.X,-12.605f+spin*MathUtils.radiansToDegrees);
+            if(rear!=null)rear.rotation.set(Vector3.X,spin*MathUtils.radiansToDegrees);
+            if(crank!=null)crank.rotation.set(Vector3.X,phase*MathUtils.radiansToDegrees);
             detailedBike.calculateTransforms();
             if(detailedCourier!=null){
                 detailedCourier.transform.set(root).translate(mount);

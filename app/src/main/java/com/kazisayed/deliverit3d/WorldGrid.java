@@ -119,7 +119,7 @@ public final class WorldGrid {
     private static double amplitude(int cx, int blockRow) {
         long seed = Math.abs((long) cx * 37 + (long) blockRow * 59);
         int pattern = (int) (seed % 4);
-        return pattern == 0 ? 0.06 : pattern == 1 ? -0.05 : pattern == 2 ? 0.05 : 0.0;
+        return pattern == 0 ? 0.03 : pattern == 1 ? -0.025 : pattern == 2 ? 0.025 : 0.0;
     }
 
     private static boolean flatBlock(float x, int blockRow) {

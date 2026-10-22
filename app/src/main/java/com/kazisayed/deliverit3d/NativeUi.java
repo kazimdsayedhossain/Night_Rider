@@ -1158,7 +1158,7 @@ public final class NativeUi extends FrameLayout {
                 RadialGradient rad = new RadialGradient(
                         b.exactCenterX(), b.exactCenterY(),
                         Math.max(b.width(), b.height()) * 0.68f,
-                        new int[]{0x65070B10, 0xBD06080D, 0xF5030508},
+                        new int[]{0x00000000, 0x3306080D, 0x88030508},
                         new float[]{0f, 0.65f, 1f},
                         Shader.TileMode.CLAMP
                 );
@@ -1194,55 +1194,33 @@ public final class NativeUi extends FrameLayout {
         titlePulse.start();
         loadingAnimators.add(titlePulse);
         topBranding.addView(title);
-
-        TextView sub = makeText("COURIER DELIVERY ARCADE  ·  METROPOLIS DISPATCH", 10.5f, 0xFF00E5FF, true);
-        sub.setLetterSpacing(0.18f);
-        sub.setGravity(Gravity.CENTER);
-        sub.setPadding(0, px(3), 0, 0);
-        topBranding.addView(sub);
         loadingLayout.addView(topBranding, new LayoutParams(-1, -2, Gravity.TOP | Gravity.CENTER_HORIZONTAL));
 
-        // 5. Bottom Cyber HUD Card (Clean docked card with glowing bar, dynamic status ticker, and tips)
+        // 5. Bottom Cyber HUD Card (Clean minimal progress card without excessive text clutter)
         LinearLayout bottomCard = new LinearLayout(getContext());
         bottomCard.setOrientation(LinearLayout.VERTICAL);
         bottomCard.setGravity(Gravity.CENTER_HORIZONTAL);
-        bottomCard.setBackground(new ChamferedDrawable(0xDE080E17, 0x4400E5FF, px(1.2f), px(14)));
-        bottomCard.setPadding(px(24), px(14), px(24), px(14));
+        bottomCard.setBackground(new ChamferedDrawable(0x99080E17, 0x4400E5FF, px(1.2f), px(14)));
+        bottomCard.setPadding(px(24), px(12), px(24), px(12));
 
         LinearLayout statusRow = new LinearLayout(getContext());
         statusRow.setOrientation(LinearLayout.HORIZONTAL);
         statusRow.setGravity(Gravity.CENTER_VERTICAL);
 
-        TextView dot = makeText("? ", 10f, 0xFF00E5FF, true);
-        statusRow.addView(dot);
-
-        TextView statusMsg = makeText("INITIALIZING METROPOLIS SECTORS...", 10f, COLOR_SILVER, true);
-        statusMsg.setLetterSpacing(0.08f);
-        statusRow.addView(statusMsg, new LinearLayout.LayoutParams(0, -2, 1.0f));
-
-        loadingPercent = makeText("0%", 12.5f, 0xFF00E5FF, true);
-        loadingPercent.setLetterSpacing(0.05f);
+        loadingPercent = makeText("0%", 13f, 0xFF00E5FF, true);
+        loadingPercent.setLetterSpacing(0.08f);
         statusRow.addView(loadingPercent);
-        bottomCard.addView(statusRow, new LinearLayout.LayoutParams(px(320), -2));
+        bottomCard.addView(statusRow, new LinearLayout.LayoutParams(-2, -2));
 
         loadingBar = new LowPolyProgressBar(getContext(), px(4));
-        LinearLayout.LayoutParams barParam = new LinearLayout.LayoutParams(px(320), px(7));
-        barParam.topMargin = px(7);
-        barParam.bottomMargin = px(7);
+        LinearLayout.LayoutParams barParam = new LinearLayout.LayoutParams(px(280), px(7));
+        barParam.topMargin = px(6);
         bottomCard.addView(loadingBar, barParam);
-
-        TextView tip = makeText("Express Tip: Cruise near sidewalk customers to deliver · Tap Brake to drift", 9.5f, COLOR_MUTED, false);
-        tip.setGravity(Gravity.CENTER);
-        bottomCard.addView(tip);
 
         loadingBar.setOnProgressUpdate(p -> {
             if (loadingPercent != null) {
                 int pct = Math.round(p * 100);
                 loadingPercent.setText(pct + "%");
-                if (pct < 30) statusMsg.setText("STREAMING CITY ROADWAYS & BLOCKS...");
-                else if (pct < 65) statusMsg.setText("CALIBRATING VEHICLE FLEET & AUDIO...");
-                else if (pct < 90) statusMsg.setText("SYNCHRONIZING NIGHT WEATHER & RAIN...");
-                else statusMsg.setText("METROPOLIS DISPATCH READY");
             }
         });
 
