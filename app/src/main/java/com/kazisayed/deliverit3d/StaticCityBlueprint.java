@@ -119,6 +119,7 @@ public final class StaticCityBlueprint {
     }
 
     public static List<BuildingLot> buildingsInTile(int cx, int cz) {
+        if (WorldGrid.isRiverRow(cz)) return Collections.emptyList();
         ensureInitialized();
         float minX = cx * WorldGrid.TILE - WorldGrid.TILE / 2f, maxX = minX + WorldGrid.TILE;
         float minZ = cz * WorldGrid.TILE - WorldGrid.TILE / 2f, maxZ = minZ + WorldGrid.TILE;

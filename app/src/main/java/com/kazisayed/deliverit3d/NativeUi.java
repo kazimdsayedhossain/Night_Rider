@@ -353,9 +353,12 @@ public final class NativeUi extends FrameLayout {
             if (displayProgress > 0.008f) {
                 float fillW = Math.max(ch * 2, w * displayProgress);
                 paint.setStyle(Paint.Style.FILL);
-                paint.setColor(0xEEFFFFFF);
+                paint.setShader(new LinearGradient(0, 0, w, 0,
+                    new int[]{0xFF00B0FF, 0xFF00E5FF, 0xFF64FFDA},
+                    new float[]{0f, 0.65f, 1f}, Shader.TileMode.CLAMP));
                 float inCh = Math.max(1f, ch - 1f);
                 drawChamferedRect(canvas, 1.5f, 1.5f, fillW - 1.5f, h - 1.5f, inCh, paint);
+                paint.setShader(null);
 
                 // 3. Shimmer sheen sweep across fill
                 buildChamferedPath(clipPath, 1.5f, 1.5f, fillW - 1.5f, h - 1.5f, inCh);
@@ -849,6 +852,150 @@ public final class NativeUi extends FrameLayout {
         return t;
     }
 
+    private Button makePauseResumeButton(String label, Runnable action) {
+        Button b = new Button(getContext());
+        b.setText(label);
+        b.setAllCaps(false);
+        b.setTextSize(14f);
+        b.setLetterSpacing(0.08f);
+        b.setTypeface(Typeface.create("sans-serif-bold", Typeface.NORMAL));
+        b.setTextColor(0xFF040A12);
+
+        Drawable bg = new Drawable() {
+            private boolean pressed = false;
+            private final Paint fill = new Paint(Paint.ANTI_ALIAS_FLAG);
+            private final Paint stroke = new Paint(Paint.ANTI_ALIAS_FLAG);
+            private final Paint glow = new Paint(Paint.ANTI_ALIAS_FLAG);
+            private final Path path = new Path();
+
+            @Override
+            public void draw(Canvas c) {
+                Rect bnd = getBounds();
+                if (bnd.width() <= 0 || bnd.height() <= 0) return;
+                path.reset();
+                float ch = px(11);
+                float padY = pressed ? 2f : 0f;
+                float l = bnd.left + 2f, t = bnd.top + 2f + padY, r = bnd.right - 2f, bt = bnd.bottom - 4f + padY;
+                buildChamferedPath(path, l, t, r, bt, ch);
+
+                glow.setStyle(Paint.Style.FILL);
+                glow.setColor(pressed ? 0x5500E5FF : 0x3300E5FF);
+                c.drawPath(path, glow);
+
+                fill.setStyle(Paint.Style.FILL);
+                fill.setShader(new LinearGradient(0, t, 0, bt,
+                        new int[]{pressed ? 0xFF00CCE0 : 0xFF3BE8FF, 0xFF00C0D8, 0xFF009AB0},
+                        new float[]{0f, 0.45f, 1f}, Shader.TileMode.CLAMP));
+                c.drawPath(path, fill);
+
+                stroke.setStyle(Paint.Style.STROKE);
+                stroke.setStrokeWidth(px(1.2f));
+                stroke.setColor(0x99FFFFFF);
+                c.drawPath(path, stroke);
+            }
+            @Override public void setAlpha(int alpha) { fill.setAlpha(alpha); }
+            @Override public void setColorFilter(ColorFilter cf) { fill.setColorFilter(cf); }
+            @Override public int getOpacity() { return PixelFormat.TRANSLUCENT; }
+            @Override protected boolean onStateChange(int[] state) {
+                boolean p = false;
+                for (int s : state) if (s == android.R.attr.state_pressed) p = true;
+                if (pressed != p) { pressed = p; invalidateSelf(); return true; }
+                return super.onStateChange(state);
+            }
+            @Override public boolean isStateful() { return true; }
+        };
+        b.setBackground(bg);
+        b.setOnTouchListener((v, event) -> {
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_DOWN:
+                    v.animate().scaleX(0.97f).scaleY(0.97f).setDuration(60).start();
+                    break;
+                case MotionEvent.ACTION_UP:
+                case MotionEvent.ACTION_CANCEL:
+                    v.animate().scaleX(1.0f).scaleY(1.0f).setDuration(160)
+                            .setInterpolator(new OvershootInterpolator(1.4f)).start();
+                    break;
+            }
+            return false;
+        });
+        b.setOnClickListener(v -> {
+            activity.feedback(20);
+            activity.playCue("ui_click");
+            if (action != null) action.run();
+        });
+        return b;
+    }
+
+    private Button makePauseGridButton(String icon, String label, Runnable action) {
+        Button b = new Button(getContext());
+        b.setText(icon + "  " + label);
+        b.setAllCaps(false);
+        b.setTextSize(12f);
+        b.setLetterSpacing(0.06f);
+        b.setTypeface(Typeface.create("sans-serif-bold", Typeface.NORMAL));
+        b.setTextColor(0xFFE2EAF2);
+
+        Drawable bg = new Drawable() {
+            private boolean pressed = false;
+            private final Paint fill = new Paint(Paint.ANTI_ALIAS_FLAG);
+            private final Paint stroke = new Paint(Paint.ANTI_ALIAS_FLAG);
+            private final Path path = new Path();
+
+            @Override
+            public void draw(Canvas c) {
+                Rect bnd = getBounds();
+                if (bnd.width() <= 0 || bnd.height() <= 0) return;
+                path.reset();
+                float ch = px(8);
+                float padY = pressed ? 1.5f : 0f;
+                float l = bnd.left + 2f, t = bnd.top + 2f + padY, r = bnd.right - 2f, bt = bnd.bottom - 3f + padY;
+                buildChamferedPath(path, l, t, r, bt, ch);
+
+                fill.setStyle(Paint.Style.FILL);
+                fill.setShader(new LinearGradient(0, t, 0, bt,
+                        pressed ? new int[]{0xEE1E2C3D, 0xF5131C28, 0xFA0B1017}
+                                : new int[]{0xEE162230, 0xF50F1622, 0xFA0A0F17},
+                        new float[]{0f, 0.5f, 1f}, Shader.TileMode.CLAMP));
+                c.drawPath(path, fill);
+
+                stroke.setStyle(Paint.Style.STROKE);
+                stroke.setStrokeWidth(px(1.0f));
+                stroke.setColor(pressed ? 0x8800E5FF : 0x33FFFFFF);
+                c.drawPath(path, stroke);
+            }
+            @Override public void setAlpha(int alpha) { fill.setAlpha(alpha); }
+            @Override public void setColorFilter(ColorFilter cf) { fill.setColorFilter(cf); }
+            @Override public int getOpacity() { return PixelFormat.TRANSLUCENT; }
+            @Override protected boolean onStateChange(int[] state) {
+                boolean p = false;
+                for (int s : state) if (s == android.R.attr.state_pressed) p = true;
+                if (pressed != p) { pressed = p; invalidateSelf(); return true; }
+                return super.onStateChange(state);
+            }
+            @Override public boolean isStateful() { return true; }
+        };
+        b.setBackground(bg);
+        b.setOnTouchListener((v, event) -> {
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_DOWN:
+                    v.animate().scaleX(0.96f).scaleY(0.96f).setDuration(60).start();
+                    break;
+                case MotionEvent.ACTION_UP:
+                case MotionEvent.ACTION_CANCEL:
+                    v.animate().scaleX(1.0f).scaleY(1.0f).setDuration(160)
+                            .setInterpolator(new OvershootInterpolator(1.4f)).start();
+                    break;
+            }
+            return false;
+        });
+        b.setOnClickListener(v -> {
+            activity.feedback(15);
+            activity.playCue("ui_click");
+            if (action != null) action.run();
+        });
+        return b;
+    }
+
     private Button makeChamferedButton(String label, boolean primary, Runnable action) {
         Button b = new Button(getContext());
         b.setText(label);
@@ -1030,63 +1177,78 @@ public final class NativeUi extends FrameLayout {
         loadingAtmosphere.start();
         loadingLayout.addView(loadingAtmosphere, new LayoutParams(-1, -1));
 
-        // 4. Center UI Box
-        LinearLayout box = new LinearLayout(getContext());
-        box.setOrientation(LinearLayout.VERTICAL);
-        box.setGravity(Gravity.CENTER);
+        // 4. Top Branding Header (Never blocks the central courier motorcycle artwork)
+        LinearLayout topBranding = new LinearLayout(getContext());
+        topBranding.setOrientation(LinearLayout.VERTICAL);
+        topBranding.setGravity(Gravity.CENTER_HORIZONTAL);
+        topBranding.setPadding(0, px(24), 0, 0);
 
-        // Title with smooth breathing glow animation
-        TextView title = makeText("NIGHT RIDER", 32, COLOR_WHITE, true);
-        title.setLetterSpacing(0.20f);
+        TextView title = makeText("NIGHT RIDER", 30, COLOR_WHITE, true);
+        title.setLetterSpacing(0.22f);
         title.setGravity(Gravity.CENTER);
-        ObjectAnimator titlePulse = ObjectAnimator.ofFloat(title, "alpha", 0.76f, 1.0f);
+        ObjectAnimator titlePulse = ObjectAnimator.ofFloat(title, "alpha", 0.82f, 1.0f);
         titlePulse.setDuration(1400);
         titlePulse.setRepeatMode(ValueAnimator.REVERSE);
         titlePulse.setRepeatCount(ValueAnimator.INFINITE);
         titlePulse.setInterpolator(new AccelerateDecelerateInterpolator());
         titlePulse.start();
         loadingAnimators.add(titlePulse);
-        box.addView(title);
+        topBranding.addView(title);
 
-        // Subtitle with subtle breathing animation
-        TextView sub = makeText("COURIER DELIVERY ARCADE", 11, COLOR_MUTED, true);
-        sub.setLetterSpacing(0.24f);
+        TextView sub = makeText("COURIER DELIVERY ARCADE  ·  METROPOLIS DISPATCH", 10.5f, 0xFF00E5FF, true);
+        sub.setLetterSpacing(0.18f);
         sub.setGravity(Gravity.CENTER);
-        sub.setPadding(0, px(4), 0, px(16));
-        ObjectAnimator subPulse = ObjectAnimator.ofFloat(sub, "alpha", 0.55f, 0.95f);
-        subPulse.setDuration(1600);
-        subPulse.setRepeatMode(ValueAnimator.REVERSE);
-        subPulse.setRepeatCount(ValueAnimator.INFINITE);
-        subPulse.setInterpolator(new AccelerateDecelerateInterpolator());
-        subPulse.start();
-        loadingAnimators.add(subPulse);
-        box.addView(sub);
+        sub.setPadding(0, px(3), 0, 0);
+        topBranding.addView(sub);
+        loadingLayout.addView(topBranding, new LayoutParams(-1, -2, Gravity.TOP | Gravity.CENTER_HORIZONTAL));
 
-        // Rotating Low-Poly Geometric Beacon Accent
-        LowPolyBeacon beacon = new LowPolyBeacon(getContext());
-        LinearLayout.LayoutParams beaconParam = new LinearLayout.LayoutParams(px(28), px(28));
-        beaconParam.bottomMargin = px(18);
-        box.addView(beacon, beaconParam);
+        // 5. Bottom Cyber HUD Card (Clean docked card with glowing bar, dynamic status ticker, and tips)
+        LinearLayout bottomCard = new LinearLayout(getContext());
+        bottomCard.setOrientation(LinearLayout.VERTICAL);
+        bottomCard.setGravity(Gravity.CENTER_HORIZONTAL);
+        bottomCard.setBackground(new ChamferedDrawable(0xDE080E17, 0x4400E5FF, px(1.2f), px(14)));
+        bottomCard.setPadding(px(24), px(14), px(24), px(14));
 
-        // Low-Poly Loading Bar (Chamfered track & fill with animated sheen sweep)
+        LinearLayout statusRow = new LinearLayout(getContext());
+        statusRow.setOrientation(LinearLayout.HORIZONTAL);
+        statusRow.setGravity(Gravity.CENTER_VERTICAL);
+
+        TextView dot = makeText("? ", 10f, 0xFF00E5FF, true);
+        statusRow.addView(dot);
+
+        TextView statusMsg = makeText("INITIALIZING METROPOLIS SECTORS...", 10f, COLOR_SILVER, true);
+        statusMsg.setLetterSpacing(0.08f);
+        statusRow.addView(statusMsg, new LinearLayout.LayoutParams(0, -2, 1.0f));
+
+        loadingPercent = makeText("0%", 12.5f, 0xFF00E5FF, true);
+        loadingPercent.setLetterSpacing(0.05f);
+        statusRow.addView(loadingPercent);
+        bottomCard.addView(statusRow, new LinearLayout.LayoutParams(px(320), -2));
+
         loadingBar = new LowPolyProgressBar(getContext(), px(4));
-        LinearLayout.LayoutParams barParam = new LinearLayout.LayoutParams(px(280), px(8));
-        box.addView(loadingBar, barParam);
+        LinearLayout.LayoutParams barParam = new LinearLayout.LayoutParams(px(320), px(7));
+        barParam.topMargin = px(7);
+        barParam.bottomMargin = px(7);
+        bottomCard.addView(loadingBar, barParam);
 
-        // Percentage Readout (Never show technical asset logs / file paths)
-        loadingPercent = makeText("0%", 12f, COLOR_SILVER, true);
-        loadingPercent.setGravity(Gravity.CENTER);
-        loadingPercent.setPadding(0, px(12), 0, 0);
-        box.addView(loadingPercent);
+        TextView tip = makeText("Express Tip: Cruise near sidewalk customers to deliver · Tap Brake to drift", 9.5f, COLOR_MUTED, false);
+        tip.setGravity(Gravity.CENTER);
+        bottomCard.addView(tip);
 
         loadingBar.setOnProgressUpdate(p -> {
             if (loadingPercent != null) {
-                loadingPercent.setText(Math.round(p * 100) + "%");
+                int pct = Math.round(p * 100);
+                loadingPercent.setText(pct + "%");
+                if (pct < 30) statusMsg.setText("STREAMING CITY ROADWAYS & BLOCKS...");
+                else if (pct < 65) statusMsg.setText("CALIBRATING VEHICLE FLEET & AUDIO...");
+                else if (pct < 90) statusMsg.setText("SYNCHRONIZING NIGHT WEATHER & RAIN...");
+                else statusMsg.setText("METROPOLIS DISPATCH READY");
             }
         });
 
-        LayoutParams centerParam = new LayoutParams(-2, -2, Gravity.CENTER);
-        loadingLayout.addView(box, centerParam);
+        LayoutParams bottomParam = new LayoutParams(-2, -2, Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL);
+        bottomParam.bottomMargin = px(24);
+        loadingLayout.addView(bottomCard, bottomParam);
 
         activePanel = loadingLayout;
         addView(loadingLayout, new LayoutParams(-1, -1));

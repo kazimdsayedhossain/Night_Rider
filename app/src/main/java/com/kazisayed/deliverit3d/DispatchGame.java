@@ -34,7 +34,7 @@ public final class DispatchGame extends ApplicationAdapter {
         }
     }
     private final List<TossedParcel> tossedParcels = new ArrayList<>();
-    private LevelData level;private final Rules.Combo combo=new Rules.Combo();private float x,z,yaw,speed,steering,throttle,time,accumulator,hudClock,invulnerable,runClock,previousZ;private int delivered,inventory,cash,tickets,score,checkpoint,stars;private boolean won,levelBanked;private String vehicleId,hatId;
+    private LevelData level;private final Rules.Combo combo=new Rules.Combo();private float x,z,yaw,speed,steering,throttle,time,accumulator,hudClock,invulnerable,runClock,previousZ,smoothElev,prevX,prevZ,prevYaw;private int delivered,inventory,cash,tickets,score,checkpoint,stars;private boolean won,levelBanked;private String vehicleId,hatId;
     private final Set<Integer> respected=new HashSet<>(),violated=new HashSet<>();private float stoppedTime;
     public DispatchGame(SaveStore saves,PlayerInput input,TiltController tilt,GameAudio audio,Host host){this.saves=saves;this.input=input;this.tilt=tilt;this.audio=audio;this.host=host;cash=saves.cash();tickets=saves.tickets();publish();}
     @Override public void create(){try{
@@ -68,7 +68,7 @@ public final class DispatchGame extends ApplicationAdapter {
         if(state==State.ERROR)return;
         if(state==State.PLAYING){accumulator+=dt;while(accumulator>=1f/60){update(1f/60);accumulator-=1f/60;if(state!=State.PLAYING){accumulator=0;break;}}}
         if(noticeTime>0){noticeTime-=dt;if(noticeTime<=0)notice="";}
-        world.stream(x,z);if(traffic!=null)traffic.setNight(weather.hour>=18.5f||weather.hour<6f||weather.rain>.4f);weather.update(state==State.PLAYING?dt:0,x,z,yaw);rider.update(state==State.PLAYING?dt:0,x,z,yaw,speed,steering,inventory);
+        world.stream(x,z);if(traffic!=null)traffic.setNight(weather.hour>=18.5f||weather.hour<6f||weather.rain>.4f);weather.update(state==State.PLAYING?dt:0,x,z,yaw);{float rawElev=WorldGrid.elevation(x,z);smoothElev=smoothElev+(rawElev-smoothElev)*(1f-(float)Math.exp(-dt*10f));}rider.update(state==State.PLAYING?dt:0,x,z,yaw,speed,steering,inventory,smoothElev);
         float back=5.8f+Math.min(2.0f,Math.abs(speed)*.10f),sin=(float)Math.sin(yaw),cos=(float)Math.cos(yaw);
         Vector3 target=new Vector3(x-sin*back,WorldGrid.elevation(x,z)+3.2f,z-cos*back);
         camera.position.lerp(target,1-(float)Math.exp(-dt*6.5f));camera.up.set(Vector3.Y);camera.lookAt(x+sin*14.0f,1.1f+WorldGrid.elevation(x,z),z+cos*14.0f);camera.fieldOfView=50.0f;camera.update();
@@ -84,7 +84,7 @@ public final class DispatchGame extends ApplicationAdapter {
     }catch(Throwable error){fail(error);}}
     private void loadLevel(int number){
         level=new LevelData(number);combo.reset();combo.window=level.comboWindow;tossedParcels.clear();
-        x=level.startX;z=level.startZ;yaw=level.startYaw*MathUtils.degreesToRadians;
+        prevX=x=level.startX;prevZ=z=level.startZ;prevYaw=yaw=level.startYaw*MathUtils.degreesToRadians;smoothElev=WorldGrid.elevation(x,z);
         speed=steering=throttle=0;time=level.timeLimit;delivered=score=checkpoint=stars=0;inventory=level.inventory;won=levelBanked=false;runClock=accumulator=invulnerable=0;respected.clear();violated.clear();stoppedTime=0;
         vehicleId=saves.text("deliver3d_vehicle","bike");hatId=saves.text("deliver3d_hat","cap");rider.equip(vehicleId,hatId);
         world.configure(level.railroad?LevelData.RAILROAD_Z:Float.NaN);traffic=new TrafficSystem(assets,kit,level);traffic.setHornSink((type,intensity)->{});
@@ -236,7 +236,7 @@ public final class DispatchGame extends ApplicationAdapter {
         case "horn"->{audio.cue("horn");traffic.horn(x,z);}
         case "center"->{tilt.center();announce("Steering centered");}
         case "weather"->{weather.automatic=false;weather.mode=WeatherSystem.Mode.values()[(weather.mode.ordinal()+1)%3];saves.put("native-weather",weather.mode.name());saves.put("native-weather-auto",false);}
-        case "recover"->{x=level.startX;z=level.startZ;yaw=level.startYaw*MathUtils.degreesToRadians;speed=0;time=Math.max(0,time-5);announce("Reset to road · 5 second penalty");}
+        case "recover"->{prevX=x=level.startX;prevZ=z=level.startZ;prevYaw=yaw=level.startYaw*MathUtils.degreesToRadians;smoothElev=WorldGrid.elevation(x,z);speed=0;time=Math.max(0,time-5);announce("Reset to road · 5 second penalty");}
     }publish();}
     public void buy(boolean vehicles,String id,int price,int tokenPrice){if(saves.owned(vehicles).contains(id)){saves.put(vehicles?"deliver3d_vehicle":"deliver3d_hat",id);}else {if(cash<price||tickets<tokenPrice){announce("Not enough funds");publish();return;}cash-=price;tickets-=tokenPrice;saves.buy(vehicles,id,cash,tickets);}vehicleId=saves.text("deliver3d_vehicle","bike");hatId=saves.text("deliver3d_hat","cap");rider.equip(vehicleId,hatId);announce("Equipped");publish();}
     public void settings(){input.tilt=saves.flag("native-tilt",true);tilt.configure(saves.decimal("native-tilt-sensitivity",1),saves.flag("native-tilt-invert",false));audio.volumes(saves.decimal("dispatch-volume-master",.75f),saves.decimal("dispatch-volume-sfx",.8f),saves.decimal("dispatch-volume-ambient",.5f));if(weather!=null){weather.automatic=saves.flag("native-weather-auto",true);weather.dayCycle=saves.flag("native-day-cycle",true);weather.headlights=saves.flag("native-headlights",true);}}

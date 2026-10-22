@@ -111,6 +111,12 @@ public final class WorldScene implements AutoCloseable {
         MeshKit.shareMaterials(c.ground, c.geometry);   // wetness / puddle changes must reach every tile
         c.colliders.addAll(tile.colliders);
 
+        // River row: CityLayout.river(b) has already built the bridge deck, parapets, piers, and water surface.
+        // No buildings or frontage shrubs should ever be placed floating on river water.
+        if (WorldGrid.isRiverRow(cz)) {
+            return c;
+        }
+
         List<StaticCityBlueprint.BuildingLot> staticLots = StaticCityBlueprint.buildingsInTile(cx, cz);
         if (!staticLots.isEmpty()) {
             for (StaticCityBlueprint.BuildingLot b : staticLots) {

@@ -108,7 +108,8 @@ public final class AssetLibrary implements AutoCloseable {
                     com.badlogic.gdx.graphics.Texture tex = ta.textureDescription.texture;
                     tex.setWrap(com.badlogic.gdx.graphics.Texture.TextureWrap.Repeat, com.badlogic.gdx.graphics.Texture.TextureWrap.Repeat);
                     tex.setFilter(com.badlogic.gdx.graphics.Texture.TextureFilter.MipMapLinearLinear, com.badlogic.gdx.graphics.Texture.TextureFilter.Linear);
-                    if(id.startsWith("solid") || (tex.getWidth() <= 2 && tex.getHeight() <= 2)){
+                    if(tex.getWidth() <= 2 && tex.getHeight() <= 2){
+                        // Only swap out genuinely tiny 1x1/2x2 dummy swatches; leave real baked textures intact
                         com.badlogic.gdx.graphics.Texture chosen = id.contains("concrete") ? concrete : (id.contains("brick") ? brick : fallback);
                         if(chosen != null) {
                             m.set(net.mgsx.gltf.scene3d.attributes.PBRTextureAttribute.createBaseColorTexture(chosen));
@@ -142,9 +143,10 @@ public final class AssetLibrary implements AutoCloseable {
                 m.set(net.mgsx.gltf.scene3d.attributes.PBRFloatAttribute.createMetallic(.05f));
             } else {
                 // Building walls, bricks, concrete trim, awnings, doors, roof tiles, parapets:
-                m.set(net.mgsx.gltf.scene3d.attributes.PBRColorAttribute.createBaseColorFactor(new Color(.95f,.95f,.95f,1f)));
-                m.set(com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute.createEmissive(new Color(.03f,.03f,.04f,1f)));
-                m.set(net.mgsx.gltf.scene3d.attributes.PBRFloatAttribute.createRoughness(.65f));
+                // WHITE factor = no tint, texture shows exactly as baked; black emissive = no glow wash
+                m.set(net.mgsx.gltf.scene3d.attributes.PBRColorAttribute.createBaseColorFactor(Color.WHITE));
+                m.set(com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute.createEmissive(Color.BLACK));
+                m.set(net.mgsx.gltf.scene3d.attributes.PBRFloatAttribute.createRoughness(.72f));
                 m.set(net.mgsx.gltf.scene3d.attributes.PBRFloatAttribute.createMetallic(.02f));
             }
         }

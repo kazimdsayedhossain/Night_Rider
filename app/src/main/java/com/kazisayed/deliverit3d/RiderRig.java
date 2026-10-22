@@ -12,7 +12,7 @@ public final class RiderRig implements AutoCloseable {
     private final List<ModelInstance> body=new ArrayList<>();private final Matrix4 root=new Matrix4();
     private final ModelInstance[] wheels=new ModelInstance[2],arms=new ModelInstance[4],legs=new ModelInstance[4],feet=new ModelInstance[2],hands=new ModelInstance[2];
     private ModelInstance torso,head,hat,bag,vehicle,detailedBike,detailedCourier;private final ModelInstance headlightBeam,groundRefl,tailStreak;private final ModelInstance[] cargo=new ModelInstance[4];private AssetLibrary.Template vehicleTemplate;
-    private final Vector3 mount=new Vector3(0,.90f,-.14f);private float phase,spin;private String selected="";private boolean detailed;
+    private final Vector3 mount=new Vector3(0,.90f,-.14f);private float phase,spin,smoothLean,smoothSteer;private String selected="";private boolean detailed;
     public RiderRig(MeshKit kit,AssetLibrary assets){this.kit=kit;this.assets=assets;
         List<ModelInstance> pieces=new ArrayList<>();Vector3 rear=new Vector3(0,.34f,-.62f),front=new Vector3(0,.34f,.62f),crank=new Vector3(0,.34f,0),saddle=new Vector3(0,.87f,-.2f),fork=new Vector3(0,.86f,.42f);
         tube(pieces,rear,crank,.032f);tube(pieces,rear,saddle,.028f);tube(pieces,saddle,crank,.038f);tube(pieces,saddle,fork,.035f);tube(pieces,crank,fork,.042f);tube(pieces,fork,front,.032f);
@@ -46,16 +46,16 @@ public final class RiderRig implements AutoCloseable {
     private void place(ModelInstance i,Vector3 p,float w,float h,float d,float pitch){i.transform.set(root).translate(p).rotate(Vector3.X,pitch).scale(w,h,d);}
     private void segment(ModelInstance i,Vector3 a,Vector3 b,float width){MeshKit.setBone(i,a,b,width);i.transform.mulLeft(root);}
     private static Vector3 elbow(Vector3 a,Vector3 b,float l1,float l2,Vector3 pole){Vector3 axis=new Vector3(b).sub(a);float distance=Rules.clamp(axis.len(),.01f,l1+l2-.002f);axis.nor();float along=(l1*l1-l2*l2+distance*distance)/(2*distance);float height=(float)Math.sqrt(Math.max(.0001f,l1*l1-along*along));Vector3 bend=new Vector3(pole).mulAdd(axis,-pole.dot(axis)).nor();return new Vector3(a).mulAdd(axis,along).mulAdd(bend,height);}
-    public void update(float dt,float x,float z,float yaw,float speed,float steering,int inventory){
+    public void update(float dt,float x,float z,float yaw,float speed,float steering,int inventory,float elev){
         phase+=Math.min(14,Math.abs(speed)*1.55f)*dt;spin+=speed/.34f*dt;
-        float lean=-steering*Math.min(Math.abs(speed)*.022f,.24f);root.idt().translate(x,WorldGrid.elevation(x,z),z).rotate(Vector3.Y,yaw*MathUtils.radiansToDegrees).rotate(Vector3.Z,lean*MathUtils.radiansToDegrees);
+        float lean=-steering*Math.min(Math.abs(speed)*.022f,.24f);root.idt().translate(x,elev,z).rotate(Vector3.Y,yaw*MathUtils.radiansToDegrees).rotate(Vector3.Z,lean*MathUtils.radiansToDegrees);
         float sin=(float)Math.sin(yaw),cos=(float)Math.cos(yaw);
         float lead=5.8f;
-        headlightBeam.transform.setToTranslation(x+sin*lead,WorldGrid.elevation(x,z)+.038f,z+cos*lead)
+        headlightBeam.transform.setToTranslation(x+sin*lead,elev+.038f,z+cos*lead)
             .rotate(Vector3.Y,yaw*MathUtils.radiansToDegrees)
             .scale(3.4f,1f,12.5f);
-        groundRefl.transform.setToTranslation(x,WorldGrid.elevation(x,z)+.037f,z).rotate(Vector3.Y,yaw*MathUtils.radiansToDegrees).scale(1.3f,1f,2.4f);
-        tailStreak.transform.setToTranslation(x-sin*0.8f,WorldGrid.elevation(x,z)+.039f,z-cos*0.8f).rotate(Vector3.Y,yaw*MathUtils.radiansToDegrees+180f).scale(1.1f,1f,3.8f);
+        groundRefl.transform.setToTranslation(x,elev+.037f,z).rotate(Vector3.Y,yaw*MathUtils.radiansToDegrees).scale(1.3f,1f,2.4f);
+        tailStreak.transform.setToTranslation(x-sin*0.8f,elev+.039f,z-cos*0.8f).rotate(Vector3.Y,yaw*MathUtils.radiansToDegrees+180f).scale(1.1f,1f,3.8f);
         for(int i=0;i<cargo.length;i++)cargo[i].transform.set(root).translate(0,.78f+i*.225f,-.66f).scale(.32f,.22f,.38f);
         if(detailed&&detailedBike!=null){
             detailedBike.transform.set(root);
@@ -77,7 +77,7 @@ public final class RiderRig implements AutoCloseable {
         for(int s=0;s<2;s++){float side=s==0?-1:1;Vector3 shoulder=new Vector3(mount).add(side*.165f,.36f,.13f);Vector3 grip=new Vector3(side*.25f,1.03f,.43f);grip.rotate(Vector3.Y,-steering*20);Vector3 joint=elbow(shoulder,grip,.285f,.265f,new Vector3(side*.25f,-.25f,-1));segment(arms[s*2],shoulder,joint,.095f);segment(arms[s*2+1],joint,grip,.073f);place(hands[s],grip,.075f,.09f,.065f,0);
             float p=phase+s*MathUtils.PI;Vector3 hip=new Vector3(mount).add(side*.095f,-.018f,0);Vector3 ankle=vehicle==null?new Vector3(side*.11f,.411f+.13f*(float)Math.cos(p),-.055f+.13f*(float)Math.sin(p)):new Vector3(side*.18f,.4f,.1f);Vector3 knee=elbow(hip,ankle,.405f,.415f,new Vector3(0,.1f,1));segment(legs[s*2],hip,knee,.13f);segment(legs[s*2+1],knee,ankle,.095f);place(feet[s],new Vector3(ankle).add(0,-.035f,.045f),.095f,.07f,.24f,-5);
         }
-        if(vehicle!=null)vehicleTemplate.place(vehicle,x,WorldGrid.elevation(x,z),z,yaw*MathUtils.radiansToDegrees,1);
+        if(vehicle!=null)vehicleTemplate.place(vehicle,x,elev,z,yaw*MathUtils.radiansToDegrees,1);
     }
     /** Frame vertices are cached in local space; wrapper applies the cyclist's world transform. */
     public void collect(Array<RenderableProvider> out,int inventory){

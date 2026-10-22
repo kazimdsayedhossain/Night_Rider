@@ -21,7 +21,8 @@ public final class Rules {
     // ---- small math helpers used by the game loop
     public static float clamp(float v, float lo, float hi) { return Math.max(lo, Math.min(hi, v)); }
     public static float lerp(float a, float b, float t) { return a + (b - a) * t; }
-    public static float wrap(float a) { return (float) Math.atan2(Math.sin(a), Math.cos(a)); }
+        public static float wrap(float a) { return (float) Math.atan2(Math.sin(a), Math.cos(a)); }
+    public static float lerpAngle(float a, float b, float t) { return a + wrap(b - a) * t; }
 
     // ---- delivery ratings
     public record Rating(String id, String label, float maxDist, int cash, int score, int time) {}
