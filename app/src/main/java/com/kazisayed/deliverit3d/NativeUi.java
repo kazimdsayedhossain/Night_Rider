@@ -2128,10 +2128,8 @@ private final FrameLayout controls;
         });
 
         LayoutParams pp = new LayoutParams(px(42), px(42), Gravity.TOP | Gravity.RIGHT);
-
-        pp.topMargin = px(14);
-
-        pp.rightMargin = px(100);
+        pp.topMargin = Math.max(safeTop, px(18));
+        pp.rightMargin = Math.max(safeRight, px(24));
 
         controls.addView(btnPause, pp);
 
@@ -2405,9 +2403,8 @@ private final FrameLayout controls;
 
         if (btnPause != null && btnPause.getLayoutParams() instanceof LayoutParams pp) {
 
-            pp.rightMargin = padR + px(100);
-
-            pp.topMargin = padT + px(14);
+            pp.rightMargin = Math.max(safeRight, px(24));
+            pp.topMargin = Math.max(safeTop, px(18));
 
             btnPause.setLayoutParams(pp);
 
@@ -3267,5 +3264,223 @@ private final FrameLayout controls;
             return true;
         }
         return false;
+    }
+
+    @Override
+    protected void onDraw(Canvas canvas) {
+        super.onDraw(canvas);
+        if (data == null || data.state() != DispatchGame.State.PLAYING) return;
+
+        canvas.save();
+        canvas.translate(getPaddingLeft(), getPaddingTop());
+        canvas.scale(dp, dp);
+        float w = (getWidth() - getPaddingLeft() - getPaddingRight()) / dp;
+        float h = (getHeight() - getPaddingTop() - getPaddingBottom()) / dp;
+
+        float safeTopDp = safeTop / dp;
+        float safeLeftDp = safeLeft / dp;
+        float safeRightDp = safeRight / dp;
+
+        // 1. TOP-LEFT: ORDER DASHBOARD (CURRENT ORDER & NEXT ORDER DETAILS)
+        float orderX = Math.max(safeLeftDp + 16, 20);
+        float orderY = Math.max(safeTopDp + 14, 16);
+        float orderW = 320;
+        float orderH = 68;
+
+        // Transparent low-poly chamfered card (Zero heavy dark box)
+        paint.setStyle(Paint.Style.FILL);
+        paint.setColor(0x330B111A);
+        drawChamferedRect(canvas, orderX, orderY, orderX + orderW, orderY + orderH, 6, paint);
+        paint.setStyle(Paint.Style.STROKE);
+        paint.setStrokeWidth(1.2f);
+        paint.setColor(0x35FFFFFF);
+        drawChamferedRect(canvas, orderX, orderY, orderX + orderW, orderY + orderH, 6, paint);
+
+        DispatchGame.DeliveryOrder active = game.getActiveDelivery();
+        DispatchGame.DeliveryOrder next = game.getNextDelivery();
+        int queueCount = game.getPendingDeliveryCount();
+
+        // --- CURRENT ORDER (Line 1 & 2) ---
+        paint.setStyle(Paint.Style.FILL);
+        paint.setTextAlign(Paint.Align.LEFT);
+
+        // Header: "CURRENT ORDER" tag + live time
+        paint.setTypeface(Typeface.create("sans-serif-bold", Typeface.BOLD));
+        paint.setTextSize(10f);
+        paint.setColor(0xFF38BDF8); // Cyan indicator
+        canvas.drawText("● CURRENT ORDER", orderX + 10, orderY + 16, paint);
+
+        int sec = Math.max(0, (int) Math.ceil(data.time()));
+        String timeStr = String.format(Locale.US, "%d:%02d", sec / 60, sec % 60);
+        paint.setColor(sec < 20 ? 0xFFFFAA88 : COLOR_SILVER);
+        float twTime = paint.measureText(timeStr);
+        canvas.drawText(timeStr, orderX + orderW - 10 - twTime, orderY + 16, paint);
+
+        // Details: Recipient, District, Payout, Side, Distance
+        paint.setColor(COLOR_WHITE);
+        paint.setTypeface(Typeface.create("sans-serif-condensed", Typeface.BOLD));
+        paint.setTextSize(12f);
+        if (active != null) {
+            String activeTitle = active.recipient.toUpperCase(Locale.ROOT) + "  ($" + active.payout + ")";
+            canvas.drawText(activeTitle, orderX + 10, orderY + 31, paint);
+
+            paint.setTypeface(Typeface.create("sans-serif-condensed", Typeface.NORMAL));
+            paint.setTextSize(10f);
+            paint.setColor(COLOR_SILVER);
+            int distM = Math.round(data.distance());
+            String sideStr = (active.side != null ? active.side.toUpperCase(Locale.ROOT) : "RIGHT");
+            String activeSub = "TARGET: " + distM + "m (" + sideStr + " SIDE)  |  " + data.delivered() + "/" + data.quota() + " DELIVERED";
+            canvas.drawText(activeSub, orderX + 10, orderY + 44, paint);
+        } else {
+            canvas.drawText("SEARCHING FOR DISPATCH CALLS...", orderX + 10, orderY + 31, paint);
+            paint.setTypeface(Typeface.create("sans-serif-condensed", Typeface.NORMAL));
+            paint.setTextSize(10f);
+            paint.setColor(COLOR_SILVER);
+            canvas.drawText(data.delivered() + "/" + data.quota() + " DELIVERED THIS SHIFT", orderX + 10, orderY + 44, paint);
+        }
+
+        // Hairline divider
+        paint.setColor(0x22FFFFFF);
+        paint.setStrokeWidth(1f);
+        canvas.drawLine(orderX + 8, orderY + 49, orderX + orderW - 8, orderY + 49, paint);
+
+        // --- NEXT ORDER (Line 3) ---
+        paint.setTypeface(Typeface.create("sans-serif-bold", Typeface.BOLD));
+        paint.setTextSize(9.5f);
+        paint.setColor(0xFF94A3B8);
+        canvas.drawText("NEXT: ", orderX + 10, orderY + 61, paint);
+
+        float twNext = paint.measureText("NEXT: ");
+        paint.setTypeface(Typeface.create("sans-serif-condensed", Typeface.NORMAL));
+        paint.setTextSize(10f);
+        if (next != null) {
+            paint.setColor(COLOR_SILVER);
+            String nextStr = next.recipient.toUpperCase(Locale.ROOT) + "  (+$" + next.payout + ")  |  " + queueCount + "/10 QUEUED";
+            canvas.drawText(nextStr, orderX + 10 + twNext, orderY + 61, paint);
+        } else {
+            paint.setColor(0xFF64748B);
+            String nextStr = queueCount > 0 ? ("STANDBY // AWAITING CALL (" + queueCount + "/10 QUEUED)") : "STANDBY // NO PENDING ORDERS (0/10)";
+            canvas.drawText(nextStr, orderX + 10 + twNext, orderY + 61, paint);
+        }
+
+        // 2. TOP-RIGHT: RADAR MINIMAP (Planted to the left of the Pause Button)
+        float pauseRight = Math.max(safeRightDp, 24);
+        float pauseTop = Math.max(safeTopDp, 18);
+        float radarRadius = 36f;
+        float radarCx = w - pauseRight - 42 - 14 - radarRadius; // 14dp gap left of pause button
+        float radarCy = pauseTop + 21; // Vertically centered with pause button
+        drawRadarMap(canvas, radarCx, radarCy, radarRadius);
+
+        // 3. BOTTOM-CENTER: RACING SPEEDOMETER (Pure Floating White Digits + KM/H)
+        int kmh = Math.round(Math.abs(data.speed()) * 3.6f);
+        String speedStr = String.valueOf(kmh);
+
+        paint.setStyle(Paint.Style.FILL);
+        paint.setTextAlign(Paint.Align.LEFT);
+        paint.setTypeface(Typeface.create("sans-serif-black", Typeface.BOLD));
+        paint.setTextSkewX(-0.16f);
+        paint.setTextSize(42);
+        paint.setColor(COLOR_WHITE_TRANSPARENT);
+        paint.setShadowLayer(4, 0, 2, 0x99000000);
+
+        float numW = paint.measureText(speedStr);
+        float speedX = w * 0.5f - (numW + 36) * 0.5f;
+        float speedY = h - 22;
+
+        canvas.drawText(speedStr, speedX, speedY, paint);
+
+        paint.setTextSkewX(0);
+        paint.setTextSize(11);
+        paint.setTypeface(Typeface.create("sans-serif-bold", Typeface.BOLD));
+        paint.setColor(0xFFCBD5E1);
+        canvas.drawText("KM/H", speedX + numW + 6, speedY - 6, paint);
+
+        // 4. CENTER SCREEN NOTIFICATION / TOAST (data.notice())
+        if (data.notice() != null && !data.notice().isEmpty()) {
+            float noteW = Math.min(w - 240, 380);
+            float noteX = w * 0.5f - noteW * 0.5f;
+            float noteY = h - 110;
+
+            paint.setStyle(Paint.Style.FILL);
+            paint.setColor(0xCC0D131A);
+            drawChamferedRect(canvas, noteX, noteY, noteX + noteW, noteY + 32, 6, paint);
+
+            paint.setStyle(Paint.Style.STROKE);
+            paint.setStrokeWidth(1.2f);
+            paint.setColor(0x55FFFFFF);
+            drawChamferedRect(canvas, noteX, noteY, noteX + noteW, noteY + 32, 6, paint);
+
+            paint.setStyle(Paint.Style.FILL);
+            paint.setTextAlign(Paint.Align.CENTER);
+            paint.setTextSize(11.5f);
+            paint.setTypeface(Typeface.create("sans-serif-bold", Typeface.NORMAL));
+            paint.setColor(COLOR_WHITE);
+            canvas.drawText(data.notice(), w * 0.5f, noteY + 20, paint);
+            paint.setTextAlign(Paint.Align.LEFT);
+        }
+
+        canvas.restore();
+    }
+
+    private void drawRadarMap(Canvas c, float cx, float cy, float radius) {
+        // Outer bezel (translucent dark glass with silver border)
+        paint.setStyle(Paint.Style.FILL);
+        paint.setColor(0x260B111A);
+        c.drawCircle(cx, cy, radius, paint);
+        paint.setStyle(Paint.Style.STROKE);
+        paint.setStrokeWidth(1.2f);
+        paint.setColor(0x35FFFFFF);
+        c.drawCircle(cx, cy, radius, paint);
+
+        // Clip circle
+        c.save();
+        Path clip = new Path();
+        clip.addCircle(cx, cy, radius - 2, Path.Direction.CW);
+        c.clipPath(clip);
+
+        // Road grid lines
+        float scale = 0.32f;
+        paint.setColor(0x20FFFFFF);
+        paint.setStrokeWidth(1.6f);
+        for (int i = -2; i <= 2; i++) {
+            float roadX = (Math.round(data.x() / 160) + i) * 160;
+            float sx = cx - (roadX - data.x()) * scale;
+            c.drawLine(sx, cy - radius, sx, cy + radius, paint);
+
+            float roadZ = (Math.round(data.z() / 160) + i) * 160;
+            float sy = cy - (roadZ - data.z()) * scale;
+            c.drawLine(cx - radius, sy, cx + radius, sy, paint);
+        }
+
+        // Markers: Crisp white for customer drops, light ice-blue for depots
+        paint.setStyle(Paint.Style.FILL);
+        if (data.markers() != null) {
+            for (DispatchGame.Marker m : data.markers()) {
+                paint.setColor(m.type() == 0 ? COLOR_WHITE : 0xCCA5B4FC);
+                c.drawCircle(cx - (m.x() - data.x()) * scale, cy - (m.z() - data.z()) * scale, 3.2f, paint);
+            }
+        }
+        c.restore();
+
+        // Player orientation arrow (Low-poly faceted chevron)
+        c.save();
+        c.translate(cx, cy);
+        c.rotate(-data.yaw() * 180 / (float) Math.PI);
+        Path arrow = new Path();
+        arrow.moveTo(0, -7);
+        arrow.lineTo(-5, 6);
+        arrow.lineTo(0, 3f);
+        arrow.lineTo(5, 6);
+        arrow.close();
+        paint.setStyle(Paint.Style.FILL);
+        paint.setColor(COLOR_WHITE);
+        c.drawPath(arrow, paint);
+        c.restore();
+
+        // North indicator 'N'
+        paint.setColor(COLOR_MUTED);
+        paint.setTextSize(9);
+        paint.setTypeface(Typeface.create("sans-serif-bold", Typeface.BOLD));
+        c.drawText("N", cx - 3.5f, cy - radius + 11, paint);
     }
 }

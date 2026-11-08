@@ -85,7 +85,13 @@ public final class DispatchGame extends ApplicationAdapter {
 
     public DispatchCall getPendingCall(){ return pendingCall; }
     public int getPendingDeliveryCount(){ return deliveryQueue.size(); }
-    public DeliveryOrder getActiveDelivery(){ return deliveryQueue.peekFirst(); }
+    public DeliveryOrder getActiveDelivery(){ return deliveryQueue.peekFirst(); }
+    public DeliveryOrder getNextDelivery(){
+        if(deliveryQueue.size() <= 1) return null;
+        Iterator<DeliveryOrder> it = deliveryQueue.iterator();
+        it.next();
+        return it.hasNext() ? it.next() : null;
+    }
 
     public void acceptCall(){
         if(pendingCall == null) return;
