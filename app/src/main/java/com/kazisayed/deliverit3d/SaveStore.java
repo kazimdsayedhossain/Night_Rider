@@ -81,4 +81,40 @@ public final class SaveStore {
     public void buy(boolean vehicles,String id,int cash,int tickets){Set<String> owned=owned(vehicles);owned.add(id);prefs.edit().putString(vehicles?"deliver3d_unlocked_veh":"deliver3d_unlocked_hats",new JSONArray(owned).toString()).putString("deliver3d_cash",String.valueOf(cash)).putString("deliver3d_tickets",String.valueOf(tickets)).putString(vehicles?"deliver3d_vehicle":"deliver3d_hat",id).commit();}
     public void bank(int cash,int tickets){prefs.edit().putString("deliver3d_cash",String.valueOf(cash)).putString("deliver3d_tickets",String.valueOf(tickets)).commit();}
     public void reset(){prefs.edit().clear().putBoolean("native-import-complete",true).commit();}
+
+    public static int getCash(android.content.Context ctx){return new SaveStore(ctx).cash();}
+    public static String getEquippedVehicle(android.content.Context ctx){return new SaveStore(ctx).text("deliver3d_vehicle","bike");}
+    public static void setEquippedVehicle(android.content.Context ctx,String id){new SaveStore(ctx).put("deliver3d_vehicle",id);}
+    public static long getBestScore(android.content.Context ctx){try{return Long.parseLong(new SaveStore(ctx).text("nightrider_best_score","0"));}catch(Exception e){return 0L;}}
+    public static void setBestScore(android.content.Context ctx,long score){new SaveStore(ctx).put("nightrider_best_score",score);}
+    public static void cacheContracts(android.content.Context ctx,java.util.List<com.kazisayed.deliverit3d.model.Contract> list){
+        if(list==null)return;
+        try{
+            org.json.JSONArray arr=new org.json.JSONArray();
+            for(com.kazisayed.deliverit3d.model.Contract c:list){
+                org.json.JSONObject obj=new org.json.JSONObject();
+                obj.put("id",c.getId());obj.put("route",c.getRoute());obj.put("payout",c.getPayout());
+                obj.put("time",c.getTimeLimitSeconds());obj.put("cargo",c.getCargo());obj.put("diff",c.getDifficulty());
+                arr.put(obj);
+            }
+            new SaveStore(ctx).put("cached_contracts",arr.toString());
+        }catch(Exception ignored){}
+    }
+    public static java.util.List<com.kazisayed.deliverit3d.model.Contract> getCachedContracts(android.content.Context ctx){
+        java.util.List<com.kazisayed.deliverit3d.model.Contract> list=new java.util.ArrayList<>();
+        String raw=new SaveStore(ctx).text("cached_contracts",null);
+        if(raw!=null){
+            try{
+                org.json.JSONArray arr=new org.json.JSONArray(raw);
+                for(int i=0;i<arr.length();i++){
+                    org.json.JSONObject o=arr.getJSONObject(i);
+                    list.add(new com.kazisayed.deliverit3d.model.Contract(
+                        o.optString("id"),o.optString("route"),o.optInt("payout"),
+                        o.optInt("time"),o.optString("cargo"),o.optInt("diff")
+                    ));
+                }
+            }catch(Exception ignored){}
+        }
+        return list;
+    }
 }

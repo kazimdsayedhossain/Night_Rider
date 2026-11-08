@@ -1,5 +1,6 @@
 plugins {
     id 'com.android.application'
+    id 'com.google.gms.google-services'
 }
 
 android {
@@ -10,8 +11,8 @@ android {
         applicationId 'com.kazisayed.deliverit3d'
         minSdk 26
         targetSdk 35
-        versionCode 2
-        versionName '2.0'
+        versionCode 3
+        versionName '3.0'
         ndk {
             abiFilters 'arm64-v8a', 'armeabi-v7a', 'x86_64'
         }
@@ -20,6 +21,10 @@ android {
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
+    }
+
+    buildFeatures {
+        viewBinding true
     }
 
     sourceSets.main.jniLibs.srcDirs = ['build/generated/jniLibs']
@@ -59,10 +64,31 @@ tasks.withType(com.android.build.gradle.internal.tasks.CheckAarMetadataTask).con
 }
 
 dependencies {
+    // LibGDX
     implementation 'com.badlogicgames.gdx:gdx:1.14.2'
     implementation 'com.badlogicgames.gdx:gdx-backend-android:1.14.2'
     implementation 'com.github.mgsx-dev.gdx-gltf:gltf:2.3.0'
     implementation 'org.iq80.leveldb:leveldb:0.12'
+
+    // AndroidX
+    implementation 'androidx.appcompat:appcompat:1.7.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    implementation 'androidx.recyclerview:recyclerview:1.3.2'
+    implementation 'androidx.cardview:cardview:1.0.0'
+    implementation 'androidx.work:work-runtime:2.9.0'
+    implementation 'androidx.activity:activity:1.9.0'
+
+    // Firebase BOM — pins all Firebase versions together
+    implementation platform('com.google.firebase:firebase-bom:33.1.0')
+    implementation 'com.google.firebase:firebase-auth'
+    implementation 'com.google.firebase:firebase-firestore'
+    implementation 'com.google.firebase:firebase-database'
+    implementation 'com.google.firebase:firebase-storage'
+
+    // Google Sign-In
+    implementation 'com.google.android.gms:play-services-auth:21.2.0'
+
+    // Native ABIs
     for (abi in ['arm64-v8a', 'armeabi-v7a', 'x86_64']) {
         natives "com.badlogicgames.gdx:gdx-platform:1.14.2:natives-$abi"
     }

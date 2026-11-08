@@ -216,17 +216,33 @@ public final class AssetLibrary implements AutoCloseable {
                 }
             }
             case 9 -> {
+                // Load original buildings Building_01..07; 08 and 09 replaced with new packs
                 SceneAsset a=load("buildings/buildings.glb");
-                for(int i=1;i<=9;i++){
+                for(int i=1;i<=7;i++){
                     String nodeName=String.format(Locale.ROOT,"Building_%02d",i);
                     try{
                         ModelInstance mi=new ModelInstance(a.scene.model,nodeName,true);
                         illuminateWindows(mi);
-                        float hScale = (i == 8 || i == 9) ? 1.75f : 1.0f;
-                        Template t=new Template(mi,20.0f,38,2.2f,0,false,true,hScale);
+                        Template t=new Template(mi,20.0f,38,2.2f,0,false,true,1.0f);
                         namedBuildings.put(nodeName,t);buildings.add(t);
                     }catch(Exception ignored){}
                 }
+                // Building_08 replacement: NYC Buildify high-rise block
+                try{
+                    SceneAsset nyc=load("buildings/building_buildify_nyc.glb");
+                    ModelInstance miNyc=new ModelInstance(nyc.scene.model);
+                    illuminateWindows(miNyc);
+                    Template tNyc=new Template(miNyc,22.0f,48,2.0f,0,false,true,1.0f);
+                    namedBuildings.put("Building_08",tNyc);buildings.add(tNyc);
+                }catch(Exception e){ com.badlogic.gdx.Gdx.app.error("AssetLib","NYC building load failed",e); }
+                // Building_09 replacement: Chicago realistic downtown block
+                try{
+                    SceneAsset chi=load("buildings/realistic_chicago_buildings.glb");
+                    ModelInstance miChi=new ModelInstance(chi.scene.model);
+                    illuminateWindows(miChi);
+                    Template tChi=new Template(miChi,22.0f,44,2.0f,0,false,true,1.0f);
+                    namedBuildings.put("Building_09",tChi);buildings.add(tChi);
+                }catch(Exception e){ com.badlogic.gdx.Gdx.app.error("AssetLib","Chicago building load failed",e); }
             }
             case 10 -> {
                 SceneAsset a=load("world/nature-library.glb");

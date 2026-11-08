@@ -7,8 +7,8 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.backends.android.*;
 
 /** Android owns the window, lifecycle, touch input, sensors, audio and accessibility. */
-public final class MainActivity extends AndroidApplication implements DispatchGame.Host {
-    private SaveStore saves;private TiltController tilt;private GameAudio audio;private DispatchGame game;private NativeUi ui;private View surface;private final Handler main=new Handler(Looper.getMainLooper());
+public class MainActivity extends AndroidApplication implements DispatchGame.Host {
+    protected SaveStore saves;protected TiltController tilt;protected GameAudio audio;protected DispatchGame game;protected NativeUi ui;protected View surface;private final Handler main=new Handler(Looper.getMainLooper());
     private final Runnable refresh=new Runnable(){public void run(){if(ui!=null)ui.refresh(game.snapshot);main.postDelayed(this,50);}};
     @Override public void onCreate(Bundle state){
         super.onCreate(state);

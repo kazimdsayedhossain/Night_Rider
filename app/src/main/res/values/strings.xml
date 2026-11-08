@@ -1,3 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">My Application</string>
+    <string name="app_name">Night Rider</string>
+    <string name="btn_play_guest">Play as Guest</string>
+    <string name="btn_sign_in">Sign in with Google</string>
+    <string name="btn_start_shift">Start Shift</string>
+    <string name="btn_garage">Garage</string>
+    <string name="btn_leaderboard">Leaderboard</string>
+    <string name="btn_shift_log">Shift Log</string>
+    <string name="btn_profile">Profile</string>
+    <string name="btn_equip">Equip</string>
+    <string name="btn_accept">Accept</string>
+    <string name="btn_play_again">Play Again</string>
+    <string name="label_cash">Cash</string>
+    <string name="label_rank">Rank</string>
+    <string name="label_score">Score</string>
+    <string name="label_no_contracts">No contracts available. Check back later.</string>
+    <string name="label_offline">Offline Mode</string>
+    <string name="notif_channel_shift">Shift Tracker</string>
+    <string name="notif_shift_active">Shift Active</string>
+    <string name="notif_return">Return to Ride</string>
+    <string name="default_web_client_id">1234567890-placeholder.apps.googleusercontent.com</string>
 </resources>

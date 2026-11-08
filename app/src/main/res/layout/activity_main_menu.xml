@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- MainMenuActivity: Courier HQ hub -->
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#0A0A0F">
+
+    <!-- Top bar: player info -->
+    <LinearLayout
+        android:id="@+id/layout_top_bar"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="16dp"
+        android:gravity="center_vertical"
+        android:background="#14141A"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <ImageView
+            android:id="@+id/iv_avatar"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:src="@mipmap/ic_launcher"
+            android:scaleType="centerCrop"
+            android:contentDescription="Courier portrait" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:layout_marginStart="12dp">
+
+            <TextView
+                android:id="@+id/tv_courier_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Courier"
+                android:textColor="#FFFFFF"
+                android:textSize="16sp" />
+
+            <TextView
+                android:id="@+id/tv_cash"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0 coins"
+                android:textColor="#F5C842"
+                android:textSize="13sp" />
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/tv_offline_badge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="OFFLINE"
+            android:textColor="#FF6B35"
+            android:textSize="11sp"
+            android:visibility="gone" />
+
+    </LinearLayout>
+
+    <!-- Menu buttons -->
+    <LinearLayout
+        android:id="@+id/layout_menu"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp"
+        android:gravity="center"
+        app:layout_constraintTop_toBottomOf="@id/layout_top_bar"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <Button
+            android:id="@+id/btn_take_job"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:text="Take a Job"
+            android:textSize="17sp"
+            android:backgroundTint="#1A73E8"
+            android:textColor="#FFFFFF"
+            android:layout_marginBottom="12dp" />
+
+        <Button
+            android:id="@+id/btn_garage"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:text="Garage"
+            android:textSize="15sp"
+            android:backgroundTint="#222228"
+            android:textColor="#CCCCCC"
+            android:layout_marginBottom="8dp" />
+
+        <Button
+            android:id="@+id/btn_leaderboard"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:text="Leaderboard"
+            android:textSize="15sp"
+            android:backgroundTint="#222228"
+            android:textColor="#CCCCCC"
+            android:layout_marginBottom="8dp" />
+
+        <Button
+            android:id="@+id/btn_shift_log"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:text="Shift Log"
+            android:textSize="15sp"
+            android:backgroundTint="#222228"
+            android:textColor="#CCCCCC"
+            android:layout_marginBottom="8dp" />
+
+        <Button
+            android:id="@+id/btn_profile"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:text="Profile"
+            android:textSize="15sp"
+            android:backgroundTint="#222228"
+            android:textColor="#CCCCCC" />
+
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
