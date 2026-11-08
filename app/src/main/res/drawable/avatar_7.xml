@@ -1,0 +1,17 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="96dp"
+    android:height="96dp"
+    android:viewportWidth="96"
+    android:viewportHeight="96">
+    <!-- Cat Ears -->
+    <path android:fillColor="#00695C" android:pathData="M18,16 L38,32 L18,40 Z"/>
+    <path android:fillColor="#00695C" android:pathData="M78,16 L78,40 L58,32 Z"/>
+    <path android:fillColor="#64FFDA" android:pathData="M22,22 L34,32 L22,36 Z"/>
+    <path android:fillColor="#64FFDA" android:pathData="M74,22 L74,36 L62,32 Z"/>
+    <!-- Head -->
+    <path android:fillColor="#004D40" android:pathData="M48,22 C24,22 18,36 18,52 C18,74 34,82 48,82 C62,82 78,74 78,52 C78,36 72,22 48,22 Z"/>
+    <!-- Neon Cat Visor -->
+    <path android:fillColor="#1DE9B6" android:pathData="M26,44 L70,44 L64,56 L32,56 Z"/>
+    <!-- Nose -->
+    <path android:fillColor="#E0F2F1" android:pathData="M46,62 L50,62 L48,66 Z"/>
+</vector>

@@ -99,7 +99,7 @@ public final class Rules {
     }
 
     // ---- difficulty curves (doubles so results match JS exactly)
-    public static double playerTopSpeedFor(int level) { return 14 + Math.min(level * 0.6, 8); }
+    public static double playerTopSpeedFor(int level) { return (14 + Math.min(level * 0.6, 8)) * 1.60; }
     public static int parcelQuotaFor(int level) { return Math.min(6, 3 + (level - 1) / 3); }
     public static int timeLimitFor(int level, double length, double topSpeed) {
         double req = Math.min(0.92, 0.80 + 0.0125 * (level - 1));

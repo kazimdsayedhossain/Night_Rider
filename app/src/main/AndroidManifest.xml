@@ -13,16 +13,16 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
 
     <application
-        android:theme="@style/Theme.AppCompat.NoActionBar"
+        android:theme="@style/Theme.NightRider.FullScreen"
         android:label="Night Rider"
         android:icon="@mipmap/ic_launcher"
         android:largeHeap="true"
         android:usesCleartextTraffic="true">
 
-        <!-- Launcher: SplashActivity -->
+        <!-- Launcher: AuthActivity (Landscape Console Style) -->
         <activity
-            android:name="com.kazisayed.deliverit3d.SplashActivity"
-            android:screenOrientation="portrait"
+            android:name="com.kazisayed.deliverit3d.AuthActivity"
+            android:screenOrientation="sensorLandscape"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -30,9 +30,9 @@
             </intent-filter>
         </activity>
 
-        <!-- Auth -->
+        <!-- SplashActivity (Decoupled, preserved for reference) -->
         <activity
-            android:name="com.kazisayed.deliverit3d.AuthActivity"
+            android:name="com.kazisayed.deliverit3d.SplashActivity"
             android:screenOrientation="portrait"
             android:exported="false" />
 
@@ -51,25 +51,25 @@
         <!-- Garage -->
         <activity
             android:name="com.kazisayed.deliverit3d.GarageActivity"
-            android:screenOrientation="portrait"
+            android:screenOrientation="sensorLandscape"
             android:exported="false" />
 
         <!-- Leaderboard -->
         <activity
             android:name="com.kazisayed.deliverit3d.LeaderboardActivity"
-            android:screenOrientation="portrait"
+            android:screenOrientation="sensorLandscape"
             android:exported="false" />
 
         <!-- Shift Log -->
         <activity
             android:name="com.kazisayed.deliverit3d.ShiftLogActivity"
-            android:screenOrientation="portrait"
+            android:screenOrientation="sensorLandscape"
             android:exported="false" />
 
         <!-- Profile -->
         <activity
             android:name="com.kazisayed.deliverit3d.ProfileActivity"
-            android:screenOrientation="portrait"
+            android:screenOrientation="sensorLandscape"
             android:exported="false" />
 
         <!-- 3D Game Riding Session (Landscape) -->

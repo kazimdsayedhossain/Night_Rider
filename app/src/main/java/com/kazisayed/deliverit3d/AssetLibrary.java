@@ -97,7 +97,14 @@ public final class AssetLibrary implements AutoCloseable {
         com.badlogic.gdx.graphics.Texture brick = getBrickTexture();
         com.badlogic.gdx.graphics.Texture concrete = getConcreteTexture();
         for(com.badlogic.gdx.graphics.g3d.Material m:instance.materials){
-            if(m==null||m.id==null)continue;
+            if(m==null)continue;
+            // Guard against GdxRuntimeException: clamp all texture coordinates to max 1 UV layer
+            for(com.badlogic.gdx.graphics.g3d.Attribute a:m){
+                if(a instanceof com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute ta){
+                    if(ta.uvIndex > 1) ta.uvIndex = 0;
+                }
+            }
+            if(m.id==null)continue;
             String id=m.id.toLowerCase();
 
             // Ensure repeating wrap on all textures and replace dummy 1x1 color swatches
@@ -189,14 +196,14 @@ public final class AssetLibrary implements AutoCloseable {
                 SceneAsset a=load("world/city-architecture.glb");
                 for(SceneModel s:a.scenes){
                     boolean isHouse = s.name.startsWith("house");
-                    if(isHouse) continue; // Skip 3-sided folded-paper house shells
-                    ModelInstance mi=new ModelInstance(s.model);illuminateWindows(mi);
                     boolean isFactory = s.name.contains("factory");
+                    if(isHouse || isFactory) continue; // Skip defective 3-sided paper houses and defective factory
+                    ModelInstance mi=new ModelInstance(s.model);illuminateWindows(mi);
                     boolean isClinic = s.name.contains("clinic");
                     boolean isHousing = s.name.contains("housing");
-                    float footprint = isFactory ? 26f : isHousing ? 26f : 24f;
-                    float heightLimit = isFactory ? 42f : isHousing ? 38f : 36f;
-                    float hScale = isFactory ? 1.8f : isHousing ? 1.6f : isClinic ? 1.8f : 1.25f;
+                    float footprint = isHousing ? 26f : 24f;
+                    float heightLimit = isHousing ? 38f : 36f;
+                    float hScale = isHousing ? 1.6f : isClinic ? 1.8f : 1.25f;
                     Template t = new Template(mi, footprint, heightLimit, 18.0f, 0, false, true, hScale);
                     buildings.add(t);
                     namedBuildings.put(s.name, t);
@@ -227,20 +234,22 @@ public final class AssetLibrary implements AutoCloseable {
                         namedBuildings.put(nodeName,t);buildings.add(t);
                     }catch(Exception ignored){}
                 }
-                // Building_08 replacement: NYC Buildify high-rise block
+                // Building_08 replacement: NYC Buildify high-rise block (immense 3x scale)
                 try{
                     SceneAsset nyc=load("buildings/building_buildify_nyc.glb");
                     ModelInstance miNyc=new ModelInstance(nyc.scene.model);
                     illuminateWindows(miNyc);
-                    Template tNyc=new Template(miNyc,22.0f,48,2.0f,0,false,true,1.0f);
-                    namedBuildings.put("Building_08",tNyc);buildings.add(tNyc);
+                    Template tNyc=new Template(miNyc,114.0f,250.0f,60.0f,0,false,true,4.5f);
+                    namedBuildings.put("Building_08",tNyc);
+                    namedBuildings.put("landmark-factory",tNyc); // Replaces old defective factory everywhere
+                    buildings.add(tNyc);
                 }catch(Exception e){ com.badlogic.gdx.Gdx.app.error("AssetLib","NYC building load failed",e); }
-                // Building_09 replacement: Chicago realistic downtown block
+                // Building_09 replacement: Chicago realistic downtown block (immense 3x scale)
                 try{
                     SceneAsset chi=load("buildings/realistic_chicago_buildings.glb");
                     ModelInstance miChi=new ModelInstance(chi.scene.model);
                     illuminateWindows(miChi);
-                    Template tChi=new Template(miChi,22.0f,44,2.0f,0,false,true,1.0f);
+                    Template tChi=new Template(miChi,120.0f,350.0f,60.0f,0,false,true,1.5f);
                     namedBuildings.put("Building_09",tChi);buildings.add(tChi);
                 }catch(Exception e){ com.badlogic.gdx.Gdx.app.error("AssetLib","Chicago building load failed",e); }
             }

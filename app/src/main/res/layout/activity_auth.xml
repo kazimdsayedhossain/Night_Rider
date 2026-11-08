@@ -4,146 +4,282 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#0A0A0F"
-    android:padding="28dp">
+    android:background="#05080C"
+    android:fitsSystemWindows="false">
 
-    <TextView
-        android:id="@+id/tv_auth_title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="NIGHT RIDER"
-        android:textColor="#FFFFFF"
-        android:textSize="32sp"
-        android:fontFamily="monospace"
-        android:letterSpacing="0.2"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintVertical_bias="0.12"
-        app:layout_constraintBottom_toBottomOf="parent" />
+    <!-- Cinematic Foggy Forest Background (User's provided reference image) -->
+    <ImageView
+        android:id="@+id/iv_background"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:src="@drawable/bg_foggy_forest"
+        android:scaleType="centerCrop"
+        android:fitsSystemWindows="false"
+        android:contentDescription="Foggy Forest Motorcycle" />
 
-    <TextView
-        android:id="@+id/tv_auth_sub"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Courier District Access"
-        android:textColor="#888888"
-        android:textSize="13sp"
-        app:layout_constraintTop_toBottomOf="@id/tv_auth_title"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="6dp" />
-
-    <EditText
-        android:id="@+id/et_email"
-        android:layout_width="0dp"
-        android:layout_height="48dp"
-        android:hint="Email address"
-        android:textColorHint="#555555"
-        android:textColor="#FFFFFF"
-        android:inputType="textEmailAddress"
-        android:background="#14141A"
-        android:paddingHorizontal="14dp"
-        android:textSize="14sp"
-        android:layout_marginTop="32dp"
-        app:layout_constraintTop_toBottomOf="@id/tv_auth_sub"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
-
-    <EditText
-        android:id="@+id/et_password"
-        android:layout_width="0dp"
-        android:layout_height="48dp"
-        android:hint="Password (min 6 characters)"
-        android:textColorHint="#555555"
-        android:textColor="#FFFFFF"
-        android:inputType="textPassword"
-        android:background="#14141A"
-        android:paddingHorizontal="14dp"
-        android:textSize="14sp"
-        android:layout_marginTop="10dp"
-        app:layout_constraintTop_toBottomOf="@id/et_email"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
-
+    <!-- ==================== LEFT SECTION: CONTENT FOR SELECTED OPTION ==================== -->
+    <!-- Opens on the LEFT side when an option (like Email/Password) is chosen; NO dark background -->
     <LinearLayout
-        android:id="@+id/layout_email_actions"
-        android:layout_width="0dp"
+        android:id="@+id/layout_right_content"
+        android:layout_width="440dp"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_marginTop="12dp"
-        app:layout_constraintTop_toBottomOf="@id/et_password"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        android:orientation="vertical"
+        android:gravity="start"
+        android:background="@null"
+        android:padding="0dp"
+        android:visibility="gone"
+        android:layout_marginStart="32dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
 
-        <Button
-            android:id="@+id/btn_email_sign_in"
-            android:layout_width="0dp"
-            android:layout_height="46dp"
-            android:layout_weight="1"
-            android:text="Sign In"
+        <TextView
+            android:id="@+id/tv_right_hint"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Enter call-sign for new registration, email and password"
+            android:textColor="#CBD5E1"
+            android:textSize="13sp"
+            android:fontFamily="sans-serif-condensed"
+            android:gravity="start"
+            android:shadowColor="#CC000000"
+            android:shadowDx="1"
+            android:shadowDy="2"
+            android:shadowRadius="4" />
+
+        <!-- Courier Name / Call-Sign Field (Required for Register) -->
+        <EditText
+            android:id="@+id/et_name"
+            android:layout_width="match_parent"
+            android:layout_height="44dp"
+            android:hint="Courier Name / Call-Sign (Required for Register)"
+            android:textColorHint="#94A3B8"
             android:textColor="#FFFFFF"
-            android:backgroundTint="#1A73E8"
             android:textSize="14sp"
-            android:layout_marginEnd="6dp" />
+            android:inputType="textPersonName|textCapWords"
+            android:background="#33000000"
+            android:paddingHorizontal="14dp"
+            android:layout_marginTop="16dp" />
 
-        <Button
-            android:id="@+id/btn_email_sign_up"
-            android:layout_width="0dp"
-            android:layout_height="46dp"
-            android:layout_weight="1"
-            android:text="Register"
-            android:textColor="#CCCCCC"
-            android:backgroundTint="#222228"
+        <!-- Email Field -->
+        <EditText
+            android:id="@+id/et_email"
+            android:layout_width="match_parent"
+            android:layout_height="44dp"
+            android:hint="Email Address"
+            android:textColorHint="#94A3B8"
+            android:textColor="#FFFFFF"
             android:textSize="14sp"
-            android:layout_marginStart="6dp" />
+            android:inputType="textEmailAddress"
+            android:background="#33000000"
+            android:paddingHorizontal="14dp"
+            android:layout_marginTop="10dp" />
+
+        <!-- Password Field -->
+        <EditText
+            android:id="@+id/et_password"
+            android:layout_width="match_parent"
+            android:layout_height="44dp"
+            android:hint="Password (min 6 characters)"
+            android:textColorHint="#94A3B8"
+            android:textColor="#FFFFFF"
+            android:textSize="14sp"
+            android:inputType="textPassword"
+            android:background="#33000000"
+            android:paddingHorizontal="14dp"
+            android:layout_marginTop="10dp" />
+
+        <!-- Action Buttons -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="18dp">
+
+            <TextView
+                android:id="@+id/btn_email_sign_in"
+                android:layout_width="0dp"
+                android:layout_height="44dp"
+                android:layout_weight="1"
+                android:text="SIGN IN"
+                android:textColor="#FFFFFF"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:fontFamily="sans-serif-condensed"
+                android:letterSpacing="0.12"
+                android:gravity="center"
+                android:background="@drawable/bg_days_gone_item"
+                android:layout_marginEnd="6dp" />
+
+            <TextView
+                android:id="@+id/btn_email_sign_up"
+                android:layout_width="0dp"
+                android:layout_height="44dp"
+                android:layout_weight="1"
+                android:text="REGISTER"
+                android:textColor="#FFFFFF"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:fontFamily="sans-serif-condensed"
+                android:letterSpacing="0.12"
+                android:gravity="center"
+                android:background="@drawable/bg_days_gone_item"
+                android:layout_marginStart="6dp" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/btn_content_close"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="CLOSE  [X]"
+            android:textColor="#94A3B8"
+            android:textSize="13sp"
+            android:fontFamily="sans-serif-condensed"
+            android:letterSpacing="0.14"
+            android:paddingVertical="8dp" android:paddingHorizontal="0dp"
+            android:layout_gravity="start"
+            android:layout_marginTop="10dp" />
 
     </LinearLayout>
 
-    <View
-        android:id="@+id/divider_auth"
-        android:layout_width="0dp"
-        android:layout_height="1dp"
-        android:background="#1A1A22"
-        android:layout_marginTop="24dp"
-        app:layout_constraintTop_toBottomOf="@id/layout_email_actions"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+    <!-- ==================== RIGHT SECTION: MAIN MENU & OPTIONS ==================== -->
+    <!-- The Menu stays on the RIGHT side. Title and options strictly left-aligned with each other. NO dark background box. -->
+    <LinearLayout
+        android:id="@+id/layout_right_nav"
+        android:layout_width="340dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="start"
+        android:layout_marginEnd="24dp"
+        android:layout_marginTop="36dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
 
-    <Button
-        android:id="@+id/btn_google_sign_in"
-        android:layout_width="0dp"
-        android:layout_height="48dp"
-        android:text="Sign in with Google"
-        android:textColor="#FFFFFF"
-        android:backgroundTint="#1F2937"
-        android:textSize="14sp"
-        android:layout_marginTop="20dp"
-        app:layout_constraintTop_toBottomOf="@id/divider_auth"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        <!-- Title Box: Left-aligned with the option buttons below -->
+        <LinearLayout
+            android:id="@+id/layout_title_box"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="start|center_vertical"
+            android:background="@drawable/bg_days_gone_box"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="8dp">
 
-    <Button
-        android:id="@+id/btn_guest"
-        android:layout_width="0dp"
-        android:layout_height="48dp"
-        android:text="Play as Guest"
-        android:textColor="#9CA3AF"
-        android:backgroundTint="#111827"
-        android:textSize="14sp"
-        android:layout_marginTop="10dp"
-        app:layout_constraintTop_toBottomOf="@id/btn_google_sign_in"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+            <TextView
+                android:id="@+id/tv_title_main"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="NIGHT RIDER"
+                android:textColor="#FFFFFF"
+                android:textSize="25sp"
+                android:textStyle="bold"
+                android:fontFamily="sans-serif-condensed"
+                android:letterSpacing="0.22"
+                android:gravity="start"
+                android:shadowColor="#000000"
+                android:shadowDx="1"
+                android:shadowDy="2"
+                android:shadowRadius="4" />
 
-    <ProgressBar
-        android:id="@+id/progress_auth"
+        </LinearLayout>
+
+        <!-- Main Options List (Strictly Left-Aligned, matching the title's left edge) -->
+        <LinearLayout
+            android:id="@+id/layout_menu_buttons"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="start"
+            android:layout_marginTop="20dp">
+
+            <!-- Option 1: Google Sign In -->
+            <TextView
+                android:id="@+id/btn_google_sign_in"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="SIGN IN WITH GOOGLE"
+                android:textColor="#F0F4F8"
+                android:textSize="17sp"
+                android:textStyle="bold"
+                android:fontFamily="sans-serif-condensed"
+                android:letterSpacing="0.14"
+                android:gravity="start|center_vertical"
+                android:paddingVertical="12dp"
+                android:paddingHorizontal="16dp"
+                android:background="@drawable/bg_days_gone_item"
+                android:shadowColor="#CC000000"
+                android:shadowDx="1"
+                android:shadowDy="2"
+                android:shadowRadius="4" />
+
+            <!-- Option 2: Email & Password Toggle -->
+            <TextView
+                android:id="@+id/btn_toggle_email"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="USE EMAIL &amp; PASSWORD"
+                android:textColor="#CBD5E1"
+                android:textSize="16sp"
+                android:fontFamily="sans-serif-condensed"
+                android:letterSpacing="0.12"
+                android:gravity="start|center_vertical"
+                android:paddingVertical="12dp"
+                android:paddingHorizontal="16dp"
+                android:background="@drawable/bg_days_gone_item"
+                android:shadowColor="#CC000000"
+                android:shadowDx="1"
+                android:shadowDy="2"
+                android:shadowRadius="4"
+                android:layout_marginTop="8dp" />
+
+            <!-- Option 3: Guest Courier Access -->
+            <TextView
+                android:id="@+id/btn_guest"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="GUEST COURIER"
+                android:textColor="#CBD5E1"
+                android:textSize="16sp"
+                android:fontFamily="sans-serif-condensed"
+                android:letterSpacing="0.12"
+                android:gravity="start|center_vertical"
+                android:paddingVertical="12dp"
+                android:paddingHorizontal="16dp"
+                android:background="@drawable/bg_days_gone_item"
+                android:shadowColor="#CC000000"
+                android:shadowDx="1"
+                android:shadowDy="2"
+                android:shadowRadius="4"
+                android:layout_marginTop="8dp" />
+
+            <ProgressBar
+                android:id="@+id/progress_auth"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:indeterminateTint="#FFFFFF"
+                android:visibility="gone"
+                android:layout_gravity="start"
+                android:layout_marginTop="16dp"
+                android:layout_marginStart="16dp" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <!-- Bottom-Right Minimalist Footnote Branding -->
+    <TextView
+        android:id="@+id/tv_footer_credits"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:visibility="gone"
-        app:layout_constraintTop_toBottomOf="@id/btn_guest"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="16dp" />
+        android:text="ONLINE COURIER SYNDICATE // v2.1"
+        android:textColor="#64748B"
+        android:textSize="11sp"
+        android:fontFamily="sans-serif-condensed"
+        android:letterSpacing="0.15"
+        android:layout_marginBottom="24dp"
+        android:layout_marginEnd="24dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,0 +1,17 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="96dp"
+    android:height="96dp"
+    android:viewportWidth="96"
+    android:viewportHeight="96">
+    <!-- Face -->
+    <path android:fillColor="#FFCC80" android:pathData="M28,38 L68,38 L64,80 L32,80 Z"/>
+    <!-- Messenger Cap -->
+    <path android:fillColor="#1565C0" android:pathData="M20,38 L76,38 L68,16 L28,16 Z"/>
+    <path android:fillColor="#0D47A1" android:pathData="M16,38 L84,34 L80,44 L16,42 Z"/>
+    <!-- Sunglasses -->
+    <path android:fillColor="#212121" android:pathData="M26,46 L46,46 L44,58 L28,58 Z"/>
+    <path android:fillColor="#212121" android:pathData="M50,46 L70,46 L68,58 L52,58 Z"/>
+    <path android:fillColor="#424242" android:pathData="M44,50 L52,50 L52,54 L44,54 Z"/>
+    <!-- Smile -->
+    <path android:fillColor="#D84315" android:pathData="M40,68 L56,68 L52,72 L44,72 Z"/>
+</vector>

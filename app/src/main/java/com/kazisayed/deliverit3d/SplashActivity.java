@@ -5,18 +5,13 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.animation.AlphaAnimation;
-import android.view.animation.ScaleAnimation;
 import android.view.animation.AnimationSet;
+import android.view.animation.ScaleAnimation;
 import androidx.appcompat.app.AppCompatActivity;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.kazisayed.deliverit3d.databinding.ActivitySplashBinding;
 
-/**
- * SplashActivity: boot logo animation.
- * If the user is already signed in (Firebase Auth persists), skips to MainMenuActivity.
- * Otherwise routes to AuthActivity after the animation.
- */
 public class SplashActivity extends AppCompatActivity {
 
     private ActivitySplashBinding binding;
@@ -27,7 +22,7 @@ public class SplashActivity extends AppCompatActivity {
         binding = ActivitySplashBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        // Animate logo: scale up + fade in
+        // Animate logo
         AnimationSet anim = new AnimationSet(true);
         ScaleAnimation scale = new ScaleAnimation(0.6f, 1f, 0.6f, 1f,
                 android.view.animation.Animation.RELATIVE_TO_SELF, 0.5f,
@@ -40,15 +35,21 @@ public class SplashActivity extends AppCompatActivity {
         binding.ivLogo.startAnimation(anim);
         binding.tvTitle.startAnimation(fade);
 
-        // After 1.5s, check auth state and route accordingly
-        new Handler(Looper.getMainLooper()).postDelayed(this::navigate, 1500);
+        new Handler(Looper.getMainLooper()).postDelayed(this::navigate, 1400);
     }
 
     private void navigate() {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        Class<?> dest = (user != null) ? MainMenuActivity.class : AuthActivity.class;
-        startActivity(new Intent(this, dest));
-        finish();
-        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+        if (user != null) {
+            UserManager.get().loadOrCreateProfile(this, user, mgr -> {
+                startActivity(new Intent(this, GameActivity.class));
+                finish();
+                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+            });
+        } else {
+            startActivity(new Intent(this, AuthActivity.class));
+            finish();
+            overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+        }
     }
 }

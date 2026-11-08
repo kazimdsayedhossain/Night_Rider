@@ -27,19 +27,6 @@ public class GameActivity extends MainActivity {
     private int contractTime = 120;
     private String contractCargo = "Standard Parcel";
 
-    private final Handler checkerHandler = new Handler(Looper.getMainLooper());
-    private boolean shiftResultShown = false;
-
-    private final Runnable completionChecker = new Runnable() {
-        @Override
-        public void run() {
-            checkShiftCompletion();
-            if (!shiftResultShown) {
-                checkerHandler.postDelayed(this, 100);
-            }
-        }
-    };
-
     @Override
     public void onCreate(Bundle state) {
         super.onCreate(state);
@@ -57,14 +44,14 @@ public class GameActivity extends MainActivity {
             }
         }
 
+        // Ensure user profile is synchronized
+        UserManager.get().loadOrCreateProfile(this, com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser(), null);
+
         // Start shift tracker foreground service
         startShiftTrackerService();
 
         // Register broadcast receivers
         registerReceivers();
-
-        // Begin polling for shift completion
-        checkerHandler.postDelayed(completionChecker, 1000);
     }
 
     private void startShiftTrackerService() {
@@ -109,27 +96,8 @@ public class GameActivity extends MainActivity {
         registerReceiver(headsetReceiver, new IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY));
     }
 
-    private void checkShiftCompletion() {
-        if (shiftResultShown || game == null) return;
-        DispatchGame.Snapshot snap = game.snapshot;
-        if (snap != null && snap.state() == DispatchGame.State.RESULT) {
-            shiftResultShown = true;
-            stopShiftTrackerService();
-
-            Intent resultIntent = new Intent(this, ShiftResultActivity.class);
-            resultIntent.putExtra(ShiftResultActivity.EXTRA_ROUTE, contractRoute);
-            resultIntent.putExtra(ShiftResultActivity.EXTRA_CASH, contractPayout);
-            resultIntent.putExtra(ShiftResultActivity.EXTRA_SCORE, (long)(snap.score() > 0 ? snap.score() : contractPayout * 10L));
-            resultIntent.putExtra(ShiftResultActivity.EXTRA_STARS, snap.stars() > 0 ? snap.stars() : (snap.won() ? 3 : 1));
-            resultIntent.putExtra(ShiftResultActivity.EXTRA_TIME_MS, (long)(snap.time() * 1000f));
-            startActivity(resultIntent);
-            finish();
-        }
-    }
-
     @Override
     protected void onDestroy() {
-        checkerHandler.removeCallbacks(completionChecker);
         stopShiftTrackerService();
         if (batteryReceiver != null) {
             try { unregisterReceiver(batteryReceiver); } catch (Exception ignored) {}

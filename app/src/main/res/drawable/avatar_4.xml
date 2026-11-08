@@ -1,0 +1,18 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="96dp"
+    android:height="96dp"
+    android:viewportWidth="96"
+    android:viewportHeight="96">
+    <!-- Owl Body/Head -->
+    <path android:fillColor="#4A148C" android:pathData="M48,12 L80,32 L74,84 L22,84 L16,32 Z"/>
+    <!-- Feather Tufts -->
+    <path android:fillColor="#7B1FA2" android:pathData="M16,14 L32,28 L20,32 Z"/>
+    <path android:fillColor="#7B1FA2" android:pathData="M80,14 L76,32 L64,28 Z"/>
+    <!-- Goggles -->
+    <path android:fillColor="#FFD600" android:pathData="M24,42 A12,12 0 1,0 48,42 A12,12 0 1,0 24,42"/>
+    <path android:fillColor="#FFD600" android:pathData="M48,42 A12,12 0 1,0 72,42 A12,12 0 1,0 48,42"/>
+    <path android:fillColor="#212121" android:pathData="M32,42 A6,6 0 1,0 44,42 A6,6 0 1,0 32,42"/>
+    <path android:fillColor="#212121" android:pathData="M52,42 A6,6 0 1,0 64,42 A6,6 0 1,0 52,42"/>
+    <!-- Beak -->
+    <path android:fillColor="#FF6D00" android:pathData="M44,52 L52,52 L48,64 Z"/>
+</vector>

@@ -167,6 +167,12 @@ public final class GameAudio implements AutoCloseable {
     }
 
     public void pause() {
+        inGame = false;
+        speed = 0;
+        throttle = 0;
+    }
+
+    public void appPause() {
         active = false;
         queue.clear();
         if (manager != null) manager.abandonAudioFocus(focusListener);
@@ -175,6 +181,7 @@ public final class GameAudio implements AutoCloseable {
     /** Trigger high-polish procedural audio cues. */
     public void cue(String name) {
         if (name == null) return;
+        if (!active) active = true;
         switch (name) {
             case "delivery" -> {
                 // Sparkling crystalline delivery arpeggio (E5 -> G#5 -> B5 -> E6)
@@ -187,6 +194,23 @@ public final class GameAudio implements AutoCloseable {
                 // Classic crisp dual arcade pickup chime (B5 -> E6)
                 queue.add(new Voice(987.77, 0.08, 0.18, KIND_BELL, 0.1f));
                 queue.add(new Voice(1318.51, 0.28, 0.22, KIND_BELL, 0.2f));
+            }
+            case "dispatch_ring" -> {
+                // Energetic incoming dispatch call chime
+                queue.add(new Voice(880.00, 0.08, 0.24, KIND_BELL, -0.1f));
+                queue.add(new Voice(1174.66, 0.12, 0.26, KIND_BELL, 0.1f));
+                queue.add(new Voice(1760.00, 0.22, 0.28, KIND_BELL, 0.2f));
+            }
+            case "equip" -> {
+                // Mechanical gear lock sound
+                queue.add(new Voice(620, 980, 0.06, 0.24, KIND_UI, 0.0f));
+                queue.add(new Voice(1240, 1560, 0.08, 0.20, KIND_BELL, 0.1f));
+            }
+            case "buy" -> {
+                // Cash transaction chime
+                queue.add(new Voice(1046.50, 0.08, 0.20, KIND_BELL, 0.0f));
+                queue.add(new Voice(1318.51, 0.12, 0.22, KIND_BELL, 0.1f));
+                queue.add(new Voice(1567.98, 0.22, 0.24, KIND_BELL, 0.2f));
             }
             case "horn" -> {
                 // Authentic dual-tone vehicle horn (F4 349Hz + A4 440Hz)

@@ -55,6 +55,8 @@ public class LeaderboardActivity extends AppCompatActivity {
         binding.rvLeaderboard.setLayoutManager(new LinearLayoutManager(this));
         binding.rvLeaderboard.setAdapter(adapter);
 
+        binding.btnBackLeaderboard.setOnClickListener(v -> finish());
+
         fetchLeaderboard();
     }
 

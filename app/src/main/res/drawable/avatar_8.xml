@@ -1,0 +1,13 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="96dp"
+    android:height="96dp"
+    android:viewportWidth="96"
+    android:viewportHeight="96">
+    <!-- Hood/Cowl -->
+    <path android:fillColor="#311B92" android:pathData="M48,8 C24,8 16,24 16,50 C16,78 30,86 48,86 C66,86 80,78 80,50 C80,24 72,8 48,8 Z"/>
+    <!-- Face Shadow -->
+    <path android:fillColor="#1A237E" android:pathData="M28,34 L68,34 L64,74 L32,74 Z"/>
+    <!-- Glowing Slit Eyes -->
+    <path android:fillColor="#76FF03" android:pathData="M32,44 L44,48 L34,52 Z"/>
+    <path android:fillColor="#76FF03" android:pathData="M64,44 L62,52 L52,48 Z"/>
+</vector>

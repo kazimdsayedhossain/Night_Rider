@@ -72,7 +72,7 @@ public final class SaveStore {
     public boolean flag(String key,boolean fallback){return Boolean.parseBoolean(text(key,String.valueOf(fallback)));}
     public void put(String key,Object value){prefs.edit().putString(key,String.valueOf(value)).commit();}
     public int level(){return Math.max(1,number("deliver3d_level",1));}
-    public int cash(){return Math.max(0,number("deliver3d_cash",6500));}
+    public int cash(){return Math.max(0,number("deliver3d_cash",100));}
     public int tickets(){return Math.max(0,number("deliver3d_tickets",45));}
     public Set<String> owned(boolean vehicles){
         Set<String> result=new HashSet<>();result.add(vehicles?"bike":"cap");

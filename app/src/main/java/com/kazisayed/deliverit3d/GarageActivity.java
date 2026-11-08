@@ -31,6 +31,8 @@ public class GarageActivity extends AppCompatActivity implements VehicleAdapter.
         VehicleAdapter adapter = new VehicleAdapter(vehicles, equipped, this);
         binding.rvVehicles.setLayoutManager(new LinearLayoutManager(this));
         binding.rvVehicles.setAdapter(adapter);
+
+        binding.btnBackGarage.setOnClickListener(v -> finish());
     }
 
     @Override

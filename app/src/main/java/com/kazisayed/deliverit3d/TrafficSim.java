@@ -22,14 +22,14 @@ public final class TrafficSim {
     public record Profile(float cruise, float max, float accel, float brake, float gap, float headway, float horn, float yield) {}
     private static final Map<String, Profile> PROFILES = new HashMap<>();
     static {
-        PROFILES.put("police", new Profile(13, 18, 7.5f, 20, 7, .9f, .78f, .55f));
-        PROFILES.put("sports", new Profile(14, 20, 8.2f, 21, 6.5f, .82f, .46f, .52f));
-        PROFILES.put("muscle_car", new Profile(13, 18, 7.2f, 19, 7.5f, .9f, .54f, .55f));
-        PROFILES.put("bus", new Profile(8, 11, 3.2f, 10, 11, 1.6f, .32f, 1.1f));
-        PROFILES.put("motorcycle", new Profile(12, 18, 7.8f, 18, 5.5f, .8f, .58f, .65f));
-        PROFILES.put("scooter", new Profile(8, 12, 4.6f, 13, 5.5f, .9f, .46f, .75f));
-        PROFILES.put("bicycle", new Profile(4.8f, 7.2f, 2.1f, 6.5f, 4.2f, 1.2f, .2f, 1f));
-        PROFILES.put("truck", new Profile(7, 9.5f, 2.8f, 9, 13, 1.8f, .42f, .9f));
+        PROFILES.put("police", new Profile(17.55f, 24.3f, 9.5f, 24f, 7.5f, .9f, .78f, .55f));
+        PROFILES.put("sports", new Profile(18.9f, 27.0f, 10.5f, 25f, 7.0f, .82f, .46f, .52f));
+        PROFILES.put("muscle_car", new Profile(17.55f, 24.3f, 9.2f, 23f, 8.0f, .9f, .54f, .55f));
+        PROFILES.put("bus", new Profile(10.8f, 14.85f, 4.2f, 13f, 12f, 1.6f, .32f, 1.1f));
+        PROFILES.put("motorcycle", new Profile(16.2f, 24.3f, 9.8f, 22f, 6.0f, .8f, .58f, .65f));
+        PROFILES.put("scooter", new Profile(10.8f, 16.2f, 5.8f, 16f, 6.0f, .9f, .46f, .75f));
+        PROFILES.put("bicycle", new Profile(6.48f, 9.72f, 2.7f, 8.5f, 4.5f, 1.2f, .2f, 1f));
+        PROFILES.put("truck", new Profile(9.45f, 12.82f, 3.6f, 12f, 14f, 1.8f, .42f, .9f));
     }
     private static float[] extents(String t) {
         return switch (t) {
@@ -77,7 +77,7 @@ public final class TrafficSim {
             for (int i = 0; i < profile.lanePool(); i++) {
                 String type = TYPES[i % TYPES.length];
                 boolean fwd = i % 2 == 0;
-                float startZ = fwd ? 70 + (i / 2) * 52 : 110 + (i / 2) * 52;
+                float startZ = (fwd ? 220f : 280f) + (i / 2) * 75f;
                 Vehicle v = make(type, fwd ? 1 : -1, i, 0.94f + ((i + 1) * 37 % 13) / 100f);
                 v.cross = false; v.roadX = 0; v.laneX = fwd ? LANE : -LANE; v.x = v.laneX; v.z = startZ;
                 v.yaw = fwd ? 0 : (float) Math.PI; v.sync();
@@ -178,7 +178,7 @@ public final class TrafficSim {
                 Spawner s = new Spawner();
                 s.key = key; s.segmentX = cx * WorldGrid.TILE; s.z = cz * WorldGrid.TILE; s.dir = dir;
                 s.interval = (9.5f + (Math.abs(cx * 17 + cz * 31 + dir * 7) % 5) * 1.5f) * profile.crossIntervalScale();
-                s.speed = 12 + (Math.abs(cx * 23 + cz * 41) % 6) + profile.crossSpeedBonus();
+                s.speed = (12 + (Math.abs(cx * 23 + cz * 41) % 6) + profile.crossSpeedBonus()) * 1.35f;
                 s.timer = 1 + (Math.abs(cx * 11 + cz * 19 + dir) % 4);
                 s.spawnIndex = Math.abs(cx * 47 + cz * 83 + dir * 13);
                 spawners.put(key, s);

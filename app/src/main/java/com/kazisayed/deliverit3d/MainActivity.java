@@ -3,6 +3,9 @@ package com.kazisayed.deliverit3d;
 import android.os.*;
 import android.view.*;
 import android.widget.FrameLayout;
+import androidx.core.view.WindowCompat;
+import androidx.core.view.WindowInsetsCompat;
+import androidx.core.view.WindowInsetsControllerCompat;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.backends.android.*;
 
@@ -11,6 +14,14 @@ public class MainActivity extends AndroidApplication implements DispatchGame.Hos
     protected SaveStore saves;protected TiltController tilt;protected GameAudio audio;protected DispatchGame game;protected NativeUi ui;protected View surface;private final Handler main=new Handler(Looper.getMainLooper());
     private final Runnable refresh=new Runnable(){public void run(){if(ui!=null)ui.refresh(game.snapshot);main.postDelayed(this,50);}};
     @Override public void onCreate(Bundle state){
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            getWindow().getAttributes().layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
+        }
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+        getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(0xFF05080C));
+        hideSystemUi();
         super.onCreate(state);
         android.util.Log.i("Dispatch", "MainActivity onCreate started");
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
@@ -22,10 +33,33 @@ public class MainActivity extends AndroidApplication implements DispatchGame.Hos
                 | WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
         saves=new SaveStore(this);tilt=new TiltController(this);audio=new GameAudio(this);PlayerInput input=new PlayerInput();game=new DispatchGame(saves,input,tilt,audio,this);
         AndroidApplicationConfiguration config=new AndroidApplicationConfiguration();config.useGL30=true;config.useAccelerometer=false;config.useCompass=false;config.useGyroscope=false;config.useRotationVectorSensor=false;config.useImmersiveMode=true;config.numSamples=0;config.depth=24;config.stencil=0;config.r=config.g=config.b=8;config.a=0;
-        surface=initializeForView(game,config);FrameLayout root=new FrameLayout(this);root.addView(surface,new FrameLayout.LayoutParams(-1,-1));ui=new NativeUi(this,game,input,saves,tilt);root.addView(ui,new FrameLayout.LayoutParams(-1,-1));setContentView(root);
-        root.setOnApplyWindowInsetsListener((v,insets)->{ui.setPadding(insets.getSystemWindowInsetLeft(),insets.getSystemWindowInsetTop(),insets.getSystemWindowInsetRight(),insets.getSystemWindowInsetBottom());return insets;});surface.addOnLayoutChangeListener((v,a,b,c,d,e,f,g,h)->applyResolution());post(game::settings);
+        surface=initializeForView(game,config);FrameLayout root=new FrameLayout(this);root.setFitsSystemWindows(false);root.setBackgroundColor(0xFF05080C);root.addView(surface,new FrameLayout.LayoutParams(-1,-1));ui=new NativeUi(this,game,input,saves,tilt);ui.setFitsSystemWindows(false);root.addView(ui,new FrameLayout.LayoutParams(-1,-1));setContentView(root);
+        root.setOnApplyWindowInsetsListener((v,insets)->{
+            ui.setSafeInsets(insets.getSystemWindowInsetLeft(),insets.getSystemWindowInsetTop(),insets.getSystemWindowInsetRight(),insets.getSystemWindowInsetBottom());
+            return insets;
+        });surface.addOnLayoutChangeListener((v,a,b,c,d,e,f,g,h)->applyResolution());post(game::settings);
         android.util.Log.i("Dispatch", "MainActivity onCreate completed");
     }
+    private void hideSystemUi(){
+        WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
+        WindowInsetsControllerCompat controller = WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView());
+        if (controller != null) {
+            controller.hide(WindowInsetsCompat.Type.systemBars());
+            controller.setSystemBarsBehavior(WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
+        }
+        getWindow().getDecorView().setSystemUiVisibility(
+                View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_FULLSCREEN
+                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+    }
+    @Override public void onWindowFocusChanged(boolean hasFocus){
+        super.onWindowFocusChanged(hasFocus);
+        if(hasFocus) hideSystemUi();
+    }
+    @Override public android.content.Context getContext() { return this; }
     public void post(Runnable work){if(Gdx.app!=null)Gdx.app.postRunnable(work);}
     public void command(String value){post(()->game.command(value));}
     public void applySettings(){post(game::settings);applyResolution();}
@@ -37,8 +71,8 @@ public class MainActivity extends AndroidApplication implements DispatchGame.Hos
             }
         }
     }
-    @Override protected void onResume(){super.onResume();if(tilt!=null)tilt.start();main.removeCallbacks(refresh);main.post(refresh);}
-    @Override protected void onPause(){main.removeCallbacks(refresh);if(game!=null)game.input.release();if(tilt!=null)tilt.stop();if(audio!=null)audio.pause();super.onPause();}
+    @Override protected void onResume(){super.onResume();hideSystemUi();if(audio!=null)audio.resume();if(tilt!=null)tilt.start();main.removeCallbacks(refresh);main.post(refresh);}
+    @Override protected void onPause(){main.removeCallbacks(refresh);if(game!=null)game.input.release();if(tilt!=null)tilt.stop();if(audio!=null)audio.appPause();super.onPause();}
     @Override protected void onDestroy(){main.removeCallbacks(refresh);if(tilt!=null)tilt.close();if(audio!=null)audio.close();super.onDestroy();}
     @Override public void onBackPressed(){if(ui!=null&&ui.closePanel())return;if(game!=null&&game.snapshot.state()==DispatchGame.State.PLAYING)command("pause");else if(game!=null&&game.snapshot.state()==DispatchGame.State.PAUSED)command("resume");else super.onBackPressed();}
     @Override public void feedback(int ms){if(!saves.flag("native-haptics",true))return;Vibrator vibrator=(Vibrator)getSystemService(VIBRATOR_SERVICE);if(vibrator==null||!vibrator.hasVibrator())return;if(Build.VERSION.SDK_INT>=26)vibrator.vibrate(VibrationEffect.createOneShot(ms,VibrationEffect.DEFAULT_AMPLITUDE));else vibrator.vibrate(ms);}

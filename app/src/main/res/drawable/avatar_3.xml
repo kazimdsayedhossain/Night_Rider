@@ -1,0 +1,16 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="96dp"
+    android:height="96dp"
+    android:viewportWidth="96"
+    android:viewportHeight="96">
+    <!-- Antenna -->
+    <path android:fillColor="#00BCD4" android:pathData="M44,8 L52,8 L50,22 L46,22 Z"/>
+    <path android:fillColor="#FFD600" android:pathData="M42,6 A6,6 0 1,0 54,6 A6,6 0 1,0 42,6"/>
+    <!-- Head -->
+    <path android:fillColor="#37474F" android:pathData="M20,24 L76,24 L74,80 L22,80 Z"/>
+    <path android:fillColor="#455A64" android:pathData="M26,30 L70,30 L68,74 L28,74 Z"/>
+    <!-- Visor Eye Screen -->
+    <path android:fillColor="#18FFFF" android:pathData="M30,38 L66,38 L64,54 L32,54 Z"/>
+    <!-- Mouth Grill -->
+    <path android:fillColor="#263238" android:pathData="M34,62 L62,62 L62,68 L34,68 Z"/>
+</vector>

@@ -1,0 +1,15 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="96dp"
+    android:height="96dp"
+    android:viewportWidth="96"
+    android:viewportHeight="96">
+    <!-- Full Face Helmet -->
+    <path android:fillColor="#C62828" android:pathData="M48,10 C26,10 18,26 18,48 C18,74 32,84 48,84 C64,84 78,74 78,48 C78,26 70,10 48,10 Z"/>
+    <!-- Aero Fin -->
+    <path android:fillColor="#FFEA00" android:pathData="M32,18 L64,18 L56,26 L40,26 Z"/>
+    <!-- Mirror Visor -->
+    <path android:fillColor="#263238" android:pathData="M22,36 L74,36 L70,58 L26,58 Z"/>
+    <path android:fillColor="#80D8FF" android:pathData="M26,40 L60,40 L44,52 L26,48 Z"/>
+    <!-- Chin Guard -->
+    <path android:fillColor="#B71C1C" android:pathData="M32,66 L64,66 L58,78 L38,78 Z"/>
+</vector>

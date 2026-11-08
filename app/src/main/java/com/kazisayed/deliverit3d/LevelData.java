@@ -72,7 +72,7 @@ public final class LevelData {
         trainSpeed = (float) (28 + Math.min(level * 1.5, 12));
         traffic = Rules.trafficProfileFor(level);
         district = DISTRICTS[(level - 1) % DISTRICTS.length];
-        name = hub.name() + " · Level " + level;
+        name = hub.name() + " - Level " + level;
 
         for (int block = 0; block * WorldGrid.TILE <= length + WorldGrid.TILE; block++) {
             WorldGrid.Config c = WorldGrid.intersectionConfig(0, block);
@@ -155,19 +155,19 @@ public final class LevelData {
     }
 
     private void buildCoinTrails(Rules.Random rng) {
-        double z = 40 + rng.next() * 20;
+        double z = 30 + rng.next() * 15;
         while (z < length - 60) {
-            int trail = 3 + (int) Math.floor(rng.next() * 2);
+            int trail = 4 + (int) Math.floor(rng.next() * 4);
             int lane = (int) Math.floor(rng.next() * COIN_LANES.length);
             for (int i = 0; i < trail; i++) {
-                double cz = z + i * 7;
+                double cz = z + i * 6.5;
                 if (cz >= length - 40) break;
                 boolean onJunction = false;
                 for (Junction j : junctions) if (Math.abs(j.z() - cz) < 14) onJunction = true;
                 if (!onJunction) coins.add(new Coin(COIN_LANES[lane], (float) (Math.floor(cz * 10 + 0.5) / 10)));
-                if (rng.next() < 0.4) lane = Math.max(0, Math.min(COIN_LANES.length - 1, lane + (rng.next() < 0.5 ? -1 : 1)));
+                if (rng.next() < 0.35) lane = Math.max(0, Math.min(COIN_LANES.length - 1, lane + (rng.next() < 0.5 ? -1 : 1)));
             }
-            z += trail * 7 + 80 + rng.next() * 60;
+            z += trail * 6.5 + 32 + rng.next() * 35;
         }
     }
 }
