@@ -29,7 +29,7 @@ public class ShiftResultActivity extends AppCompatActivity {
 
     private static final String TAG = "ShiftResult";
     // Replace with your Firebase Realtime DB URL
-    private static final String DB_URL = "https://night-rider-default-rtdb.firebaseio.com";
+    private static final String DB_URL = "https://nightrider-4066f-default-rtdb.firebaseio.com";
 
     public static final String EXTRA_ROUTE = "route";
     public static final String EXTRA_CASH = "cash";

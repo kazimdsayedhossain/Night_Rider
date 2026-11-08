@@ -37,7 +37,7 @@ public class LeaderboardActivity extends AppCompatActivity {
     private static final String TAG = "Leaderboard";
     // Replace with your Firebase Realtime Database URL from Firebase Console
     private static final String DB_URL =
-            "https://night-rider-default-rtdb.firebaseio.com/leaderboard.json?orderBy=%22score%22&limitToLast=20&print=pretty";
+            "https://nightrider-4066f-default-rtdb.firebaseio.com/leaderboard.json?orderBy=%22score%22&limitToLast=20&print=pretty";
 
     private ActivityLeaderboardBinding binding;
     private LeaderboardAdapter adapter;

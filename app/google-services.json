@@ -1,31 +1,36 @@
 {
   "project_info": {
-    "project_number": "109876543210",
-    "project_id": "night-rider-3d",
-    "storage_bucket": "night-rider-3d.appspot.com"
+    "project_number": "548292711755",
+    "project_id": "nightrider-4066f",
+    "storage_bucket": "nightrider-4066f.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:109876543210:android:a1b2c3d4e5f60718",
+        "mobilesdk_app_id": "1:548292711755:android:02433fdf5a41ff649fc4ce",
         "android_client_info": {
           "package_name": "com.kazisayed.deliverit3d"
         }
       },
       "oauth_client": [
         {
-          "client_id": "109876543210-abcdefghijklmnopqrstuvwxyz.apps.googleusercontent.com",
+          "client_id": "548292711755-0n6bioeftfee3osbhrnstjdft7jinirb.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyDummyKeyForNightRiderAppValid00"
+          "current_key": "AIzaSyBCk30lKnX-oiz-Jr9OZ1QjIR5PPsjMlvQ"
         }
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "548292711755-0n6bioeftfee3osbhrnstjdft7jinirb.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }
