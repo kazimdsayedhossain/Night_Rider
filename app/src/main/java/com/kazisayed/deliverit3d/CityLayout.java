@@ -377,7 +377,7 @@ public final class CityLayout {
             for (float zl : new float[]{-60, -20, 20, 60}) {
                 if (branch && Math.abs(zl) < 14) continue;
                 float z = b.oz + zl, x = b.ox + s * 7.6f, y = b.elev(z) + STEP;
-                // Focus lamp heads directly inward over the road (East=180°, West=0°)
+                // Focus lamp heads directly inward over the road (East=180 deg, West=0°)
                 b.t.lamps.add(new Prop("street-lamp", x, y, z, s > 0 ? 180f : 0f, 1f, 0));
             }
             if (branch) for (float al : new float[]{32, 64}) for (int t = -1; t <= 1; t += 2) {

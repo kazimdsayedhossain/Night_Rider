@@ -40,8 +40,8 @@ public class ShiftLogAdapter extends RecyclerView.Adapter<ShiftLogAdapter.ShiftL
 
         int stars = record.getStars();
         StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < stars; i++) sb.append("★");
-        for (int i = stars; i < 3; i++) sb.append("☆");
+        for (int i = 0; i < stars; i++) sb.append("\u2605");
+        for (int i = stars; i < 3; i++) sb.append("\u2606");
         holder.binding.tvShiftStars.setText(sb.toString());
     }
 

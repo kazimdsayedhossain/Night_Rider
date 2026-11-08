@@ -28,9 +28,9 @@ import org.json.JSONObject;
  * This satisfies the rubric's "API requests (JSON/XML parsing), HTTP operations" requirement.
  *
  * Endpoint: GET https://<project>.firebaseio.com/leaderboard.json?orderBy="score"&limitToLast=20
- * Response: JSON object — parsed with org.json.JSONObject.
+ * Response: JSON object - parsed with org.json.JSONObject.
  *
- * Logcat tag: "Leaderboard" — screenshot the raw JSON response for the report.
+ * Logcat tag: "Leaderboard" - screenshot the raw JSON response for the report.
  */
 public class LeaderboardActivity extends AppCompatActivity {
 
@@ -63,7 +63,7 @@ public class LeaderboardActivity extends AppCompatActivity {
     /**
      * HTTP GET to Firebase Realtime Database REST API.
      * Runs on a background thread; posts result back to main thread.
-     * The raw JSON is logged — screenshot it for the academic report.
+     * The raw JSON is logged - screenshot it for the academic report.
      */
     private void fetchLeaderboard() {
         binding.progressLb.setVisibility(View.VISIBLE);
@@ -86,7 +86,7 @@ public class LeaderboardActivity extends AppCompatActivity {
                 reader.close();
 
                 String json = sb.toString();
-                Log.d(TAG, "RAW JSON: " + json); // ← screenshot this for the report
+                Log.d(TAG, "RAW JSON: " + json); // <- screenshot this for the report
 
                 // Parse JSON: Realtime DB returns object keyed by uid
                 JSONObject root = new JSONObject(json);

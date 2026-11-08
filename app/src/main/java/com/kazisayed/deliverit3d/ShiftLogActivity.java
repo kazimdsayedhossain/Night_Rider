@@ -18,7 +18,7 @@ import java.util.List;
 /**
  * ShiftLogActivity: personal delivery history from Firestore.
  *
- * Reads: users/{uid}/shifts — sorted by date descending.
+ * Reads: users/{uid}/shifts - sorted by date descending.
  * Uses RecyclerView + ShiftLogAdapter + ShiftLogViewHolder.
  */
 public class ShiftLogActivity extends AppCompatActivity {

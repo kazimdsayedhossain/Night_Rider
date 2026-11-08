@@ -2670,7 +2670,7 @@ private final FrameLayout controls;
 
 
 
-        int padR = Math.max(safeRight, px(20));
+        int padR = Math.max(safeRight, px(8));
 
         int padT = Math.max(safeTop, px(18));
 
@@ -2765,7 +2765,7 @@ private final FrameLayout controls;
 
         rightNav.addView(navList, new LinearLayout.LayoutParams(px(290), -2));
 
-        int padR = Math.max(safeRight, px(20));
+        int padR = Math.max(safeRight, px(8));
         int padT = Math.max(safeTop, px(32));
         LayoutParams rightLp = new LayoutParams(-2, -2, Gravity.TOP | Gravity.RIGHT);
         rightLp.rightMargin = padR;
@@ -2834,7 +2834,7 @@ private final FrameLayout controls;
 
         rightNav.addView(navList, new LinearLayout.LayoutParams(px(290), -2));
 
-        int padR = Math.max(safeRight, px(20));
+        int padR = Math.max(safeRight, px(8));
         int padT = Math.max(safeTop, px(32));
         LayoutParams rightLp = new LayoutParams(-2, -2, Gravity.TOP | Gravity.RIGHT);
         rightLp.rightMargin = padR;
@@ -2887,9 +2887,9 @@ private final FrameLayout controls;
 
         if (won && data != null) {
             String starsStr = switch (Math.max(1, Math.min(3, data.stars()))) {
-                case 3 -> "★  ★  ★";
-                case 2 -> "★  ★  ☆";
-                default -> "★  ☆  ☆";
+                case 3 -> "\u2605  \u2605  \u2605";
+                case 2 -> "\u2605  \u2605  \u2606";
+                default -> "\u2605  \u2606  \u2606";
             };
             addProfileRow(card, "PERFORMANCE RATING", starsStr);
         }
@@ -3308,7 +3308,9 @@ private final FrameLayout controls;
         paint.setTypeface(Typeface.create("sans-serif-bold", Typeface.BOLD));
         paint.setTextSize(10f);
         paint.setColor(0xFF38BDF8); // Cyan indicator
-        canvas.drawText("● CURRENT ORDER", orderX + 10, orderY + 16, paint);
+        paint.setStyle(Paint.Style.FILL);
+        canvas.drawCircle(orderX + 14, orderY + 12, 3.5f, paint);
+        canvas.drawText("CURRENT ORDER", orderX + 22, orderY + 16, paint);
 
         int sec = Math.max(0, (int) Math.ceil(data.time()));
         String timeStr = String.format(Locale.US, "%d:%02d", sec / 60, sec % 60);

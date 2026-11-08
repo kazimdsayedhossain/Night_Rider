@@ -149,7 +149,7 @@ public final class Rules {
         return best;
     }
 
-    /** mulberry32 – bit-exact with the JS generator. */
+    /** mulberry32 - bit-exact with the JS generator. */
     public static final class Random {
         private int a;
         public Random(int seed) { a = seed; }

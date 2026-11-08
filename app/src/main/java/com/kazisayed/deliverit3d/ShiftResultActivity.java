@@ -105,7 +105,7 @@ public class ShiftResultActivity extends AppCompatActivity {
     }
 
     /**
-     * HTTP PUT to Firebase Realtime Database REST API — this is the networking requirement.
+     * HTTP PUT to Firebase Realtime Database REST API - this is the networking requirement.
      * Logs the JSON payload and response code for the academic report screenshot.
      */
     private void pushLeaderboardEntry(String uid, String name, long score) {
@@ -118,7 +118,7 @@ public class ShiftResultActivity extends AppCompatActivity {
                 payload.put("district", "Neo-Downtown");
 
                 byte[] body = payload.toString().getBytes("UTF-8");
-                Log.d(TAG, "PUT " + endpoint + " body=" + payload); // ← screenshot for report
+                Log.d(TAG, "PUT " + endpoint + " body=" + payload); // <- screenshot for report
 
                 HttpURLConnection conn = (HttpURLConnection) new URL(endpoint).openConnection();
                 conn.setRequestMethod("PUT");
@@ -131,7 +131,7 @@ public class ShiftResultActivity extends AppCompatActivity {
                 os.close();
 
                 int code = conn.getResponseCode();
-                Log.d(TAG, "PUT response: " + code); // ← screenshot for report
+                Log.d(TAG, "PUT response: " + code); // <- screenshot for report
                 conn.disconnect();
             } catch (Exception e) {
                 Log.e(TAG, "Leaderboard PUT failed", e);
@@ -140,7 +140,7 @@ public class ShiftResultActivity extends AppCompatActivity {
     }
 
     private String starsString(int stars) {
-        return "★".repeat(Math.max(0, stars)) + "☆".repeat(Math.max(0, 3 - stars));
+        return "\u2605".repeat(Math.max(0, stars)) + "\u2606".repeat(Math.max(0, 3 - stars));
     }
 
     private String formatTime(long ms) {

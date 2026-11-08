@@ -288,7 +288,7 @@ public final class StaticCityBlueprint {
             // Skip any lamp at or near cross-street intersections (multiples of 160m)
             float distToJunction = Math.abs(z - Math.round(z / 160.0f) * 160.0f);
             if (distToJunction < 14f) continue;
-            // Focus lamp heads inward directly over the roadway (East: 180° = PI, West: 0°)
+            // Focus lamp heads inward directly over the roadway (East: 180 deg = PI, West: 0°)
             LIGHTS.add(new PropPlacement("street-lamp",  8.6f, 0f, z, (float) Math.PI, 1f));
             LIGHTS.add(new PropPlacement("street-lamp", -8.6f, 0f, z,  0f, 1f));
         }
@@ -393,7 +393,7 @@ public final class StaticCityBlueprint {
                     if (distToJunction < 14.0f) continue;
                     // Also guard against any road position
                     if (WorldGrid.road(x, z)) continue;
-                    // Focus street lamps directly inward onto the road (East=180°, West=0°)
+                    // Focus street lamps directly inward onto the road (East=180 deg, West=0°)
                     yaw = x > 0 ? (float) Math.PI : 0f;
                 } else if ("trees-pack".equals(id) || "tree".equals(id)) {
                     // Move street verge trees securely away from sidewalk (ends at 8.5m) to 13.5m
