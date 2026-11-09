@@ -165,6 +165,36 @@ public final class SaveStore {
         }
         return success;
     }
+
+    public int utilUpgrade(String vehicleId) {
+        return Math.max(0, Math.min(3, number("upgrade_util_" + (vehicleId != null ? vehicleId : "bike"), 0)));
+    }
+
+    public boolean upgradeUtilPart(String vehicleId, int cost) {
+        int curTier = utilUpgrade(vehicleId);
+        if (curTier >= 3) return false;
+        if (cash() < cost) return false;
+        int remaining = cash() - cost;
+        put("deliver3d_cash", remaining);
+        put("upgrade_util_" + vehicleId, curTier + 1);
+        return true;
+    }
+
+    public static int getUtilityUpgradeLevel(android.content.Context ctx, String vehicleId) {
+        return new SaveStore(ctx).utilUpgrade(vehicleId);
+    }
+
+    public static boolean upgradeVehicleUtility(android.content.Context ctx, String vehicleId, int cost) {
+        SaveStore s = new SaveStore(ctx);
+        boolean success = s.upgradeUtilPart(vehicleId, cost);
+        if (success) {
+            try {
+                UserManager.get().loadLocal(ctx);
+                UserManager.get().spendCash(ctx, cost);
+            } catch (Throwable ignored) {}
+        }
+        return success;
+    }
     public static void cacheContracts(android.content.Context ctx,java.util.List<com.kazisayed.deliverit3d.model.Contract> list){
         if(list==null)return;
         try{

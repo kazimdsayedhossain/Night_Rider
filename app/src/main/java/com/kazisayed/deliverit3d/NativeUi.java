@@ -45,6 +45,8 @@ import java.util.function.Consumer;
  */
 
 public final class NativeUi extends FrameLayout {
+    private String activeNavOption = "PROFILE";
+    private String selectedGarageVehicle = "bike";
 
     // Frosted Low-Poly Color Palette (Translucent Silver, Graphite & White - Zero Neon)
 
@@ -2532,7 +2534,7 @@ private final FrameLayout controls;
 
         ImageView bgView = new ImageView(getContext());
 
-        bgView.setScaleType(ImageView.ScaleType.FIT_XY);
+        bgView.setScaleType(ImageView.ScaleType.CENTER_CROP);
 
         try (java.io.InputStream is = getContext().getAssets().open("loading_bg.jpg")) {
 
@@ -2740,31 +2742,7 @@ private final FrameLayout controls;
         navList.setGravity(Gravity.LEFT);
         navList.setBackground(null);
 
-        if (isPaused) {
-            addNavButton(navList, "RESUME", true, () -> activity.command("resume"));
-            addNavButton(navList, "PROFILE", false, this::showProfileInLeft);
-            addNavButton(navList, "GARAGE", false, () -> showGarageInLeft(true));
-            addNavButton(navList, "LEADERBOARD", false, this::showLeaderboardInLeft);
-            addNavButton(navList, "SETTINGS", false, this::showSettingsInLeft);
-            addNavButton(navList, "RESTART ROUTE", false, () -> activity.command("restart"));
-            addNavButton(navList, "MAIN MENU", false, () -> activity.command("menu"));
-        } else {
-            addNavButton(navList, "RIDE", true, () -> activity.command("start"));
-            addNavButton(navList, "PROFILE", false, this::showProfileInLeft);
-            addNavButton(navList, "GARAGE", false, () -> showGarageInLeft(true));
-            addNavButton(navList, "LEADERBOARD", false, this::showLeaderboardInLeft);
-            addNavButton(navList, "SETTINGS", false, this::showSettingsInLeft);
-        }
-
-        addNavButton(navList, "SIGN OUT", false, () -> {
-            saves.put("user_logged_in", false);
-            com.google.firebase.auth.FirebaseAuth.getInstance().signOut();
-            android.content.Intent intent = new android.content.Intent(activity, AuthActivity.class);
-            intent.putExtra("force_auth", true);
-            activity.startActivity(intent);
-            activity.overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
-            activity.finish();
-        });
+        populateNavList(navList, isPaused);
 
         rightNav.addView(navList, new LinearLayout.LayoutParams(px(290), -2));
 
@@ -2828,12 +2806,7 @@ private final FrameLayout controls;
         navList.setGravity(Gravity.LEFT);
         navList.setBackground(null);
 
-        addNavButton(navList, "RETRY ROUTE", true, () -> activity.command("restart"));
-        addNavButton(navList, "PROFILE", false, this::showProfileInLeft);
-        addNavButton(navList, "GARAGE", false, () -> showGarageInLeft(true));
-        addNavButton(navList, "LEADERBOARD", false, this::showLeaderboardInLeft);
-        addNavButton(navList, "SETTINGS", false, this::showSettingsInLeft);
-        addNavButton(navList, "MAIN MENU", false, () -> activity.command("menu"));
+        populateResultNavList(navList, won);
 
         rightNav.addView(navList, new LinearLayout.LayoutParams(px(290), -2));
 
@@ -2916,27 +2889,120 @@ private final FrameLayout controls;
         setLeftContentWithAnim(card);
     }
 
+    private void populateNavList(LinearLayout navList, boolean isPaused) {
+        navList.removeAllViews();
+        if (isPaused) {
+            addNavButton(navList, "RESUME", true, () -> activity.command("resume"));
+            addNavButton(navList, "PROFILE", false, () -> {
+                activeNavOption = "PROFILE";
+                populateNavList(navList, isPaused);
+                showProfileInLeft();
+            });
+            addNavButton(navList, "GARAGE", false, () -> {
+                activeNavOption = "GARAGE";
+                populateNavList(navList, isPaused);
+                showGarageInLeft(true);
+            });
+            addNavButton(navList, "LEADERBOARD", false, () -> {
+                activeNavOption = "LEADERBOARD";
+                populateNavList(navList, isPaused);
+                showLeaderboardInLeft();
+            });
+            addNavButton(navList, "SETTINGS", false, () -> {
+                activeNavOption = "SETTINGS";
+                populateNavList(navList, isPaused);
+                showSettingsInLeft();
+            });
+            addNavButton(navList, "RESTART ROUTE", false, () -> activity.command("restart"));
+            addNavButton(navList, "MAIN MENU", false, () -> activity.command("menu"));
+        } else {
+            addNavButton(navList, "RIDE", true, () -> activity.command("start"));
+            addNavButton(navList, "PROFILE", false, () -> {
+                activeNavOption = "PROFILE";
+                populateNavList(navList, isPaused);
+                showProfileInLeft();
+            });
+            addNavButton(navList, "GARAGE", false, () -> {
+                activeNavOption = "GARAGE";
+                populateNavList(navList, isPaused);
+                showGarageInLeft(true);
+            });
+            addNavButton(navList, "LEADERBOARD", false, () -> {
+                activeNavOption = "LEADERBOARD";
+                populateNavList(navList, isPaused);
+                showLeaderboardInLeft();
+            });
+            addNavButton(navList, "SETTINGS", false, () -> {
+                activeNavOption = "SETTINGS";
+                populateNavList(navList, isPaused);
+                showSettingsInLeft();
+            });
+        }
+
+        addNavButton(navList, "SIGN OUT", false, () -> {
+            saves.put("user_logged_in", false);
+            com.google.firebase.auth.FirebaseAuth.getInstance().signOut();
+            android.content.Intent intent = new android.content.Intent(activity, AuthActivity.class);
+            intent.putExtra("force_auth", true);
+            activity.startActivity(intent);
+            activity.overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+            activity.finish();
+        });
+    }
+
+    private void populateResultNavList(LinearLayout navList, boolean won) {
+        navList.removeAllViews();
+        addNavButton(navList, "RETRY ROUTE", true, () -> activity.command("restart"));
+        addNavButton(navList, "PROFILE", false, () -> {
+            activeNavOption = "PROFILE";
+            populateResultNavList(navList, won);
+            showProfileInLeft();
+        });
+        addNavButton(navList, "GARAGE", false, () -> {
+            activeNavOption = "GARAGE";
+            populateResultNavList(navList, won);
+            showGarageInLeft(true);
+        });
+        addNavButton(navList, "LEADERBOARD", false, () -> {
+            activeNavOption = "LEADERBOARD";
+            populateResultNavList(navList, won);
+            showLeaderboardInLeft();
+        });
+        addNavButton(navList, "SETTINGS", false, () -> {
+            activeNavOption = "SETTINGS";
+            populateResultNavList(navList, won);
+            showSettingsInLeft();
+        });
+        addNavButton(navList, "MAIN MENU", false, () -> activity.command("menu"));
+    }
+
     private TextView addNavButton(LinearLayout panel, String text, boolean primary, Runnable action) {
+        boolean isSelected = text.equalsIgnoreCase(activeNavOption);
         TextView tv = new TextView(getContext());
-        tv.setText(text.toUpperCase(Locale.ROOT));
-        tv.setTextColor(primary ? 0xFFFFFFFF : 0xFFCBD5E1);
-        tv.setTextSize(15.5f);
-        tv.setTypeface(Typeface.create("sans-serif-condensed", primary ? Typeface.BOLD : Typeface.NORMAL));
+        String display = (isSelected ? "▶  " : "    ") + text.toUpperCase(Locale.ROOT);
+        tv.setText(display);
+        tv.setTextColor(isSelected ? 0xFFFFFFFF : (primary ? 0xFFFFFFFF : 0xFF94A3B8));
+        tv.setTextSize(isSelected ? 16f : 14.5f);
+        tv.setTypeface(Typeface.create("sans-serif-condensed", isSelected ? Typeface.BOLD : (primary ? Typeface.BOLD : Typeface.NORMAL)));
         tv.setLetterSpacing(0.14f);
         tv.setGravity(Gravity.LEFT | Gravity.CENTER_VERTICAL);
         tv.setPadding(px(16), px(9), px(16), px(9));
         tv.setShadowLayer(4, 1, 2, 0xEE000000);
 
+        if (isSelected) {
+            tv.setBackground(new ChamferedDrawable(0x280284C7, 0xFF38BDF8, px(1.5f), 0));
+        } else {
+            tv.setBackground(null);
+        }
+
         tv.setOnTouchListener((v, event) -> {
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN -> {
                     tv.setTextColor(0xFFFFFFFF);
-                    tv.setBackgroundColor(0x33FFFFFF);
                     tv.animate().scaleX(1.03f).scaleY(1.03f).setDuration(60).start();
                 }
                 case MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
-                    tv.setTextColor(primary ? 0xFFFFFFFF : 0xFFCBD5E1);
-                    tv.setBackgroundColor(0x00000000);
+                    tv.setTextColor(isSelected ? 0xFFFFFFFF : (primary ? 0xFFFFFFFF : 0xFF94A3B8));
                     tv.animate().scaleX(1.0f).scaleY(1.0f).setDuration(120).start();
                 }
             }
@@ -3070,72 +3136,162 @@ private final FrameLayout controls;
         section = "garage";
         if (rightContentArea == null) return;
 
+        ScrollView scroll = new ScrollView(getContext());
+        scroll.setFillViewport(true);
+        scroll.setVerticalScrollBarEnabled(false);
+
         LinearLayout card = new LinearLayout(getContext());
         card.setOrientation(LinearLayout.VERTICAL);
         card.setGravity(Gravity.LEFT);
         card.setBackground(null);
-        card.setPadding(0, 0, 0, 0);
+        card.setPadding(0, 0, 0, px(16));
 
         int cashVal = data != null ? data.cash() : saves.cash();
         int ticketVal = data != null ? data.tickets() : saves.tickets();
         TextView wallet = makeText("WALLET: $" + String.format(Locale.US, "%,d", cashVal) + "  |  " + ticketVal + " TICKETS", 11.5f, 0xFF94A3B8, false);
         wallet.setGravity(Gravity.LEFT);
         wallet.setLetterSpacing(0.10f);
-        wallet.setPadding(0, 0, 0, px(10));
+        wallet.setPadding(0, 0, 0, px(8));
         card.addView(wallet);
 
-        View div = new View(getContext());
-        div.setBackgroundColor(0x33CBD5E1);
-        card.addView(div, new LinearLayout.LayoutParams(-1, px(1)));
+        View div1 = new View(getContext());
+        div1.setBackgroundColor(0x33CBD5E1);
+        card.addView(div1, new LinearLayout.LayoutParams(-1, px(1)));
+
+        // Fleet Showroom Header
+        TextView fleetHeader = makeText("FLEET SHOWROOM // SELECT OR BUY", 11.5f, 0xFF38BDF8, true);
+        fleetHeader.setLetterSpacing(0.12f);
+        fleetHeader.setPadding(0, px(10), 0, px(4));
+        card.addView(fleetHeader);
 
         LinearLayout itemsList = new LinearLayout(getContext());
         itemsList.setOrientation(LinearLayout.VERTICAL);
         itemsList.setGravity(Gravity.LEFT);
-        itemsList.setPadding(0, px(6), 0, 0);
+        itemsList.setPadding(0, px(2), 0, 0);
 
-        addGarageItemRow(itemsList, true, "bike", "FIXIE MESSENGER", 0, 0);
-        addGarageItemRow(itemsList, true, "scooter", "VESPA SPRINT", 450, 0);
-        addGarageItemRow(itemsList, true, "superbike", "BOBBER 750", 1400, 0);
-        addGarageItemRow(itemsList, true, "guzzi", "V7 NIGHT RIDER", 3200, 0);
-        addGarageItemRow(itemsList, true, "barracuda", "BARRACUDA 440", 7500, 0);
-        addGarageItemRow(itemsList, false, "cap", "COURIER CAP", 0, 0);
-        addGarageItemRow(itemsList, false, "helmet", "AERO HELMET", 800, 0);
-        addGarageItemRow(itemsList, false, "crown", "GOLD CROWN", 0, 25);
+        List<com.kazisayed.deliverit3d.model.VehicleSpec> allVehicles = com.kazisayed.deliverit3d.model.VehicleSpec.all();
+        String currentEquipped = saves.text("deliver3d_vehicle", "bike");
+        if (selectedGarageVehicle == null || selectedGarageVehicle.isEmpty()) {
+            selectedGarageVehicle = currentEquipped;
+        }
 
-        // Tuning Sub-Section for Equipped Vehicle
-        String eqVeh = saves.text("deliver3d_vehicle", "bike");
-        com.kazisayed.deliverit3d.model.VehicleSpec eqSpec = com.kazisayed.deliverit3d.model.VehicleSpec.findById(eqVeh);
-        int spdTier = saves.number("upgrade_speed_" + eqVeh, 0);
-        int cpTier = saves.number("upgrade_cap_" + eqVeh, 0);
-        int spdCost = com.kazisayed.deliverit3d.model.VehicleSpec.getSpeedUpgradeCost(eqVeh, spdTier);
-        int cpCost = com.kazisayed.deliverit3d.model.VehicleSpec.getCapacityUpgradeCost(eqVeh, cpTier);
+        for (com.kazisayed.deliverit3d.model.VehicleSpec spec : allVehicles) {
+            String vId = spec.getId();
+            boolean isOwned = "bike".equals(vId) || saves.owned(true).contains(vId);
+            boolean isEquipped = currentEquipped.equals(vId);
 
-        TextView tuneHeader = makeText("TUNING // " + eqSpec.getName().toUpperCase(Locale.ROOT), 11.5f, 0xFF38BDF8, true);
-        tuneHeader.setPadding(0, px(12), 0, px(4));
-        itemsList.addView(tuneHeader);
+            String statusTag;
+            if (isEquipped) {
+                statusTag = "PURCHASED [EQUIPPED]";
+            } else if (isOwned) {
+                statusTag = "PURCHASED";
+            } else {
+                statusTag = "BUY ($" + String.format(Locale.US, "%,d", spec.getPrice()) + ")";
+            }
 
-        String spdLabel = "⚡ " + eqSpec.getSpeedPartName() + " (LV " + spdTier + "/3)" + (spdCost > 0 ? (" - $" + spdCost) : " [MAX]");
-        addContentButton(itemsList, spdLabel, spdCost <= 0, () -> {
-            activity.feedback(20);
-            activity.post(() -> game.upgradeVehiclePart(true));
-            postDelayed(() -> {
-                data = game.snapshot;
-                showGarageInLeft(true);
-            }, 120);
-        });
+            String rowText = spec.getName().toUpperCase(Locale.ROOT) + "  |  " + statusTag;
+            boolean highlightRow = isEquipped || vId.equals(selectedGarageVehicle);
 
-        String capLabel = "📦 " + eqSpec.getCapacityPartName() + " (LV " + cpTier + "/3)" + (cpCost > 0 ? (" - $" + cpCost) : " [MAX]");
-        addContentButton(itemsList, capLabel, cpCost <= 0, () -> {
-            activity.feedback(20);
-            activity.post(() -> game.upgradeVehiclePart(false));
-            postDelayed(() -> {
-                data = game.snapshot;
-                showGarageInLeft(true);
-            }, 120);
-        });
-
+            addContentButton(itemsList, rowText, highlightRow, () -> {
+                int curCash = data != null ? data.cash() : saves.cash();
+                if (!isOwned) {
+                    if (curCash < spec.getPrice()) {
+                        activity.feedback(40);
+                        activity.post(() -> game.announce("Insufficient cash: Need $" + spec.getPrice() + " (Have $" + curCash + ")"));
+                        return;
+                    }
+                    activity.feedback(25);
+                    activity.post(() -> game.buy(true, spec.getId(), spec.getPrice(), 0));
+                    activity.playCue("buy");
+                    selectedGarageVehicle = spec.getId();
+                } else {
+                    activity.feedback(15);
+                    saves.put("deliver3d_vehicle", spec.getId());
+                    selectedGarageVehicle = spec.getId();
+                    activity.playCue("equip");
+                }
+                postDelayed(() -> {
+                    data = game.snapshot;
+                    showGarageInLeft(true);
+                }, 120);
+            });
+        }
         card.addView(itemsList);
-        setLeftContentWithAnim(card);
+
+        // Tuning Section for Selected / Equipped Vehicle
+        com.kazisayed.deliverit3d.model.VehicleSpec activeSpec = com.kazisayed.deliverit3d.model.VehicleSpec.findById(selectedGarageVehicle);
+        int spdTier = saves.number("upgrade_speed_" + activeSpec.getId(), 0);
+        int cpTier = saves.number("upgrade_cap_" + activeSpec.getId(), 0);
+        int utilTier = saves.number("upgrade_util_" + activeSpec.getId(), 0);
+
+        int spdCost = com.kazisayed.deliverit3d.model.VehicleSpec.getSpeedUpgradeCost(activeSpec.getId(), spdTier);
+        int cpCost = com.kazisayed.deliverit3d.model.VehicleSpec.getCapacityUpgradeCost(activeSpec.getId(), cpTier);
+        int utilCost = com.kazisayed.deliverit3d.model.VehicleSpec.getUtilityUpgradeCost(activeSpec.getId(), utilTier);
+
+        View div2 = new View(getContext());
+        div2.setBackgroundColor(0x33CBD5E1);
+        LinearLayout.LayoutParams div2Lp = new LinearLayout.LayoutParams(-1, px(1));
+        div2Lp.topMargin = px(12);
+        div2Lp.bottomMargin = px(8);
+        card.addView(div2, div2Lp);
+
+        TextView tuneHeader = makeText("TUNING // " + activeSpec.getName().toUpperCase(Locale.ROOT) + " (" + (int) activeSpec.getBaseSpeedKmh() + " KM/H STOCK)", 11.5f, 0xFF10B981, true);
+        tuneHeader.setLetterSpacing(0.12f);
+        tuneHeader.setPadding(0, px(2), 0, px(4));
+        card.addView(tuneHeader);
+
+        // Part 1: Speed / Engine
+        String spdLabel = "⚡ " + activeSpec.getSpeedPartName() + " (LV " + spdTier + "/3)" + (spdCost > 0 ? (" - $" + spdCost) : " [MAX TIER]");
+        addContentButton(card, spdLabel, spdCost <= 0, () -> {
+            activity.feedback(20);
+            activity.post(() -> game.upgradeVehiclePart(0));
+            postDelayed(() -> {
+                data = game.snapshot;
+                showGarageInLeft(true);
+            }, 120);
+        });
+
+        // Part 2: Cargo / Capacity
+        String capLabel = "📦 " + activeSpec.getCapacityPartName() + " (LV " + cpTier + "/3)" + (cpCost > 0 ? (" - $" + cpCost) : " [MAX TIER]");
+        addContentButton(card, capLabel, cpCost <= 0, () -> {
+            activity.feedback(20);
+            activity.post(() -> game.upgradeVehiclePart(1));
+            postDelayed(() -> {
+                data = game.snapshot;
+                showGarageInLeft(true);
+            }, 120);
+        });
+
+        // Part 3: Utility / Handling Part
+        String utilLabel = "🛠 " + activeSpec.getUtilityPartName() + " (LV " + utilTier + "/3)" + (utilCost > 0 ? (" - $" + utilCost) : " [MAX TIER]");
+        addContentButton(card, utilLabel, utilCost <= 0, () -> {
+            activity.feedback(20);
+            activity.post(() -> game.upgradeVehiclePart(2));
+            postDelayed(() -> {
+                data = game.snapshot;
+                showGarageInLeft(true);
+            }, 120);
+        });
+
+        // Headwear & Accessories
+        View div3 = new View(getContext());
+        div3.setBackgroundColor(0x33CBD5E1);
+        LinearLayout.LayoutParams div3Lp = new LinearLayout.LayoutParams(-1, px(1));
+        div3Lp.topMargin = px(12);
+        div3Lp.bottomMargin = px(8);
+        card.addView(div3, div3Lp);
+
+        TextView hatHeader = makeText("COURIER HEADWEAR & GEAR", 11.5f, 0xFFF59E0B, true);
+        hatHeader.setLetterSpacing(0.12f);
+        hatHeader.setPadding(0, px(2), 0, px(4));
+        card.addView(hatHeader);
+
+        addGarageItemRow(card, false, "cap", "COURIER CAP", 0, 0);
+        addGarageItemRow(card, false, "helmet", "AERO HELMET", 800, 0);
+        addGarageItemRow(card, false, "crown", "GOLD CROWN", 0, 25);
+
+        scroll.addView(card);
+        setLeftContentWithAnim(scroll);
     }
 
     private void addGarageItemRow(LinearLayout panel, boolean isVehicles, String id, String name, int priceCash, int priceTokens) {

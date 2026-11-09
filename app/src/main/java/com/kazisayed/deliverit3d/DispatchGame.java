@@ -322,11 +322,20 @@ public final class DispatchGame extends ApplicationAdapter {
         if(Math.abs(steering) < .004f) steering = 0;
         throttle = Rules.lerp(throttle, input.pedal ? 1 : 0, 1 - (float)Math.exp(-dt * 12));
 
-        float grip = (weather.rain > .4f ? .84f : weather.snow > .4f ? .68f : 1) * com.kazisayed.deliverit3d.model.VehicleSpec.getGrip(vehicleId);
-        float baseVehicleSpeed = com.kazisayed.deliverit3d.model.VehicleSpec.getBaseSpeed(vehicleId);
         int speedTier = saves != null ? saves.number("upgrade_speed_" + vehicleId, 0) : 0;
+        int utilTier = saves != null ? saves.number("upgrade_util_" + vehicleId, 0) : 0;
+
+        float baseGrip = com.kazisayed.deliverit3d.model.VehicleSpec.getGrip(vehicleId);
+        float rainGripBonus = ("bike".equals(vehicleId) ? (0.06f * utilTier) : 0f);
+        float snowGripBonus = ("bike".equals(vehicleId) ? (0.08f * utilTier) : 0f);
+        float weatherGrip = (weather.rain > .4f ? (.84f + rainGripBonus) : weather.snow > .4f ? (.68f + snowGripBonus) : 1f);
+        float grip = weatherGrip * baseGrip * (1f + ("bike".equals(vehicleId) ? 0.05f * utilTier : 0f));
+
+        float baseKmh = com.kazisayed.deliverit3d.model.VehicleSpec.getBaseSpeedKmh(vehicleId);
         float upgradeSpeedMult = com.kazisayed.deliverit3d.model.VehicleSpec.getSpeedMultiplier(vehicleId, speedTier);
-        float maximum = level.speed * (combo.fever() ? 1.25f : 1) * baseVehicleSpeed * upgradeSpeedMult * (weather.rain > .4f ? .92f : weather.snow > .4f ? .82f : 1) * (WorldGrid.road(x, z) ? 1 : .68f);
+        float feverMult = combo.fever() ? ("guzzi".equals(vehicleId) ? (1.20f + 0.06f * utilTier) : 1.20f) : 1.0f;
+        float maxKmh = baseKmh * upgradeSpeedMult * feverMult;
+        float maximum = (maxKmh / 3.6f) * (weather.rain > .4f ? .92f : weather.snow > .4f ? .82f : 1) * (WorldGrid.road(x, z) ? 1 : .68f);
 
         // Responsive acceleration tuned per vehicle & upgrade tier
         float baseAccelMult = com.kazisayed.deliverit3d.model.VehicleSpec.getBaseAccel(vehicleId);
@@ -334,7 +343,8 @@ public final class DispatchGame extends ApplicationAdapter {
         float acceleration = (combo.fever() ? 40f : 28f) * 1.6f * baseAccelMult * upgradeAccelMult;
 
         if(input.brake){
-            speed -= 32 * grip * dt;
+            float brakeBoost = "scooter".equals(vehicleId) ? (1.0f + 0.35f * utilTier) : 1.0f;
+            speed -= 32 * grip * brakeBoost * dt;
             speed = Math.max(speed, -Math.min(6.5f, maximum * .34f));
         } else if(throttle > .01f){
             speed = Math.min(maximum, speed + acceleration * throttle * dt);
@@ -370,13 +380,22 @@ public final class DispatchGame extends ApplicationAdapter {
                     x += car.x() * .45f; z += car.z() * .45f; audio.cue("skid"); host.feedback(55);
                     announce("Fever Shield Deflected Impact!"); break;
                 }
-                boolean highSpeedFrontal = (Math.abs(car.z()) > Math.abs(car.x()) * .75f && Math.abs(speed) > 11.5f) || Math.abs(speed) > 19.0f;
+                boolean highSpeedFrontal = (Math.abs(car.z()) > Math.abs(car.x()) * .75f && Math.abs(speed) > ("superbike".equals(vehicleId) ? (13.5f + utilTier * 2.0f) : 11.5f)) || Math.abs(speed) > ("superbike".equals(vehicleId) ? (22.0f + utilTier * 2.0f) : 19.0f);
                 if(highSpeedFrontal){
                     x += car.x() * .20f; z += car.z() * .20f; audio.cue("crash"); host.feedback(90); combo.drop("crash");
                     finish(false, "Traffic collision - Shift terminated"); break;
                 } else {
-                    speed *= .32f; x += car.x() * .42f; z += car.z() * .42f; invulnerable = 1.6f; combo.drop("scrape"); time = Math.max(0, time - 2.5f);
-                    audio.cue("skid"); host.feedback(45); announce("Traffic scrape - 2.5s penalty"); break;
+                    float speedRetain = "superbike".equals(vehicleId) ? (0.32f + 0.12f * utilTier) : 0.32f;
+                    speed *= speedRetain; x += car.x() * .42f; z += car.z() * .42f; invulnerable = 1.6f;
+                    float timePen = "superbike".equals(vehicleId) ? (2.5f * Math.max(0.25f, 1.0f - 0.25f * utilTier)) : 2.5f;
+                    time = Math.max(0, time - timePen);
+                    if ("barracuda".equals(vehicleId) && utilTier >= 1) {
+                        announce("Bull bar absorbed impact! Combo preserved!");
+                    } else {
+                        combo.drop("scrape");
+                        announce("Traffic scrape - " + String.format(java.util.Locale.US, "%.1f", timePen) + "s penalty");
+                    }
+                    audio.cue("skid"); host.feedback(45); break;
                 }
             }
             if(wall != null){
@@ -394,7 +413,9 @@ public final class DispatchGame extends ApplicationAdapter {
         if(state != State.PLAYING) return;
         traffic.update(dt, x, z, speed, yaw);
         if(traffic.nearMiss(x, z, yaw, speed)){
-            award(25, Rules.SCORE_NEAR_MISS, 0); combo.extend(Rules.NEAR_MISS_COMBO_EXTEND); audio.cue("combo"); announce("Close pass +25");
+            int nearBonus = ("barracuda".equals(vehicleId) && utilTier >= 1) ? (25 + utilTier * 25) : 25;
+            float feverExt = "guzzi".equals(vehicleId) ? (Rules.NEAR_MISS_COMBO_EXTEND + utilTier * 0.6f) : Rules.NEAR_MISS_COMBO_EXTEND;
+            award(nearBonus, Rules.SCORE_NEAR_MISS, 0); combo.extend(feverExt); audio.cue("combo"); announce("Close pass +" + nearBonus);
         }
 
         for(int i = tossedParcels.size() - 1; i >= 0; i--){
@@ -569,11 +590,14 @@ public final class DispatchGame extends ApplicationAdapter {
         publish();
     }
 
-    public void upgradeVehiclePart(boolean isSpeed) {
+    public void upgradeVehiclePart(int partType) {
         String veh = vehicleId != null ? vehicleId : saves.text("deliver3d_vehicle", "bike");
-        int curTier = saves.number((isSpeed ? "upgrade_speed_" : "upgrade_cap_") + veh, 0);
-        int cost = isSpeed ? com.kazisayed.deliverit3d.model.VehicleSpec.getSpeedUpgradeCost(veh, curTier)
-                           : com.kazisayed.deliverit3d.model.VehicleSpec.getCapacityUpgradeCost(veh, curTier);
+        int curTier = partType == 0 ? saves.number("upgrade_speed_" + veh, 0)
+                    : partType == 1 ? saves.number("upgrade_cap_" + veh, 0)
+                    : saves.number("upgrade_util_" + veh, 0);
+        int cost = partType == 0 ? com.kazisayed.deliverit3d.model.VehicleSpec.getSpeedUpgradeCost(veh, curTier)
+                 : partType == 1 ? com.kazisayed.deliverit3d.model.VehicleSpec.getCapacityUpgradeCost(veh, curTier)
+                 : com.kazisayed.deliverit3d.model.VehicleSpec.getUtilityUpgradeCost(veh, curTier);
         if(cost <= 0){
             announce("Part already at MAX tier");
             return;
@@ -582,18 +606,26 @@ public final class DispatchGame extends ApplicationAdapter {
             announce("Need $" + cost + " (Wallet: $" + cash + ")");
             return;
         }
-        boolean success = isSpeed ? saves.upgradeSpeedPart(veh, cost) : saves.upgradeCapPart(veh, cost);
+        boolean success = partType == 0 ? saves.upgradeSpeedPart(veh, cost)
+                        : partType == 1 ? saves.upgradeCapPart(veh, cost)
+                        : saves.upgradeUtilPart(veh, cost);
         if(success){
             cash = saves.cash();
             try {
                 com.kazisayed.deliverit3d.UserManager.get().spendCash(null, cost);
             } catch(Throwable ignored) {}
-            String partName = isSpeed ? com.kazisayed.deliverit3d.model.VehicleSpec.findById(veh).getSpeedPartName()
-                                      : com.kazisayed.deliverit3d.model.VehicleSpec.findById(veh).getCapacityPartName();
+            com.kazisayed.deliverit3d.model.VehicleSpec spec = com.kazisayed.deliverit3d.model.VehicleSpec.findById(veh);
+            String partName = partType == 0 ? spec.getSpeedPartName()
+                            : partType == 1 ? spec.getCapacityPartName()
+                            : spec.getUtilityPartName();
             announce("Upgraded: " + partName + " (Tier " + (curTier + 1) + ")");
             audio.cue("delivery");
             publish();
         }
+    }
+
+    public void upgradeVehiclePart(boolean isSpeed) {
+        upgradeVehiclePart(isSpeed ? 0 : 1);
     }
     public void settings(){input.tilt=saves.flag("native-tilt",true);tilt.configure(saves.decimal("native-tilt-sensitivity",1),saves.flag("native-tilt-invert",false));audio.volumes(saves.decimal("dispatch-volume-master",.75f),saves.decimal("dispatch-volume-sfx",.8f),saves.decimal("dispatch-volume-ambient",.5f));if(weather!=null){weather.automatic=saves.flag("native-weather-auto",true);weather.dayCycle=saves.flag("native-day-cycle",true);weather.headlights=saves.flag("native-headlights",true);}}
     private void publish(){

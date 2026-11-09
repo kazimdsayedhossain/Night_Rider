@@ -195,5 +195,42 @@ public class GarageActivity extends AppCompatActivity implements VehicleAdapter.
             dialogBinding.btnDialogUpgradeCap.setEnabled(false);
             dialogBinding.btnDialogUpgradeCap.setOnClickListener(null);
         }
+
+        // Utility / Handling Tuning
+        int utilTier = SaveStore.getUtilityUpgradeLevel(getApplicationContext(), vehicle.getId());
+        dialogBinding.tvUtilPartName.setText(vehicle.getUtilityPartName());
+        dialogBinding.tvUtilPartDesc.setText(vehicle.getUtilityPartDesc());
+        dialogBinding.tvUtilTierLabel.setText("TIER " + utilTier + " / 3");
+
+        if (vehicle.getUtilityPart() != null) {
+            if (utilTier < 3) {
+                dialogBinding.tvUtilStatDiff.setText("Current: " + vehicle.getUtilityPart().getBenefit(utilTier)
+                        + " -> Next: " + vehicle.getUtilityPart().getNextBenefit(utilTier));
+            } else {
+                dialogBinding.tvUtilStatDiff.setText("Current: " + vehicle.getUtilityPart().getBenefit(utilTier) + " [MAXIMUM TIER]");
+            }
+        }
+
+        int utilCost = VehicleSpec.getUtilityUpgradeCost(vehicle.getId(), utilTier);
+        if (utilCost > 0) {
+            dialogBinding.btnDialogUpgradeUtil.setText(String.format(Locale.US, "UPGRADE FOR $%,d", utilCost));
+            dialogBinding.btnDialogUpgradeUtil.setEnabled(true);
+            dialogBinding.btnDialogUpgradeUtil.setOnClickListener(v -> {
+                int curCash = SaveStore.getCash(getApplicationContext());
+                if (curCash < utilCost) {
+                    Toast.makeText(this, String.format(Locale.US, "Need $%,d for this upgrade! (Wallet: $%,d)", utilCost, curCash), Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                SaveStore.upgradeVehicleUtility(getApplicationContext(), vehicle.getId(), utilCost);
+                updateWallet();
+                refreshDialogViews(dialogBinding, vehicle);
+                adapter.notifyDataSetChanged();
+                Toast.makeText(this, "Upgraded " + vehicle.getUtilityPartName() + " to Tier " + (utilTier + 1) + "!", Toast.LENGTH_SHORT).show();
+            });
+        } else {
+            dialogBinding.btnDialogUpgradeUtil.setText("MAX TIER REACHED");
+            dialogBinding.btnDialogUpgradeUtil.setEnabled(false);
+            dialogBinding.btnDialogUpgradeUtil.setOnClickListener(null);
+        }
     }
 }
