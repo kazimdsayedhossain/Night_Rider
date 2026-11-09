@@ -3292,94 +3292,99 @@ private final FrameLayout controls;
         float safeLeftDp = safeLeft / dp;
         float safeRightDp = safeRight / dp;
 
-        // 1. TOP-LEFT: ORDER DASHBOARD (CURRENT ORDER & NEXT ORDER DETAILS)
+        // 1. TOP-LEFT: MINIMAL ORDER DASHBOARD (CURRENT & NEXT ORDER)
         float orderX = Math.max(safeLeftDp + 16, 20);
         float orderY = Math.max(safeTopDp + 14, 16);
-        float orderW = 320;
-        float orderH = 68;
+        float orderW = 210f;
+        float orderH = 38f;
 
-        // Transparent low-poly chamfered card (Zero heavy dark box)
+        // Subtle low-poly translucent card (Minimal cyber badge)
         paint.setStyle(Paint.Style.FILL);
-        paint.setColor(0x330B111A);
-        drawChamferedRect(canvas, orderX, orderY, orderX + orderW, orderY + orderH, 6, paint);
+        paint.setColor(0x280B111A);
+        drawChamferedRect(canvas, orderX, orderY, orderX + orderW, orderY + orderH, 5, paint);
         paint.setStyle(Paint.Style.STROKE);
-        paint.setStrokeWidth(1.2f);
-        paint.setColor(0x35FFFFFF);
-        drawChamferedRect(canvas, orderX, orderY, orderX + orderW, orderY + orderH, 6, paint);
+        paint.setStrokeWidth(1.0f);
+        paint.setColor(0x28FFFFFF);
+        drawChamferedRect(canvas, orderX, orderY, orderX + orderW, orderY + orderH, 5, paint);
+
+        // Left cyan accent notch
+        paint.setStyle(Paint.Style.FILL);
+        paint.setColor(0xFF38BDF8);
+        canvas.drawRoundRect(orderX + 3.5f, orderY + 6.5f, orderX + 5.5f, orderY + orderH - 6.5f, 1f, 1f, paint);
 
         DispatchGame.DeliveryOrder active = game.getActiveDelivery();
         DispatchGame.DeliveryOrder next = game.getNextDelivery();
-        int queueCount = game.getPendingDeliveryCount();
 
-        // --- CURRENT ORDER (Line 1 & 2) ---
+        // --- ROW 1: ACTIVE RECIPIENT, PAYOUT, DISTANCE & SIDE ---
         paint.setStyle(Paint.Style.FILL);
         paint.setTextAlign(Paint.Align.LEFT);
 
-        // Header: "CURRENT ORDER" tag + live time
-        paint.setTypeface(Typeface.create("sans-serif-bold", Typeface.BOLD));
-        paint.setTextSize(10f);
-        paint.setColor(0xFF38BDF8); // Cyan indicator
+        if (active != null) {
+            paint.setTypeface(Typeface.create("sans-serif-bold", Typeface.BOLD));
+            paint.setTextSize(10.5f);
+            paint.setColor(COLOR_WHITE);
+            String name = active.recipient.toUpperCase(Locale.ROOT);
+            canvas.drawText(name, orderX + 11, orderY + 14.5f, paint);
+
+            float nameW = paint.measureText(name);
+            paint.setColor(0xFF38BDF8);
+            canvas.drawText(" +$" + active.payout, orderX + 11 + nameW, orderY + 14.5f, paint);
+
+            int distM = Math.round(data.distance());
+            String sideStr = (active.side != null && active.side.equalsIgnoreCase("left")) ? "L" : "R";
+            String distStr = distM + "m " + sideStr;
+
+            paint.setTextAlign(Paint.Align.RIGHT);
+            paint.setTypeface(Typeface.create("sans-serif-condensed", Typeface.BOLD));
+            paint.setTextSize(10f);
+            paint.setColor(COLOR_SILVER);
+            canvas.drawText(distStr, orderX + orderW - 7, orderY + 14.5f, paint);
+        } else {
+            paint.setTypeface(Typeface.create("sans-serif-bold", Typeface.BOLD));
+            paint.setTextSize(10f);
+            paint.setColor(0xFF94A3B8);
+            canvas.drawText("STANDBY", orderX + 11, orderY + 14.5f, paint);
+
+            paint.setTextAlign(Paint.Align.RIGHT);
+            paint.setTypeface(Typeface.create("sans-serif-condensed", Typeface.BOLD));
+            paint.setTextSize(10f);
+            paint.setColor(COLOR_DIM);
+            canvas.drawText("PATROL", orderX + orderW - 7, orderY + 14.5f, paint);
+        }
+
+        // Subtle divider hairline
+        paint.setStyle(Paint.Style.STROKE);
+        paint.setStrokeWidth(0.8f);
+        paint.setColor(0x18FFFFFF);
+        canvas.drawLine(orderX + 11, orderY + 20f, orderX + orderW - 7, orderY + 20f, paint);
+
+        // --- ROW 2: NEXT QUEUED ORDER & DELIVERED / TIMER ---
         paint.setStyle(Paint.Style.FILL);
-        canvas.drawCircle(orderX + 14, orderY + 12, 3.5f, paint);
-        canvas.drawText("CURRENT ORDER", orderX + 22, orderY + 16, paint);
+        paint.setTextAlign(Paint.Align.LEFT);
+        paint.setTypeface(Typeface.create("sans-serif-condensed", Typeface.NORMAL));
+        paint.setTextSize(9.5f);
+        paint.setColor(0xFF94A3B8);
+
+        String nextStr = (next != null)
+                ? ("NEXT: " + next.recipient.toUpperCase(Locale.ROOT) + " (+$" + next.payout + ")")
+                : "NEXT: NONE";
+        canvas.drawText(nextStr, orderX + 11, orderY + 30.5f, paint);
 
         int sec = Math.max(0, (int) Math.ceil(data.time()));
         String timeStr = String.format(Locale.US, "%d:%02d", sec / 60, sec % 60);
-        paint.setColor(sec < 20 ? 0xFFFFAA88 : COLOR_SILVER);
-        float twTime = paint.measureText(timeStr);
-        canvas.drawText(timeStr, orderX + orderW - 10 - twTime, orderY + 16, paint);
+        String metaStr = data.delivered() + "/" + data.quota() + "  " + timeStr;
 
-        // Details: Recipient, District, Payout, Side, Distance
-        paint.setColor(COLOR_WHITE);
+        paint.setTextAlign(Paint.Align.RIGHT);
         paint.setTypeface(Typeface.create("sans-serif-condensed", Typeface.BOLD));
-        paint.setTextSize(12f);
-        if (active != null) {
-            String activeTitle = active.recipient.toUpperCase(Locale.ROOT) + "  ($" + active.payout + ")";
-            canvas.drawText(activeTitle, orderX + 10, orderY + 31, paint);
-
-            paint.setTypeface(Typeface.create("sans-serif-condensed", Typeface.NORMAL));
-            paint.setTextSize(10f);
-            paint.setColor(COLOR_SILVER);
-            int distM = Math.round(data.distance());
-            String sideStr = (active.side != null ? active.side.toUpperCase(Locale.ROOT) : "RIGHT");
-            String activeSub = "TARGET: " + distM + "m (" + sideStr + " SIDE)  |  " + data.delivered() + "/" + data.quota() + " DELIVERED";
-            canvas.drawText(activeSub, orderX + 10, orderY + 44, paint);
-        } else {
-            canvas.drawText("SEARCHING FOR DISPATCH CALLS...", orderX + 10, orderY + 31, paint);
-            paint.setTypeface(Typeface.create("sans-serif-condensed", Typeface.NORMAL));
-            paint.setTextSize(10f);
-            paint.setColor(COLOR_SILVER);
-            canvas.drawText(data.delivered() + "/" + data.quota() + " DELIVERED THIS SHIFT", orderX + 10, orderY + 44, paint);
-        }
-
-        // Hairline divider
-        paint.setColor(0x22FFFFFF);
-        paint.setStrokeWidth(1f);
-        canvas.drawLine(orderX + 8, orderY + 49, orderX + orderW - 8, orderY + 49, paint);
-
-        // --- NEXT ORDER (Line 3) ---
-        paint.setTypeface(Typeface.create("sans-serif-bold", Typeface.BOLD));
         paint.setTextSize(9.5f);
-        paint.setColor(0xFF94A3B8);
-        canvas.drawText("NEXT: ", orderX + 10, orderY + 61, paint);
-
-        float twNext = paint.measureText("NEXT: ");
-        paint.setTypeface(Typeface.create("sans-serif-condensed", Typeface.NORMAL));
-        paint.setTextSize(10f);
-        if (next != null) {
-            paint.setColor(COLOR_SILVER);
-            String nextStr = next.recipient.toUpperCase(Locale.ROOT) + "  (+$" + next.payout + ")  |  " + queueCount + "/10 QUEUED";
-            canvas.drawText(nextStr, orderX + 10 + twNext, orderY + 61, paint);
-        } else {
-            paint.setColor(0xFF64748B);
-            String nextStr = queueCount > 0 ? ("STANDBY // AWAITING CALL (" + queueCount + "/10 QUEUED)") : "STANDBY // NO PENDING ORDERS (0/10)";
-            canvas.drawText(nextStr, orderX + 10 + twNext, orderY + 61, paint);
-        }
+        paint.setColor(sec < 20 ? 0xFFFFAA88 : COLOR_SILVER);
+        canvas.drawText(metaStr, orderX + orderW - 7, orderY + 30.5f, paint);
+        paint.setTextAlign(Paint.Align.LEFT);
 
         // 2. TOP-RIGHT: RADAR MINIMAP (Planted to the left of the Pause Button)
         float pauseRight = Math.max(safeRightDp, 24);
         float pauseTop = Math.max(safeTopDp, 18);
-        float radarRadius = 36f;
+        float radarRadius = 38f;
         float radarCx = w - pauseRight - 42 - 14 - radarRadius; // 14dp gap left of pause button
         float radarCy = pauseTop + 21; // Vertically centered with pause button
         drawRadarMap(canvas, radarCx, radarCy, radarRadius);
@@ -3499,64 +3504,309 @@ private final FrameLayout controls;
     }
 
     private void drawRadarMap(Canvas c, float cx, float cy, float radius) {
-        // Outer bezel (translucent dark glass with silver border)
+        StaticCityBlueprint.ensureInitialized();
+
+        // 1. Outer Bezel Base Fill (Translucent dark tactical glass)
         paint.setStyle(Paint.Style.FILL);
-        paint.setColor(0x260B111A);
-        c.drawCircle(cx, cy, radius, paint);
-        paint.setStyle(Paint.Style.STROKE);
-        paint.setStrokeWidth(1.2f);
-        paint.setColor(0x35FFFFFF);
+        paint.setColor(0xCC090F17);
         c.drawCircle(cx, cy, radius, paint);
 
-        // Clip circle
+        // 2. Clipped Minimap Viewport
         c.save();
         Path clip = new Path();
-        clip.addCircle(cx, cy, radius - 2, Path.Direction.CW);
+        clip.addCircle(cx, cy, radius - 1.5f, Path.Direction.CW);
         c.clipPath(clip);
 
-        // Road grid lines
-        float scale = 0.32f;
-        paint.setColor(0x20FFFFFF);
-        paint.setStrokeWidth(1.6f);
-        for (int i = -2; i <= 2; i++) {
-            float roadX = (Math.round(data.x() / 160) + i) * 160;
-            float sx = cx - (roadX - data.x()) * scale;
-            c.drawLine(sx, cy - radius, sx, cy + radius, paint);
+        // Inner Range Rings (Tactical 50m distance guide)
+        paint.setStyle(Paint.Style.STROKE);
+        paint.setStrokeWidth(0.8f);
+        paint.setColor(0x14FFFFFF);
+        c.drawCircle(cx, cy, radius * 0.52f, paint);
 
-            float roadZ = (Math.round(data.z() / 160) + i) * 160;
-            float sy = cy - (roadZ - data.z()) * scale;
-            c.drawLine(cx - radius, sy, cx + radius, sy, paint);
-        }
+        // Cardinal subtle cross-hairs
+        paint.setColor(0x1094A3B8);
+        c.drawLine(cx - radius, cy, cx + radius, cy, paint);
+        c.drawLine(cx, cy - radius, cx, cy + radius, paint);
 
-        // Markers: Crisp white for customer drops, light ice-blue for depots
-        paint.setStyle(Paint.Style.FILL);
-        if (data.markers() != null) {
-            for (DispatchGame.Marker m : data.markers()) {
-                paint.setColor(m.type() == 0 ? COLOR_WHITE : 0xCCA5B4FC);
-                c.drawCircle(cx - (m.x() - data.x()) * scale, cy - (m.z() - data.z()) * scale, 3.2f, paint);
-            }
-        }
-        c.restore();
-
-        // Player orientation arrow (Low-poly faceted chevron)
+        // 3. ROTATED WORLD LAYER (World rotates around player; Player stays pointing UP)
         c.save();
         c.translate(cx, cy);
-        c.rotate(-data.yaw() * 180 / (float) Math.PI);
-        Path arrow = new Path();
-        arrow.moveTo(0, -7);
-        arrow.lineTo(-5, 6);
-        arrow.lineTo(0, 3f);
-        arrow.lineTo(5, 6);
-        arrow.close();
+        c.rotate(-(float) Math.toDegrees(data.yaw()));
+
+        float scale = 0.35f; // ~108m radius visible
+
+        // A. River Deck / River water ribbons
+        paint.setStyle(Paint.Style.FILL);
+        paint.setColor(0x350284C7);
+        for (int rRow : WorldGrid.RIVER_ROWS) {
+            float rz = rRow * WorldGrid.TILE;
+            float dz = rz - data.z();
+            if (Math.abs(dz) < 140) {
+                float ry = -dz * scale;
+                float rHw = 32f * scale;
+                c.drawRect(-radius * 1.5f, ry - rHw, radius * 1.5f, ry + rHw, paint);
+            }
+        }
+
+        // B. Low-Poly Road Network (Tarmac Corridors, Curbs & Centerlines)
+        for (StaticCityBlueprint.RoadSegment r : StaticCityBlueprint.ROADS) {
+            float minX = Math.min(r.x1, r.x2) - 15f;
+            float maxX = Math.max(r.x1, r.x2) + 15f;
+            float minZ = Math.min(r.z1, r.z2) - 15f;
+            float maxZ = Math.max(r.z1, r.z2) + 15f;
+            if (data.x() < minX - 120 || data.x() > maxX + 120 || data.z() < minZ - 120 || data.z() > maxZ + 120) continue;
+
+            float x1 = (r.x1 - data.x()) * scale;
+            float y1 = -(r.z1 - data.z()) * scale;
+            float x2 = (r.x2 - data.x()) * scale;
+            float y2 = -(r.z2 - data.z()) * scale;
+            float rWidth = Math.max(3.4f, r.width * scale);
+
+            // Curb outer outline
+            paint.setStyle(Paint.Style.STROKE);
+            paint.setStrokeCap(Paint.Cap.ROUND);
+            paint.setColor(0x3364748B);
+            paint.setStrokeWidth(rWidth + 1.2f);
+            c.drawLine(x1, y1, x2, y2, paint);
+
+            // Dark asphalt surface
+            paint.setColor(0xFF1E2836);
+            paint.setStrokeWidth(rWidth);
+            c.drawLine(x1, y1, x2, y2, paint);
+
+            // Subtle dashed/hairline centerline
+            paint.setColor(0x3094A3B8);
+            paint.setStrokeWidth(0.7f);
+            c.drawLine(x1, y1, x2, y2, paint);
+        }
+
+        // Intersections
+        paint.setStyle(Paint.Style.FILL);
+        paint.setColor(0xFF1E2836);
+        for (StaticCityBlueprint.Intersection it : StaticCityBlueprint.INTERSECTIONS) {
+            float dx = it.x - data.x();
+            float dz = it.z - data.z();
+            if (dx * dx + dz * dz > 120 * 120) continue;
+            float ix = dx * scale;
+            float iy = -dz * scale;
+            float isz = (it.size * scale) * 0.5f;
+            c.drawRect(ix - isz, iy - isz, ix + isz, iy + isz, paint);
+        }
+
+        // Procedural lattice roads (infinite city avenues & cross streets fallback)
+        int tileX = WorldGrid.tile(data.x());
+        int tileZ = WorldGrid.tile(data.z());
+        for (int i = -1; i <= 1; i++) {
+            float aveX = (tileX + i) * 160f;
+            if (Math.abs(aveX) > 160f || data.z() < -480f || data.z() > 1360f) {
+                float rx = (aveX - data.x()) * scale;
+                paint.setStyle(Paint.Style.STROKE);
+                paint.setColor(0xFF1E2836);
+                paint.setStrokeWidth(3.5f);
+                c.drawLine(rx, -radius * 1.5f, rx, radius * 1.5f, paint);
+            }
+        }
+        for (int j = -1; j <= 1; j++) {
+            float crossZ = (tileZ + j) * 160f;
+            if (crossZ < -320f || crossZ > 1120f || Math.abs(data.x()) > 160f) {
+                float ry = -(crossZ - data.z()) * scale;
+                paint.setStyle(Paint.Style.STROKE);
+                paint.setColor(0xFF1E2836);
+                paint.setStrokeWidth(3.5f);
+                c.drawLine(-radius * 1.5f, ry, radius * 1.5f, ry, paint);
+            }
+        }
+
+        // C. Low-Poly Buildings (Crisp Slate Footprints with Facets)
+        paint.setStyle(Paint.Style.FILL);
+        for (StaticCityBlueprint.BuildingLot b : StaticCityBlueprint.BUILDINGS) {
+            float dx = b.x - data.x();
+            float dz = b.z - data.z();
+            if (dx * dx + dz * dz > 120 * 120) continue;
+
+            float bx = dx * scale;
+            float by = -dz * scale;
+            float hw = Math.max(2.2f, b.halfWidth * scale);
+            float hl = Math.max(2.2f, b.halfLength * scale);
+
+            c.save();
+            c.translate(bx, by);
+            if (b.yaw != 0) c.rotate(-(float) Math.toDegrees(b.yaw));
+
+            // Building solid low-poly face
+            paint.setStyle(Paint.Style.FILL);
+            paint.setColor(0xFF141D2B);
+            c.drawRect(-hw, -hl, hw, hl, paint);
+
+            // Thin geometric outline
+            paint.setStyle(Paint.Style.STROKE);
+            paint.setStrokeWidth(0.8f);
+            paint.setColor(0x55475569);
+            c.drawRect(-hw, -hl, hw, hl, paint);
+
+            // Low-poly roof facet line
+            if (hw > 2.0f && hl > 2.0f) {
+                paint.setColor(0x18FFFFFF);
+                paint.setStrokeWidth(0.6f);
+                c.drawLine(-hw + 0.6f, -hl + 0.6f, hw - 0.6f, hl - 0.6f, paint);
+            }
+            c.restore();
+        }
+
+        // Procedural quadrant buildings outside static zones
+        for (int ti = -1; ti <= 1; ti++) {
+            for (int tj = -1; tj <= 1; tj++) {
+                int cxGrid = tileX + ti;
+                int czGrid = tileZ + tj;
+                if (WorldGrid.isRiverRow(czGrid)) continue;
+                if (!StaticCityBlueprint.buildingsInTile(cxGrid, czGrid).isEmpty()) continue;
+
+                float tileOx = cxGrid * WorldGrid.TILE;
+                float tileOz = czGrid * WorldGrid.TILE;
+                float[] offsets = {-40f, 40f};
+                for (float qx : offsets) {
+                    for (float qz : offsets) {
+                        float wx = tileOx + qx;
+                        float wz = tileOz + qz;
+                        float qdx = wx - data.x();
+                        float qdz = wz - data.z();
+                        if (qdx * qdx + qdz * qdz > 120 * 120) continue;
+
+                        float qbx = qdx * scale;
+                        float qby = -qdz * scale;
+                        float qhw = 22f * scale;
+                        float qhl = 22f * scale;
+
+                        paint.setStyle(Paint.Style.FILL);
+                        paint.setColor(0xFF141D2B);
+                        c.drawRect(qbx - qhw, qby - qhl, qbx + qhw, qby + qhl, paint);
+                        paint.setStyle(Paint.Style.STROKE);
+                        paint.setStrokeWidth(0.8f);
+                        paint.setColor(0x40475569);
+                        c.drawRect(qbx - qhw, qby - qhl, qbx + qhw, qby + qhl, paint);
+                    }
+                }
+            }
+        }
+
+        // D. Active Delivery Waypoint (with Edge Clamping)
+        DispatchGame.DeliveryOrder active = (game != null) ? game.getActiveDelivery() : null;
+        if (active != null) {
+            float ax = (active.targetX - data.x()) * scale;
+            float ay = -(active.targetZ - data.z()) * scale;
+            float distTarget = (float) Math.hypot(ax, ay);
+
+            if (distTarget <= radius - 4.5f) {
+                // Waypoint is in view: draw pulsing glowing target pin
+                paint.setStyle(Paint.Style.FILL);
+                paint.setColor(0x4038BDF8);
+                c.drawCircle(ax, ay, 4.5f, paint);
+                paint.setColor(0xFF38BDF8);
+                c.drawCircle(ax, ay, 2.6f, paint);
+                paint.setColor(COLOR_WHITE);
+                c.drawCircle(ax, ay, 1.2f, paint);
+            } else {
+                // Waypoint off-screen: edge-clamp directional chevron to radar rim
+                float clampX = (ax / distTarget) * (radius - 5.0f);
+                float clampY = (ay / distTarget) * (radius - 5.0f);
+                float arrowAngle = (float) Math.toDegrees(Math.atan2(clampY, clampX));
+
+                c.save();
+                c.translate(clampX, clampY);
+                c.rotate(arrowAngle);
+                Path edgeArrow = new Path();
+                edgeArrow.moveTo(3.5f, 0);
+                edgeArrow.lineTo(-3.0f, -2.5f);
+                edgeArrow.lineTo(-1.5f, 0);
+                edgeArrow.lineTo(-3.0f, 2.5f);
+                edgeArrow.close();
+                paint.setStyle(Paint.Style.FILL);
+                paint.setColor(0xFF38BDF8);
+                c.drawPath(edgeArrow, paint);
+                c.restore();
+            }
+        }
+
+        // Queued orders & depots (subtle dots)
+        if (data.markers() != null) {
+            paint.setStyle(Paint.Style.FILL);
+            for (DispatchGame.Marker m : data.markers()) {
+                if (active != null && Math.abs(m.x() - active.targetX) < 1f && Math.abs(m.z() - active.targetZ) < 1f) {
+                    continue; // Skip active target already drawn above
+                }
+                float mx = (m.x() - data.x()) * scale;
+                float my = -(m.z() - data.z()) * scale;
+                if (Math.hypot(mx, my) <= radius - 3.5f) {
+                    paint.setColor(m.type() == 0 ? 0xCC818CF8 : 0xCCA5B4FC);
+                    c.drawCircle(mx, my, 2.2f, paint);
+                }
+            }
+        }
+
+        // E. Player Rider Chevron (CONSTANT HEADING: Points strictly UP at 12 o'clock)
+        // Subtle forward headlight/vision cone
+        paint.setStyle(Paint.Style.FILL);
+        paint.setColor(0x1838BDF8);
+        Path fov = new Path();
+        fov.moveTo(0, 0);
+        fov.lineTo(-7f, -18f);
+        fov.lineTo(7f, -18f);
+        fov.close();
+        c.drawPath(fov, paint);
+
+        // Low-poly faceted player chevron
+        Path chevron = new Path();
+        chevron.moveTo(0, -6.5f);  // Top tip pointing UP
+        chevron.lineTo(-4.5f, 5.0f);
+        chevron.lineTo(0, 2.5f);   // Inner notch
+        chevron.lineTo(4.5f, 5.0f);
+        chevron.close();
+
+        paint.setColor(COLOR_WHITE);
+        paint.setStyle(Paint.Style.FILL);
+        c.drawPath(chevron, paint);
+
+        paint.setStyle(Paint.Style.STROKE);
+        paint.setStrokeWidth(0.9f);
+        paint.setColor(0xFF38BDF8);
+        c.drawPath(chevron, paint);
+
+        c.restore(); // Restore rotated world layer
+        c.restore(); // Restore circular clip
+
+        // 4. Outer Radar Bezel (Tactical ring & Cardinal ticks)
+        paint.setStyle(Paint.Style.STROKE);
+        paint.setStrokeWidth(1.2f);
+        paint.setColor(0x5094A3B8);
+        c.drawCircle(cx, cy, radius, paint);
+
+        // Cardinal 2dp tick marks at 0, 90, 180, 270 deg
+        paint.setColor(0x35FFFFFF);
+        paint.setStrokeWidth(1f);
+        c.drawLine(cx, cy - radius, cx, cy - radius + 2.5f, paint);
+        c.drawLine(cx, cy + radius, cx, cy + radius - 2.5f, paint);
+        c.drawLine(cx - radius, cy, cx - radius + 2.5f, cy, paint);
+        c.drawLine(cx + radius, cy, cx + radius - 2.5f, cy, paint);
+
+        // 5. Rotating North Indicator 'N' (Smoothly glides along rim)
+        float nx = cx - (radius - 1.5f) * (float) Math.sin(data.yaw());
+        float ny = cy - (radius - 1.5f) * (float) Math.cos(data.yaw());
+
+        paint.setStyle(Paint.Style.FILL);
+        paint.setColor(0xEE090F17);
+        c.drawCircle(nx, ny, 4.5f, paint);
+
+        paint.setStyle(Paint.Style.STROKE);
+        paint.setStrokeWidth(0.8f);
+        paint.setColor(0xFFEF4444); // Crimson North accent
+        c.drawCircle(nx, ny, 4.5f, paint);
+
         paint.setStyle(Paint.Style.FILL);
         paint.setColor(COLOR_WHITE);
-        c.drawPath(arrow, paint);
-        c.restore();
-
-        // North indicator 'N'
-        paint.setColor(COLOR_MUTED);
-        paint.setTextSize(9);
+        paint.setTextAlign(Paint.Align.CENTER);
         paint.setTypeface(Typeface.create("sans-serif-bold", Typeface.BOLD));
-        c.drawText("N", cx - 3.5f, cy - radius + 11, paint);
+        paint.setTextSize(6.5f);
+        c.drawText("N", nx, ny + 2.3f, paint);
+        paint.setTextAlign(Paint.Align.LEFT);
     }
 }
