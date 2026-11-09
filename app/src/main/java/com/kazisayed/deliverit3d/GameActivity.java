@@ -76,12 +76,14 @@ public class GameActivity extends MainActivity {
         batteryReceiver = new BatteryReceiver(new BatteryReceiver.OnBatteryStatusListener() {
             @Override
             public void onBatteryLow() {
-                Toast.makeText(GameActivity.this, "Low Battery: Bike in Eco Mode", Toast.LENGTH_SHORT).show();
+                setTargetFps(30);
+                Toast.makeText(GameActivity.this, "Low Battery: 30 FPS Eco Mode", Toast.LENGTH_SHORT).show();
             }
 
             @Override
             public void onPowerConnected() {
-                Toast.makeText(GameActivity.this, "Power Connected: Full Boost", Toast.LENGTH_SHORT).show();
+                setTargetFps(60);
+                Toast.makeText(GameActivity.this, "Power Connected: 60 FPS Boost", Toast.LENGTH_SHORT).show();
             }
         });
         IntentFilter bFilter = new IntentFilter();

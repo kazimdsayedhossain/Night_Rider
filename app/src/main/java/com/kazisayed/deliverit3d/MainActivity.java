@@ -8,10 +8,13 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.backends.android.*;
+import android.content.Intent;
+import android.content.IntentFilter;
+import com.kazisayed.deliverit3d.receiver.BatteryReceiver;
 
 /** Android owns the window, lifecycle, touch input, sensors, audio and accessibility. */
 public class MainActivity extends AndroidApplication implements DispatchGame.Host {
-    protected SaveStore saves;protected TiltController tilt;protected GameAudio audio;protected DispatchGame game;protected NativeUi ui;protected View surface;private final Handler main=new Handler(Looper.getMainLooper());
+    protected BatteryReceiver batteryReceiver;protected SaveStore saves;protected TiltController tilt;protected GameAudio audio;protected DispatchGame game;protected NativeUi ui;protected View surface;private final Handler main=new Handler(Looper.getMainLooper());
     private final Runnable refresh=new Runnable(){public void run(){if(ui!=null)ui.refresh(game.snapshot);main.postDelayed(this,50);}};
     @Override public void onCreate(Bundle state){
         requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -37,7 +40,9 @@ public class MainActivity extends AndroidApplication implements DispatchGame.Hos
         root.setOnApplyWindowInsetsListener((v,insets)->{
             ui.setSafeInsets(insets.getSystemWindowInsetLeft(),insets.getSystemWindowInsetTop(),insets.getSystemWindowInsetRight(),insets.getSystemWindowInsetBottom());
             return insets;
-        });surface.addOnLayoutChangeListener((v,a,b,c,d,e,f,g,h)->applyResolution());post(game::settings);
+        });surface.addOnLayoutChangeListener((v,a,b,c,d,e,f,g,h)->applyResolution());        post(game::settings);
+        requestNotificationPermission();
+        setupBatteryMonitoring();
         android.util.Log.i("Dispatch", "MainActivity onCreate completed");
     }
     private void hideSystemUi(){
@@ -62,7 +67,9 @@ public class MainActivity extends AndroidApplication implements DispatchGame.Hos
     @Override public android.content.Context getContext() { return this; }
     public void post(Runnable work){if(Gdx.app!=null)Gdx.app.postRunnable(work);}
     public void command(String value){post(()->game.command(value));}
-    public void applySettings(){post(game::settings);applyResolution();}
+    public void applySettings(){        post(game::settings);
+        requestNotificationPermission();
+        setupBatteryMonitoring();applyResolution();}
     private void applyResolution(){
         if(surface instanceof SurfaceView s&&surface.getWidth()>0){
             float scale=saves.decimal("native-resolution",1f);
@@ -73,7 +80,34 @@ public class MainActivity extends AndroidApplication implements DispatchGame.Hos
     }
     @Override protected void onResume(){super.onResume();hideSystemUi();if(audio!=null)audio.resume();if(tilt!=null)tilt.start();main.removeCallbacks(refresh);main.post(refresh);}
     @Override protected void onPause(){main.removeCallbacks(refresh);if(game!=null)game.input.release();if(tilt!=null)tilt.stop();if(audio!=null)audio.appPause();super.onPause();}
-    @Override protected void onDestroy(){main.removeCallbacks(refresh);if(tilt!=null)tilt.close();if(audio!=null)audio.close();super.onDestroy();}
+        public void setTargetFps(int fps){if(game!=null)post(()->game.setTargetFps(fps));}
+    public int getTargetFps(){return game!=null?game.getTargetFps():60;}
+    protected void setupBatteryMonitoring(){
+        batteryReceiver=new BatteryReceiver(new BatteryReceiver.OnBatteryStatusListener(){
+            @Override public void onBatteryLow(){setTargetFps(30);}
+            @Override public void onPowerConnected(){setTargetFps(60);}
+        });
+        IntentFilter filter=new IntentFilter();
+        filter.addAction(Intent.ACTION_BATTERY_LOW);
+        filter.addAction(Intent.ACTION_BATTERY_OKAY);
+        filter.addAction(Intent.ACTION_POWER_CONNECTED);
+        registerReceiver(batteryReceiver,filter);
+        BatteryReceiver.checkInitialBatteryState(this,new BatteryReceiver.OnBatteryStatusListener(){
+            @Override public void onBatteryLow(){setTargetFps(30);}
+            @Override public void onPowerConnected(){setTargetFps(60);}
+        });
+    }
+    protected void requestNotificationPermission(){
+        if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.TIRAMISU){
+            if(checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS)!=android.content.pm.PackageManager.PERMISSION_GRANTED){
+                requestPermissions(new String[]{android.Manifest.permission.POST_NOTIFICATIONS},101);
+            }
+        }
+    }
+    @Override protected void onDestroy(){
+        if(batteryReceiver!=null){try{unregisterReceiver(batteryReceiver);}catch(Exception ignored){}}
+        main.removeCallbacks(refresh);if(tilt!=null)tilt.close();if(audio!=null)audio.close();super.onDestroy();
+    }
     @Override public void onBackPressed(){if(ui!=null&&ui.closePanel())return;if(game!=null&&game.snapshot.state()==DispatchGame.State.PLAYING)command("pause");else if(game!=null&&game.snapshot.state()==DispatchGame.State.PAUSED)command("resume");else super.onBackPressed();}
     @Override public void feedback(int ms){if(!saves.flag("native-haptics",true))return;Vibrator vibrator=(Vibrator)getSystemService(VIBRATOR_SERVICE);if(vibrator==null||!vibrator.hasVibrator())return;if(Build.VERSION.SDK_INT>=26)vibrator.vibrate(VibrationEffect.createOneShot(ms,VibrationEffect.DEFAULT_AMPLITUDE));else vibrator.vibrate(ms);}
     @Override public void playCue(String name){if(audio!=null)audio.cue(name);}

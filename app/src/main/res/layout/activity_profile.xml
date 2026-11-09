@@ -156,6 +156,22 @@
         </LinearLayout>
 
         <TextView
+            android:id="@+id/btn_share_score"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="SHARE MY SCORE"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:fontFamily="sans-serif-condensed"
+            android:letterSpacing="0.14"
+            android:gravity="start|center_vertical"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="12dp"
+            android:layout_marginBottom="12dp"
+            android:background="@drawable/bg_days_gone_item" />
+
+        <TextView
             android:id="@+id/btn_back_to_game"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

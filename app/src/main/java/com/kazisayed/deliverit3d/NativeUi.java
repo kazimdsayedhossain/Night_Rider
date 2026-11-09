@@ -3030,6 +3030,16 @@ private final FrameLayout controls;
         String timeStr = hrs > 0 ? (hrs + "h " + (mins % 60) + "m") : (mins + "m " + sec + "s");
         addProfileRow(card, "TIME IN TRANSIT", timeStr);
 
+        View div2 = new View(getContext());
+        div2.setBackgroundColor(0x33CBD5E1);
+        card.addView(div2, new LinearLayout.LayoutParams(-1, px(1)));
+
+        LinearLayout actBox = new LinearLayout(getContext());
+        actBox.setOrientation(LinearLayout.VERTICAL);
+        actBox.setPadding(0, px(10), 0, 0);
+        addContentButton(actBox, "SHARE MY SCORE", true, () -> ScoreCardGenerator.shareScoreCard(activity));
+        card.addView(actBox);
+
         setLeftContentWithAnim(card);
     }
 
@@ -3373,7 +3383,37 @@ private final FrameLayout controls;
         float radarCy = pauseTop + 21; // Vertically centered with pause button
         drawRadarMap(canvas, radarCx, radarCy, radarRadius);
 
-        // 3. BOTTOM-CENTER: RACING SPEEDOMETER (Pure Floating White Digits + KM/H)
+        // 3. TOP-CENTER: LIVE FPS READOUT (Subtle Low-Poly Gaming Badge)
+        int liveFps = data.fps();
+        boolean isEco = (game != null && game.getTargetFps() <= 30);
+        String fpsText = isEco ? (liveFps + " FPS [ECO]") : (liveFps + " FPS");
+
+        float fpsW = isEco ? 96f : 68f;
+        float fpsH = 19f;
+        float fpsX = w * 0.5f - fpsW * 0.5f;
+        float fpsY = Math.max(safeTopDp + 14, 16);
+
+        paint.setStyle(Paint.Style.FILL);
+        paint.setColor(isEco ? 0x44D97706 : 0x2A0B111A);
+        drawChamferedRect(canvas, fpsX, fpsY, fpsX + fpsW, fpsY + fpsH, 4, paint);
+
+        paint.setStyle(Paint.Style.STROKE);
+        paint.setStrokeWidth(1.0f);
+        paint.setColor(isEco ? 0x88F59E0B : 0x33FFFFFF);
+        drawChamferedRect(canvas, fpsX, fpsY, fpsX + fpsW, fpsY + fpsH, 4, paint);
+
+        paint.setStyle(Paint.Style.FILL);
+        paint.setTextAlign(Paint.Align.CENTER);
+        paint.setTypeface(Typeface.create("sans-serif-condensed", Typeface.BOLD));
+        paint.setTextSize(10f);
+        paint.setLetterSpacing(0.08f);
+        paint.setColor(isEco ? 0xFFFCD34D : 0xFFCBD5E1);
+        canvas.drawText(fpsText, w * 0.5f, fpsY + 13.5f, paint);
+
+        paint.setTextAlign(Paint.Align.LEFT);
+        paint.setLetterSpacing(0);
+
+        // 4. BOTTOM-CENTER: RACING SPEEDOMETER (Pure Floating White Digits + KM/H)
         int kmh = Math.round(Math.abs(data.speed()) * 3.6f);
         String speedStr = String.valueOf(kmh);
 

@@ -33,6 +33,7 @@ public class ProfileActivity extends AppCompatActivity {
         long secs = totalSecs % 60;
         binding.tvProfilePlaytime.setText(String.format(Locale.US, "%dm %ds", mins, secs));
 
+        binding.btnShareScore.setOnClickListener(v -> ScoreCardGenerator.shareScoreCard(this));
         binding.btnBackToGame.setOnClickListener(v -> finish());
     }
 }
