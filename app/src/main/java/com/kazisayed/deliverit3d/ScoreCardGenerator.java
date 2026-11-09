@@ -111,10 +111,19 @@ public final class ScoreCardGenerator {
         paint.setColor(0x40FFFFFF);
         drawChamfered(canvas, col1X, col1Y, col1X + col1W, col1Y + col1H, 10, paint);
 
-        // Avatar icon
-        int avatarRes = UserManager.getAvatarDrawable(user.getAvatarId());
+        // Avatar icon (custom profile photo or one of 5 default avatars)
         try {
-            Bitmap avBmp = BitmapFactory.decodeResource(context.getResources(), avatarRes);
+            Bitmap avBmp = null;
+            if (user.hasCustomProfilePic()) {
+                Bitmap custom = user.getProfilePicBitmap();
+                if (custom != null) {
+                    avBmp = UserManager.getCircularBitmap(custom);
+                }
+            }
+            if (avBmp == null) {
+                int avatarRes = UserManager.getDefaultAvatarDrawable(user.getAvatarId());
+                avBmp = BitmapFactory.decodeResource(context.getResources(), avatarRes);
+            }
             if (avBmp != null) {
                 Rect avDst = new Rect((int)(col1X + col1W / 2 - 50), (int)(col1Y + 30), (int)(col1X + col1W / 2 + 50), (int)(col1Y + 130));
                 canvas.drawBitmap(avBmp, null, avDst, paint);

@@ -39,8 +39,10 @@ public class SplashActivity extends AppCompatActivity {
     }
 
     private void navigate() {
+        SaveStore saves = new SaveStore(this);
+        boolean sessionActive = saves.flag("user_logged_in", true);
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        if (user != null) {
+        if (user != null && sessionActive) {
             UserManager.get().loadOrCreateProfile(this, user, mgr -> {
                 startActivity(new Intent(this, GameActivity.class));
                 finish();

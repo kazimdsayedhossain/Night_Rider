@@ -1,13 +1,24 @@
 package com.kazisayed.deliverit3d;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
+import android.graphics.Rect;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Base64;
 import android.util.Log;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
+import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -21,6 +32,7 @@ import org.json.JSONObject;
 public final class UserManager {
     private static final String TAG = "UserManager";
     private static final String RTDB_URL = "https://nightrider-4066f-default-rtdb.firebaseio.com";
+    public static final int DEFAULT_AVATARS_COUNT = 5;
 
     private static UserManager instance;
 
@@ -36,8 +48,9 @@ public final class UserManager {
     private int totalCoins = 0;
     private int completedDeliveries = 0;
     private long points = 0;
-    private long totalPlaytime = 0; // in seconds
-    private int avatarId = 1;
+    private long totalPlaytime = 0; // in seconds (backed by Firebase Realtime Database)
+    private int avatarId = 1; // Default avatar index (1..5)
+    private String profilePicBase64 = null; // Custom photo saved in Firestore
     private int globalRank = 4;
 
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
@@ -87,11 +100,14 @@ public final class UserManager {
                         Long p = doc.getLong("points");
                         this.points = p != null ? p : 0;
 
-                        Long pt = doc.getLong("totalPlaytime");
-                        this.totalPlaytime = pt != null ? pt : 0;
+                        // Custom profile photo in Firestore
+                        this.profilePicBase64 = doc.getString("profilePic");
 
                         Long av = doc.getLong("avatarId");
-                        this.avatarId = av != null ? Math.max(1, Math.min(8, av.intValue())) : 1;
+                        this.avatarId = av != null ? Math.max(1, Math.min(5, av.intValue())) : (1 + new Random().nextInt(5));
+
+                        // Fetch totalPlaytime from Firebase Realtime Database
+                        fetchRTDBPlaytime(uid, context);
 
                         saveLocal(context);
                         Log.i(TAG, "Profile loaded: " + username + " ($" + cash + ", coins=" + totalCoins + ", deliveries=" + completedDeliveries + ")");
@@ -108,7 +124,8 @@ public final class UserManager {
                         this.completedDeliveries = 0;
                         this.points = 0;
                         this.totalPlaytime = 0;
-                        this.avatarId = 1 + new Random().nextInt(8);
+                        this.avatarId = 1 + new Random().nextInt(5);
+                        this.profilePicBase64 = null;
 
                         Map<String, Object> data = new HashMap<>();
                         data.put("username", this.username);
@@ -117,11 +134,12 @@ public final class UserManager {
                         data.put("totalCoins", this.totalCoins);
                         data.put("completedDeliveries", this.completedDeliveries);
                         data.put("points", this.points);
-                        data.put("totalPlaytime", this.totalPlaytime);
+                        // totalPlaytime is stored in Firebase Realtime Database (NOT Firestore)
                         data.put("avatarId", this.avatarId);
                         data.put("createdAt", FieldValue.serverTimestamp());
 
                         db.collection("users").document(uid).set(data);
+                        updateRTDBPlaytime(uid, 0);
                         saveLocal(context);
                         Log.i(TAG, "Created new profile: " + username + " (avatar=" + avatarId + ")");
                     }
@@ -207,11 +225,60 @@ public final class UserManager {
 
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user != null) {
-            FirebaseFirestore.getInstance().collection("users").document(user.getUid())
-                    .update("totalPlaytime", FieldValue.increment(seconds),
-                            "lastActive", FieldValue.serverTimestamp());
+            // Update Realtime Database only (NO Firestore writes!)
+            updateRTDBPlaytime(user.getUid(), this.totalPlaytime);
             pushLeaderboardEntry(user.getUid(), this.username, this.points, this.totalPlaytime, this.completedDeliveries, this.totalMoney, this.totalCoins);
         }
+    }
+
+    private void updateRTDBPlaytime(String uid, long seconds) {
+        executor.execute(() -> {
+            try {
+                String endpoint = RTDB_URL + "/playtime/" + uid + ".json";
+                JSONObject payload = new JSONObject();
+                payload.put("seconds", seconds);
+                payload.put("updatedAt", System.currentTimeMillis());
+
+                byte[] body = payload.toString().getBytes("UTF-8");
+                HttpURLConnection conn = (HttpURLConnection) new URL(endpoint).openConnection();
+                conn.setRequestMethod("PUT");
+                conn.setRequestProperty("Content-Type", "application/json");
+                conn.setDoOutput(true);
+                conn.setConnectTimeout(6000);
+                conn.setReadTimeout(6000);
+                OutputStream os = conn.getOutputStream();
+                os.write(body);
+                os.close();
+                conn.getResponseCode();
+                conn.disconnect();
+            } catch (Exception ignored) {}
+        });
+    }
+
+    private void fetchRTDBPlaytime(String uid, Context context) {
+        executor.execute(() -> {
+            try {
+                String endpoint = RTDB_URL + "/playtime/" + uid + ".json";
+                HttpURLConnection conn = (HttpURLConnection) new URL(endpoint).openConnection();
+                conn.setRequestMethod("GET");
+                conn.setConnectTimeout(6000);
+                conn.setReadTimeout(6000);
+                if (conn.getResponseCode() == 200) {
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                    StringBuilder sb = new StringBuilder();
+                    String line;
+                    while ((line = reader.readLine()) != null) sb.append(line);
+                    reader.close();
+                    JSONObject obj = new JSONObject(sb.toString());
+                    long rtdbSeconds = obj.optLong("seconds", obj.optLong("playtime", 0));
+                    if (rtdbSeconds > 0) {
+                        this.totalPlaytime = Math.max(this.totalPlaytime, rtdbSeconds);
+                        saveLocal(context);
+                    }
+                }
+                conn.disconnect();
+            } catch (Exception ignored) {}
+        });
     }
 
     private void pushLeaderboardEntry(String uid, String name, long score, long playtime, int deliveries, int money, int coins) {
@@ -255,6 +322,7 @@ public final class UserManager {
         s.put("player_points", points);
         s.put("player_playtime", totalPlaytime);
         s.put("player_avatar_id", avatarId);
+        s.put("player_profile_pic", profilePicBase64 != null ? profilePicBase64 : "");
     }
 
     public void loadLocal(Context context) {
@@ -278,7 +346,9 @@ public final class UserManager {
         this.completedDeliveries = s.number("player_deliveries", 0);
         this.points = s.number("player_points", 0);
         this.totalPlaytime = s.number("player_playtime", 0);
-        this.avatarId = Math.max(1, Math.min(8, s.number("player_avatar_id", 1)));
+        this.avatarId = Math.max(1, Math.min(5, s.number("player_avatar_id", 1)));
+        String pic = s.text("player_profile_pic", "");
+        this.profilePicBase64 = !pic.isEmpty() ? pic : null;
     }
 
     public void setUsername(String name) {
@@ -287,15 +357,111 @@ public final class UserManager {
         }
     }
 
+    public boolean hasCustomProfilePic() {
+        return profilePicBase64 != null && !profilePicBase64.trim().isEmpty();
+    }
+
+    public String getProfilePicBase64() {
+        return profilePicBase64;
+    }
+
+    public Bitmap getProfilePicBitmap() {
+        if (!hasCustomProfilePic()) return null;
+        try {
+            byte[] bytes = Base64.decode(profilePicBase64, Base64.DEFAULT);
+            return BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+        } catch (Exception e) {
+            Log.w(TAG, "Failed to decode profilePicBase64", e);
+            return null;
+        }
+    }
+
+    public void setProfilePic(Context context, Bitmap rawBitmap) {
+        if (rawBitmap == null) return;
+        try {
+            Bitmap scaled = createSquareBitmap(rawBitmap, 256);
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            scaled.compress(Bitmap.CompressFormat.JPEG, 85, baos);
+            byte[] bytes = baos.toByteArray();
+            this.profilePicBase64 = Base64.encodeToString(bytes, Base64.NO_WRAP);
+            saveLocal(context);
+
+            FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+            if (user != null) {
+                FirebaseFirestore.getInstance().collection("users").document(user.getUid())
+                        .update("profilePic", this.profilePicBase64);
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error encoding profile picture", e);
+        }
+    }
+
+    public void removeProfilePic(Context context) {
+        this.profilePicBase64 = null;
+        saveLocal(context);
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user != null) {
+            Map<String, Object> updates = new HashMap<>();
+            updates.put("profilePic", FieldValue.delete());
+            FirebaseFirestore.getInstance().collection("users").document(user.getUid())
+                    .update(updates);
+        }
+    }
+
+    public void setAvatarId(Context context, int newAvatarId) {
+        this.avatarId = Math.max(1, Math.min(5, newAvatarId));
+        saveLocal(context);
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user != null) {
+            FirebaseFirestore.getInstance().collection("users").document(user.getUid())
+                    .update("avatarId", this.avatarId);
+        }
+    }
+
+    private static Bitmap createSquareBitmap(Bitmap src, int maxEdge) {
+        if (src == null) return null;
+        int w = src.getWidth();
+        int h = src.getHeight();
+        int minEdge = Math.min(w, h);
+        int srcX = (w - minEdge) / 2;
+        int srcY = (h - minEdge) / 2;
+        Bitmap cropped = Bitmap.createBitmap(src, srcX, srcY, minEdge, minEdge);
+        if (minEdge > maxEdge) {
+            Bitmap scaled = Bitmap.createScaledBitmap(cropped, maxEdge, maxEdge, true);
+            if (cropped != src && !cropped.isRecycled()) cropped.recycle();
+            return scaled;
+        }
+        return cropped;
+    }
+
+    public static Bitmap getCircularBitmap(Bitmap bitmap) {
+        if (bitmap == null) return null;
+        int size = Math.min(bitmap.getWidth(), bitmap.getHeight());
+        Bitmap output = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(output);
+        Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG);
+        int srcX = (bitmap.getWidth() - size) / 2;
+        int srcY = (bitmap.getHeight() - size) / 2;
+        Rect srcRect = new Rect(srcX, srcY, srcX + size, srcY + size);
+        Rect dstRect = new Rect(0, 0, size, size);
+        canvas.drawARGB(0, 0, 0, 0);
+        canvas.drawCircle(size / 2f, size / 2f, size / 2f, paint);
+        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
+        canvas.drawBitmap(bitmap, srcRect, dstRect, paint);
+        return output;
+    }
+
     public static int getAvatarDrawable(int id) {
-        return switch (id) {
+        return getDefaultAvatarDrawable(id);
+    }
+
+    public static int getDefaultAvatarDrawable(int id) {
+        int index = ((id - 1) % 5 + 5) % 5 + 1;
+        return switch (index) {
             case 2 -> R.drawable.avatar_2;
             case 3 -> R.drawable.avatar_3;
             case 4 -> R.drawable.avatar_4;
             case 5 -> R.drawable.avatar_5;
-            case 6 -> R.drawable.avatar_6;
-            case 7 -> R.drawable.avatar_7;
-            case 8 -> R.drawable.avatar_8;
             default -> R.drawable.avatar_1;
         };
     }
