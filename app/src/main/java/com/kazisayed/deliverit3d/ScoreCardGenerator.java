@@ -172,7 +172,7 @@ public final class ScoreCardGenerator {
         com.kazisayed.deliverit3d.model.VehicleSpec activeSpec = com.kazisayed.deliverit3d.model.VehicleSpec.findById(activeVehicleId);
         String vName = activeSpec != null ? activeSpec.getName().toUpperCase(Locale.ROOT) : "FIXIE MESSENGER";
         String vType = activeSpec != null ? activeSpec.getType().toUpperCase(Locale.ROOT) : "BICYCLE";
-        int vSpeed = activeSpec != null ? (int) activeSpec.getBaseSpeedKmh() : 30;
+        int vSpeed = activeSpec != null ? (int) activeSpec.getBaseSpeedKmh() : 45;
 
         paint.setStyle(Paint.Style.FILL);
         paint.setTypeface(Typeface.create("sans-serif-condensed", Typeface.BOLD));

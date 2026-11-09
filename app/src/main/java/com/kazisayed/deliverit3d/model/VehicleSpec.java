@@ -77,7 +77,7 @@ public class VehicleSpec implements Serializable {
     public String getStats() { return stats != null ? stats : ""; }
     public int getPrice() { return price; }
     public boolean isUnlocked() { return unlocked; }
-    public float getBaseSpeedKmh() { return baseSpeedKmh > 0 ? baseSpeedKmh : 30f; }
+    public float getBaseSpeedKmh() { return baseSpeedKmh > 0 ? baseSpeedKmh : 45f; }
     public int getBaseCapacity() { return baseCapacity > 0 ? baseCapacity : 4; }
     public int getCapacityPerTier() { return capacityPerTier > 0 ? capacityPerTier : 2; }
     public float getGrip() { return grip > 0 ? grip : 1.0f; }
@@ -100,13 +100,13 @@ public class VehicleSpec implements Serializable {
         // 1. Fixie Messenger (Default bicycle: Base Speed = 30 KM/H)
         list.add(new VehicleSpec(
                 "bike", "Fixie Messenger", "Bicycle",
-                "Base Speed: 30 km/h | Agile Courier Bicycle | Free Default",
-                0, true, 30.0f, 4, 2, 1.05f,
+                "Base Speed: 45 km/h | Agile Courier Bicycle | Free Default",
+                0, true, 45.0f, 4, 2, 1.05f,
                 new PartUpgrade(
                         "Shimano Alfine Drivetrain",
                         "High-cadence hollow-tech crankset boosting top speed & cadence.",
                         new int[]{100, 220, 450},
-                        new String[]{"+12% Speed (34 km/h)", "+24% Speed (37 km/h)", "+36% Speed (41 km/h)"}
+                        new String[]{"+12% Speed (50 km/h)", "+24% Speed (56 km/h)", "+36% Speed (61 km/h)"}
                 ),
                 new PartUpgrade(
                         "Porteur Front Cargo Deck",
@@ -125,13 +125,13 @@ public class VehicleSpec implements Serializable {
         // 2. Vespa Sprint (Urban Motor Scooter)
         list.add(new VehicleSpec(
                 "scooter", "Vespa Sprint", "Motor Scooter",
-                "Base Speed: 48 km/h | Lightweight Urban Cruiser",
-                450, false, 48.0f, 6, 2, 1.15f,
+                "Base Speed: 72 km/h | Lightweight Urban Cruiser",
+                450, false, 72.0f, 6, 2, 1.15f,
                 new PartUpgrade(
                         "Polini Hi-Speed Variator & Exhaust",
                         "Tuned variator rollers and low-restriction carbon exhaust pipe.",
                         new int[]{150, 320, 650},
-                        new String[]{"+12% Speed (54 km/h)", "+24% Speed (60 km/h)", "+36% Speed (66 km/h)"}
+                        new String[]{"+12% Speed (81 km/h)", "+24% Speed (89 km/h)", "+36% Speed (98 km/h)"}
                 ),
                 new PartUpgrade(
                         "Heavy-Duty Rear Courier Top-Box",
@@ -150,13 +150,13 @@ public class VehicleSpec implements Serializable {
         // 3. Bobber 750 (Cruiser Motorcycle)
         list.add(new VehicleSpec(
                 "superbike", "Bobber 750", "Cruiser Motorcycle",
-                "Base Speed: 85 km/h | High-Torque V-Twin Cruiser",
-                1400, false, 85.0f, 8, 2, 0.95f,
+                "Base Speed: 128 km/h | High-Torque V-Twin Cruiser",
+                1400, false, 128.0f, 8, 2, 0.95f,
                 new PartUpgrade(
                         "Stage-1 Carburetor & Free-Flow Headers",
                         "Enlarged air jets and direct dual exhaust headers for raw torque.",
                         new int[]{300, 650, 1200},
-                        new String[]{"+14% Speed (97 km/h)", "+28% Speed (109 km/h)", "+42% Speed (121 km/h)"}
+                        new String[]{"+14% Speed (146 km/h)", "+28% Speed (164 km/h)", "+42% Speed (182 km/h)"}
                 ),
                 new PartUpgrade(
                         "Reinforced Leather Saddlebag System",
@@ -175,13 +175,13 @@ public class VehicleSpec implements Serializable {
         // 4. V7 Night Rider (Roadster Motorcycle)
         list.add(new VehicleSpec(
                 "guzzi", "V7 Night Rider", "Roadster Motorcycle",
-                "Base Speed: 105 km/h | High-Velocity Syndicate Roadster",
-                3200, false, 105.0f, 10, 2, 1.05f,
+                "Base Speed: 158 km/h | High-Velocity Syndicate Roadster",
+                3200, false, 158.0f, 10, 2, 1.05f,
                 new PartUpgrade(
                         "Dyno-Tuned Race ECU & Titanium Exhaust",
                         "Remapped fuel curves, aggressive ignition, and lightweight titanium pipes.",
                         new int[]{500, 1100, 2200},
-                        new String[]{"+15% Speed (120 km/h)", "+30% Speed (136 km/h)", "+45% Speed (152 km/h)"}
+                        new String[]{"+15% Speed (182 km/h)", "+30% Speed (205 km/h)", "+45% Speed (229 km/h)"}
                 ),
                 new PartUpgrade(
                         "Dual Hard-Shell Touring Panniers",
@@ -200,13 +200,13 @@ public class VehicleSpec implements Serializable {
         // 5. Barracuda 440 (Muscle Car)
         list.add(new VehicleSpec(
                 "barracuda", "Barracuda 440", "Muscle Car",
-                "Base Speed: 135 km/h | Heavy Courier Muscle Machine",
-                7500, false, 135.0f, 12, 3, 0.90f,
+                "Base Speed: 203 km/h | Heavy Courier Muscle Machine",
+                7500, false, 203.0f, 12, 3, 0.90f,
                 new PartUpgrade(
                         "Roots Positive-Displacement Supercharger",
                         "Belt-driven supercharger blower forcing immense air into 440ci V8.",
                         new int[]{950, 2100, 4200},
-                        new String[]{"+16% Speed (156 km/h)", "+32% Speed (178 km/h)", "+48% Speed (200 km/h)"}
+                        new String[]{"+16% Speed (235 km/h)", "+32% Speed (268 km/h)", "+48% Speed (300 km/h)"}
                 ),
                 new PartUpgrade(
                         "Reinforced Courier Trunk Bay",
