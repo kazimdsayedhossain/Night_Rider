@@ -25,36 +25,28 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent">
 
-        <!-- Profile Picture Container with Edit Button -->
+        <!-- Clean Profile Header Row: Avatar + Name & Tap-to-Change hint -->
         <LinearLayout
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:gravity="center_vertical"
-            android:layout_marginBottom="12dp">
+            android:layout_marginBottom="16dp">
 
             <RelativeLayout
                 android:id="@+id/layout_avatar_container"
-                android:layout_width="72dp"
-                android:layout_height="72dp">
+                android:layout_width="68dp"
+                android:layout_height="68dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:background="?android:attr/selectableItemBackgroundBorderless">
 
                 <ImageView
                     android:id="@+id/iv_avatar"
-                    android:layout_width="72dp"
-                    android:layout_height="72dp"
+                    android:layout_width="68dp"
+                    android:layout_height="68dp"
                     android:scaleType="centerCrop"
                     android:src="@drawable/avatar_1" />
-
-                <TextView
-                    android:layout_width="22dp"
-                    android:layout_height="22dp"
-                    android:layout_alignParentEnd="true"
-                    android:layout_alignParentBottom="true"
-                    android:background="@drawable/bg_days_gone_item"
-                    android:text="✎"
-                    android:textColor="#38BDF8"
-                    android:textSize="12sp"
-                    android:gravity="center" />
 
             </RelativeLayout>
 
@@ -62,62 +54,37 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:layout_marginStart="14dp">
+                android:layout_marginStart="16dp">
 
                 <TextView
-                    android:id="@+id/btn_change_photo"
+                    android:id="@+id/tv_profile_name"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="CHANGE PHOTO"
-                    android:textColor="#38BDF8"
-                    android:textSize="11.5sp"
+                    android:text="RIDER"
+                    android:textColor="#FFFFFF"
+                    android:textSize="22sp"
                     android:textStyle="bold"
                     android:fontFamily="sans-serif-condensed"
-                    android:letterSpacing="0.12"
-                    android:paddingHorizontal="12dp"
-                    android:paddingVertical="6dp"
-                    android:background="@drawable/bg_days_gone_box" />
+                    android:letterSpacing="0.08"
+                    android:shadowColor="#EE000000"
+                    android:shadowDx="1"
+                    android:shadowDy="2"
+                    android:shadowRadius="4" />
 
                 <TextView
-                    android:id="@+id/tv_avatar_type"
+                    android:id="@+id/tv_profile_uid"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Default Avatar #1"
-                    android:textColor="#94A3B8"
-                    android:textSize="10.5sp"
+                    android:text="ID: #000000 | TAP PHOTO TO CHANGE"
+                    android:textColor="#38BDF8"
+                    android:textSize="11.5sp"
                     android:fontFamily="sans-serif-condensed"
-                    android:letterSpacing="0.08"
-                    android:layout_marginTop="4dp" />
+                    android:letterSpacing="0.10"
+                    android:layout_marginTop="3dp" />
 
             </LinearLayout>
 
         </LinearLayout>
-
-        <TextView
-            android:id="@+id/tv_profile_name"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Rider"
-            android:textColor="#FFFFFF"
-            android:textSize="21sp"
-            android:textStyle="bold"
-            android:fontFamily="sans-serif-condensed"
-            android:shadowColor="#EE000000"
-            android:shadowDx="1"
-            android:shadowDy="2"
-            android:shadowRadius="4" />
-
-        <TextView
-            android:id="@+id/tv_profile_uid"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="ID #000000"
-            android:textColor="#94A3B8"
-            android:textSize="11.5sp"
-            android:fontFamily="sans-serif-condensed"
-            android:letterSpacing="0.10"
-            android:layout_marginTop="2dp"
-            android:layout_marginBottom="16dp" />
 
         <View
             android:layout_width="match_parent"

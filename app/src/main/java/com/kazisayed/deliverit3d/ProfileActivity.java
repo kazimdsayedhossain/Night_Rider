@@ -19,8 +19,9 @@ import java.util.Locale;
 
 /**
  * ProfileActivity: Courier profile screen displaying live statistics,
- * RTDB-backed total playtime, and customizable profile picture
- * with runtime storage/media permission checks and 5 default avatars fallback.
+ * RTDB-backed total playtime, and customizable profile picture.
+ * Header layout places avatar next to username and ID.
+ * Tapping photo directly allows changing avatar/picture.
  */
 public class ProfileActivity extends AppCompatActivity {
 
@@ -49,9 +50,10 @@ public class ProfileActivity extends AppCompatActivity {
         refreshAvatarDisplay();
 
         // Display user details
-        binding.tvProfileName.setText(user.getUsername());
+        binding.tvProfileName.setText(user.getUsername().toUpperCase(Locale.ROOT));
         String uid = user.getUid();
-        binding.tvProfileUid.setText("ID: #" + (uid.length() > 8 ? uid.substring(0, 8) : uid));
+        String shortUid = (uid != null && uid.length() > 8) ? uid.substring(0, 8).toUpperCase(Locale.ROOT) : (uid != null ? uid.toUpperCase(Locale.ROOT) : "GUEST");
+        binding.tvProfileUid.setText("ID: #" + shortUid + " | TAP PHOTO TO CHANGE");
 
         binding.tvProfileCash.setText("$" + user.getCash());
         binding.tvProfilePoints.setText(String.format(Locale.US, "%,d pts", user.getPoints()));
@@ -62,9 +64,9 @@ public class ProfileActivity extends AppCompatActivity {
         long secs = totalSecs % 60;
         binding.tvProfilePlaytime.setText(String.format(Locale.US, "%dm %ds", mins, secs));
 
-        // Profile Picture Click Handlers
+        // Profile Picture Click Handlers: Tap on photo to change
         binding.layoutAvatarContainer.setOnClickListener(v -> showPhotoOptionsDialog());
-        binding.btnChangePhoto.setOnClickListener(v -> showPhotoOptionsDialog());
+        binding.ivAvatar.setOnClickListener(v -> showPhotoOptionsDialog());
 
         binding.btnShareScore.setOnClickListener(v -> ScoreCardGenerator.shareScoreCard(this));
         binding.btnBackToGame.setOnClickListener(v -> finish());
@@ -77,7 +79,6 @@ public class ProfileActivity extends AppCompatActivity {
             if (customBmp != null) {
                 Bitmap circular = UserManager.getCircularBitmap(customBmp);
                 binding.ivAvatar.setImageBitmap(circular);
-                binding.tvAvatarType.setText("CUSTOM PHOTO");
                 return;
             }
         }
@@ -85,7 +86,6 @@ public class ProfileActivity extends AppCompatActivity {
         // Fallback to one of the 5 default avatars
         int avatarRes = UserManager.getDefaultAvatarDrawable(user.getAvatarId());
         binding.ivAvatar.setImageResource(avatarRes);
-        binding.tvAvatarType.setText("DEFAULT AVATAR #" + user.getAvatarId());
     }
 
     private void showPhotoOptionsDialog() {

@@ -52,7 +52,7 @@
         <activity
             android:name="com.kazisayed.deliverit3d.GarageActivity"
             android:screenOrientation="sensorLandscape"
-            android:exported="false" />
+            android:exported="true" />
 
         <!-- Leaderboard -->
         <activity
@@ -70,7 +70,7 @@
         <activity
             android:name="com.kazisayed.deliverit3d.ProfileActivity"
             android:screenOrientation="sensorLandscape"
-            android:exported="false" />
+            android:exported="true" />
 
         <!-- 3D Game Riding Session (Landscape) -->
         <activity
