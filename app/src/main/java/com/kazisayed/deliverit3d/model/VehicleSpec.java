@@ -281,6 +281,14 @@ public class VehicleSpec implements Serializable {
         return spec.capacityPart != null ? spec.capacityPart.getCost(currentTier) : -1;
     }
 
+    public static float[] getHalfExtents(String id) {
+        if ("barracuda".equalsIgnoreCase(id)) return new float[]{0.95f, 2.35f};
+        if ("superbike".equalsIgnoreCase(id)) return new float[]{0.48f, 1.25f};
+        if ("guzzi".equalsIgnoreCase(id)) return new float[]{0.45f, 1.15f};
+        if ("vespa".equalsIgnoreCase(id)) return new float[]{0.42f, 1.05f};
+        return new float[]{0.35f, 0.95f}; // Fixie Messenger bicycle
+    }
+
     public static int getUtilityUpgradeCost(String id, int currentTier) {
         VehicleSpec spec = findById(id);
         return spec.utilityPart != null ? spec.utilityPart.getCost(currentTier) : -1;

@@ -373,33 +373,44 @@ public final class DispatchGame extends ApplicationAdapter {
             if(Math.abs(nz) > 3980 || Math.abs(nx) > 3980){ speed = 0; announce("County boundary"); break; }
             Collision.Contact wall = world.collision(nx, nz, yaw);
             TrafficSystem tr = traffic;
-            Collision.Contact car = invulnerable <= 0 ? tr.collision(nx, nz, yaw) : null;
+            float[] playerExt = com.kazisayed.deliverit3d.model.VehicleSpec.getHalfExtents(vehicleId);
+            Collision.Contact car = tr.collision(nx, nz, yaw, playerExt[0], playerExt[1]);
             if(tr.hitsTrain(nx, nz, yaw)){
                 audio.cue("crash"); host.feedback(90); finish(false, "Rail crossing collision - Shift terminated"); break;
             }
             if(car != null){
-                if(combo.fever()){
-                    combo.drop("fever_shield"); invulnerable = 1.8f; speed = Math.max(speed * .65f, 3.5f);
-                    x += car.x() * .45f; z += car.z() * .45f; audio.cue("skid"); host.feedback(55);
-                    announce("Fever Shield Deflected Impact!"); break;
-                }
-                boolean highSpeedFrontal = (Math.abs(car.z()) > Math.abs(car.x()) * .75f && Math.abs(speed) > ("superbike".equals(vehicleId) ? (13.5f + utilTier * 2.0f) : 11.5f)) || Math.abs(speed) > ("superbike".equals(vehicleId) ? (22.0f + utilTier * 2.0f) : 19.0f);
-                if(highSpeedFrontal){
-                    x += car.x() * .20f; z += car.z() * .20f; audio.cue("crash"); host.feedback(90); combo.drop("crash");
-                    finish(false, "Traffic collision - Shift terminated"); break;
-                } else {
-                    float speedRetain = "superbike".equals(vehicleId) ? (0.32f + 0.12f * utilTier) : 0.32f;
-                    speed *= speedRetain; x += car.x() * .42f; z += car.z() * .42f; invulnerable = 1.6f;
-                    float timePen = "superbike".equals(vehicleId) ? (2.5f * Math.max(0.25f, 1.0f - 0.25f * utilTier)) : 2.5f;
-                    time = Math.max(0, time - timePen);
-                    if ("barracuda".equals(vehicleId) && utilTier >= 1) {
-                        announce("Bull bar absorbed impact! Combo preserved!");
-                    } else {
-                        combo.drop("scrape");
-                        announce("Traffic scrape - " + String.format(java.util.Locale.US, "%.1f", timePen) + "s penalty");
+                float impactSpeed = Math.abs(speed);
+                float sep = car.depth() + 0.12f;
+                nx += car.x() * sep;
+                nz += car.z() * sep;
+                x = nx; z = nz;
+                speed = Math.min(0f, speed * -0.25f);
+
+                if(invulnerable <= 0){
+                    if(combo.fever()){
+                        combo.drop("fever_shield"); invulnerable = 1.8f; speed = Math.max(impactSpeed * .65f, 3.5f);
+                        audio.cue("skid"); host.feedback(55);
+                        announce("Fever Shield Deflected Impact!");
+                        break;
                     }
-                    audio.cue("skid"); host.feedback(45); break;
+                    boolean highSpeedFrontal = (Math.abs(car.z()) > Math.abs(car.x()) * .75f && impactSpeed > ("superbike".equals(vehicleId) ? (13.5f + utilTier * 2.0f) : 11.5f)) || impactSpeed > ("superbike".equals(vehicleId) ? (22.0f + utilTier * 2.0f) : 19.0f);
+                    if(highSpeedFrontal){
+                        audio.cue("crash"); host.feedback(90); combo.drop("crash");
+                        finish(false, "Traffic collision - Shift terminated"); break;
+                    } else {
+                        invulnerable = 1.6f;
+                        float timePen = "superbike".equals(vehicleId) ? (2.5f * Math.max(0.25f, 1.0f - 0.25f * utilTier)) : 2.5f;
+                        time = Math.max(0, time - timePen);
+                        if ("barracuda".equals(vehicleId) && utilTier >= 1) {
+                            announce("Bull bar absorbed impact! Combo preserved!");
+                        } else {
+                            combo.drop("scrape");
+                            announce("Traffic scrape - " + String.format(java.util.Locale.US, "%.1f", timePen) + "s penalty");
+                        }
+                        audio.cue("skid"); host.feedback(45);
+                    }
                 }
+                break;
             }
             if(wall != null){
                 x += wall.x() * .14f; z += wall.z() * .14f;

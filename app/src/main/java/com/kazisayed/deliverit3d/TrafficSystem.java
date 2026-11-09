@@ -58,7 +58,7 @@ public final class TrafficSystem {
         if (t == null) return;
         View view = new View(); view.template = t; view.model = t.create(0, 0, 0, 0, 1);
         // collision box from the real model footprint (width/length of the normalised template)
-        v.halfWidth = Math.max(.3f, t.width * .46f); v.halfLength = Math.max(.8f, t.length * .46f);
+        v.halfWidth = Math.max(.3f, t.width * .46f); v.halfLength = Math.max(.8f, t.length * .46f); v.sync();
         boolean twoWheeler = isTwoWheeler(v.type);
         float beamWidth = twoWheeler ? 2.4f : Math.max(3.4f, t.width * 1.8f);
         float beamLength = twoWheeler ? 13.0f : 17.0f;
@@ -152,10 +152,14 @@ public final class TrafficSystem {
         }
     }
 
-    public Collision.Contact collision(float x, float z, float yaw) {
-        TrafficSim.Vehicle v = sim.hit(x, z, yaw);
+    public Collision.Contact collision(float x, float z, float yaw, float hw, float hl) {
+        TrafficSim.Vehicle v = sim.hit(x, z, yaw, hw, hl);
         if (v == null) return null;
-        return Collision.contact(x, z, yaw, .37f, .95f, v.box);
+        return Collision.contact(x, z, yaw, hw, hl, v.box);
+    }
+
+    public Collision.Contact collision(float x, float z, float yaw) {
+        return collision(x, z, yaw, .37f, .95f);
     }
     public boolean nearMiss(float x, float z, float yaw, float speed) {
         return sim.nearMiss(x, z, yaw, (float) Math.sin(yaw) * speed, (float) Math.cos(yaw) * speed, 6f);

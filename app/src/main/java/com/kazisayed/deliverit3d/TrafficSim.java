@@ -383,7 +383,7 @@ public final class TrafficSim {
         for (int i = 0; i < all.size(); i++) for (int j = i + 1; j < all.size(); j++) {
             Vehicle a = all.get(i), b = all.get(j);
             float dx = a.x - b.x, dz = a.z - b.z;
-            if (dx * dx + dz * dz > 100) continue;
+            if (dx * dx + dz * dz > 225) continue;
             Collision.Contact c = Collision.contact(a.box, b.box, 0);
             if (c == null) continue;
             float sep = c.depth() + .02f;
@@ -395,11 +395,21 @@ public final class TrafficSim {
     }
 
     /** First vehicle touching the rider's OBB, or null. */
-    public Vehicle hit(float x, float z, float yaw) {
-        Collision.Box p = new Collision.Box(x, z, .38f, 1.02f, yaw, "cycle");
-        for (List<Vehicle> list : List.of(lane, cross)) for (Vehicle v : list)
-            if (Math.abs(v.x - x) < 8 && Math.abs(v.z - z) < 8 && Collision.contact(p, v.box, 0) != null) return v;
+    public Vehicle hit(float x, float z, float yaw, float hw, float hl) {
+        Collision.Box p = new Collision.Box(x, z, hw, hl, yaw, "rider");
+        for (List<Vehicle> list : List.of(lane, cross)) {
+            for (Vehicle v : list) {
+                float reach = Math.max(v.halfLength, v.halfWidth) + Math.max(hw, hl) + 4.0f;
+                if (Math.abs(v.x - x) < reach && Math.abs(v.z - z) < reach) {
+                    if (Collision.contact(p, v.box, 0) != null) return v;
+                }
+            }
+        }
         return null;
+    }
+
+    public Vehicle hit(float x, float z, float yaw) {
+        return hit(x, z, yaw, .38f, 1.02f);
     }
 
     /** Graze (<0.9 m) with a vehicle that is closing on the rider; each vehicle pays out once. */
