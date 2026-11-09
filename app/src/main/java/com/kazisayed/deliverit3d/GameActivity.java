@@ -82,14 +82,33 @@ public class GameActivity extends MainActivity {
 
             @Override
             public void onPowerConnected() {
-                setTargetFps(60);
-                Toast.makeText(GameActivity.this, "Power Connected: 60 FPS Boost", Toast.LENGTH_SHORT).show();
+                setTargetFps(0);
+                Toast.makeText(GameActivity.this, "Power Connected: Full Performance Enabled", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onBatteryOkay() {
+                setTargetFps(0);
+                Toast.makeText(GameActivity.this, "Battery Normal: Full Performance Enabled", Toast.LENGTH_SHORT).show();
             }
         });
         IntentFilter bFilter = new IntentFilter();
         bFilter.addAction(Intent.ACTION_BATTERY_LOW);
+        bFilter.addAction(Intent.ACTION_BATTERY_OKAY);
         bFilter.addAction(Intent.ACTION_POWER_CONNECTED);
         registerReceiver(batteryReceiver, bFilter);
+
+        BatteryReceiver.checkInitialBatteryState(this, new BatteryReceiver.OnBatteryStatusListener() {
+            @Override
+            public void onBatteryLow() {
+                setTargetFps(30);
+            }
+
+            @Override
+            public void onPowerConnected() {
+                setTargetFps(0);
+            }
+        });
 
         headsetReceiver = new HeadsetReceiver(() -> {
             Toast.makeText(GameActivity.this, "Audio disconnected: Game paused", Toast.LENGTH_SHORT).show();

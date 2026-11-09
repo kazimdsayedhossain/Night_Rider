@@ -18,6 +18,7 @@ public class BatteryReceiver extends BroadcastReceiver {
     public interface OnBatteryStatusListener {
         void onBatteryLow();
         void onPowerConnected();
+        default void onBatteryOkay() { onPowerConnected(); }
     }
 
     private final OnBatteryStatusListener listener;
@@ -33,7 +34,10 @@ public class BatteryReceiver extends BroadcastReceiver {
         if (Intent.ACTION_BATTERY_LOW.equals(action)) {
             postBatteryNotification(context, true);
             if (listener != null) listener.onBatteryLow();
-        } else if (Intent.ACTION_BATTERY_OKAY.equals(action) || Intent.ACTION_POWER_CONNECTED.equals(action)) {
+        } else if (Intent.ACTION_BATTERY_OKAY.equals(action)) {
+            postBatteryNotification(context, false);
+            if (listener != null) listener.onBatteryOkay();
+        } else if (Intent.ACTION_POWER_CONNECTED.equals(action)) {
             postBatteryNotification(context, false);
             if (listener != null) listener.onPowerConnected();
         }
@@ -73,9 +77,9 @@ public class BatteryReceiver extends BroadcastReceiver {
                 nm.createNotificationChannel(channel);
             }
 
-            String title = lowBattery ? "Low Battery - Eco Mode (30 FPS)" : "Power Connected - Full Speed (60 FPS)";
-            String text = lowBattery ? "Battery is low! Night Rider frame rate reduced to 30 FPS to save energy."
-                                     : "Power connected. Restored full 60 FPS performance.";
+            String title = lowBattery ? "Low Battery - Eco Mode (30 FPS)" : "Full Performance Active";
+            String text = lowBattery ? "Battery is low! Night Rider frame rate reduced to 30 FPS to conserve energy."
+                                     : "Power / Battery optimal. Full display performance enabled.";
 
             NotificationCompat.Builder builder = new NotificationCompat.Builder(context, ALERT_CHANNEL_ID)
                     .setSmallIcon(R.mipmap.ic_launcher)

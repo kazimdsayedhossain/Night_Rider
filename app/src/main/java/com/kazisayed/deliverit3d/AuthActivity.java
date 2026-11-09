@@ -282,11 +282,46 @@ public class AuthActivity extends AppCompatActivity {
 
     private void handleForgotPassword() {
         String email = getEmail();
-        if (TextUtils.isEmpty(email) || !email.contains("@")) {
-            binding.etEmail.setError("Enter your registered email address first");
-            Toast.makeText(this, "Enter your email above to receive a password reset link", Toast.LENGTH_SHORT).show();
+        if (!TextUtils.isEmpty(email) && email.contains("@")) {
+            sendResetEmail(email.trim());
             return;
         }
+
+        android.widget.EditText input = new android.widget.EditText(this);
+        input.setHint("Enter your registered email");
+        input.setInputType(android.text.InputType.TYPE_CLASS_TEXT | android.text.InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS);
+        input.setTextColor(0xFFFFFFFF);
+        input.setHintTextColor(0xFF64748B);
+        input.setBackgroundColor(0xFF1E293B);
+        int pad = (int) (14 * getResources().getDisplayMetrics().density);
+        input.setPadding(pad, pad, pad, pad);
+
+        android.widget.FrameLayout container = new android.widget.FrameLayout(this);
+        int margin = (int) (20 * getResources().getDisplayMetrics().density);
+        android.widget.FrameLayout.LayoutParams lp = new android.widget.FrameLayout.LayoutParams(
+                android.widget.FrameLayout.LayoutParams.MATCH_PARENT,
+                android.widget.FrameLayout.LayoutParams.WRAP_CONTENT);
+        lp.setMargins(margin, margin / 2, margin, margin / 2);
+        container.addView(input, lp);
+
+        new androidx.appcompat.app.AlertDialog.Builder(this)
+                .setTitle("RESET PASSWORD")
+                .setMessage("Enter your courier account email to receive password reset instructions.")
+                .setView(container)
+                .setPositiveButton("SEND RESET LINK", (dialog, which) -> {
+                    String entered = input.getText().toString().trim();
+                    if (!TextUtils.isEmpty(entered) && entered.contains("@")) {
+                        binding.etEmail.setText(entered);
+                        sendResetEmail(entered);
+                    } else {
+                        Toast.makeText(this, "Please enter a valid email address", Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .setNegativeButton("CANCEL", null)
+                .show();
+    }
+
+    private void sendResetEmail(String email) {
         setLoading(true);
         auth.sendPasswordResetEmail(email)
                 .addOnSuccessListener(unused -> {

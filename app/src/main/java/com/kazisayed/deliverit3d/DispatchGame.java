@@ -92,9 +92,12 @@ public final class DispatchGame extends ApplicationAdapter {
     private long lastFrameTimeNano = 0;
 
     public void setTargetFps(int fps) {
-        this.targetFps = Math.max(15, fps);
+        this.targetFps = fps;
         try {
-            if (com.badlogic.gdx.Gdx.graphics != null) com.badlogic.gdx.Gdx.graphics.setForegroundFPS(this.targetFps);
+            if (com.badlogic.gdx.Gdx.graphics != null) {
+                // If fps <= 0, 0 unthrottles LibGDX so it renders at maximum display refresh rate (Full Performance)
+                com.badlogic.gdx.Gdx.graphics.setForegroundFPS(fps <= 0 ? 0 : Math.max(15, fps));
+            }
         } catch (Throwable ignored) {}
     }
 

@@ -85,7 +85,8 @@ public class MainActivity extends AndroidApplication implements DispatchGame.Hos
     protected void setupBatteryMonitoring(){
         batteryReceiver=new BatteryReceiver(new BatteryReceiver.OnBatteryStatusListener(){
             @Override public void onBatteryLow(){setTargetFps(30);}
-            @Override public void onPowerConnected(){setTargetFps(60);}
+            @Override public void onPowerConnected(){setTargetFps(0);}
+            @Override public void onBatteryOkay(){setTargetFps(0);}
         });
         IntentFilter filter=new IntentFilter();
         filter.addAction(Intent.ACTION_BATTERY_LOW);
@@ -94,7 +95,8 @@ public class MainActivity extends AndroidApplication implements DispatchGame.Hos
         registerReceiver(batteryReceiver,filter);
         BatteryReceiver.checkInitialBatteryState(this,new BatteryReceiver.OnBatteryStatusListener(){
             @Override public void onBatteryLow(){setTargetFps(30);}
-            @Override public void onPowerConnected(){setTargetFps(60);}
+            @Override public void onPowerConnected(){setTargetFps(0);}
+            @Override public void onBatteryOkay(){setTargetFps(0);}
         });
     }
     protected void requestNotificationPermission(){

@@ -45,6 +45,40 @@ import java.util.function.Consumer;
  */
 
 public final class NativeUi extends FrameLayout {
+    private void addStandardPanelHeader(LinearLayout card, String title, String subtitle) {
+        LinearLayout headerBox = new LinearLayout(getContext());
+        headerBox.setOrientation(LinearLayout.VERTICAL);
+        headerBox.setGravity(Gravity.CENTER_VERTICAL | Gravity.LEFT);
+        headerBox.setLayoutParams(new LinearLayout.LayoutParams(-1, px(52)));
+
+        TextView tView = makeText(title.toUpperCase(Locale.ROOT), 20f, 0xFFFFFFFF, true);
+        tView.setTypeface(Typeface.create("sans-serif-condensed", Typeface.BOLD));
+        tView.setLetterSpacing(0.14f);
+        headerBox.addView(tView);
+
+        if (subtitle != null && !subtitle.isEmpty()) {
+            TextView sView = makeText(subtitle.toUpperCase(Locale.ROOT), 11f, 0xFF94A3B8, false);
+            sView.setLetterSpacing(0.10f);
+            sView.setPadding(0, px(2), 0, 0);
+            headerBox.addView(sView);
+        }
+        card.addView(headerBox);
+
+        // Fixed-height top divider line: exact same position across ALL screens!
+        View topDiv = new View(getContext());
+        topDiv.setBackgroundColor(0x33CBD5E1);
+        card.addView(topDiv, new LinearLayout.LayoutParams(-1, px(1)));
+    }
+
+    private void addStandardBottomDivider(LinearLayout card) {
+        View bottomDiv = new View(getContext());
+        bottomDiv.setBackgroundColor(0x33CBD5E1);
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(-1, px(1));
+        lp.topMargin = px(12);
+        lp.bottomMargin = px(8);
+        card.addView(bottomDiv, lp);
+    }
+
     private String activeNavOption = "PROFILE";
     private String selectedGarageVehicle = "bike";
 
@@ -2753,11 +2787,13 @@ private final FrameLayout controls;
         rightLp.topMargin = padT;
         masterRoot.addView(rightNav, rightLp);
 
-        // ==================== LEFT BIG CONTENT AREA (NO TITLE, NO DARK BACKGROUND) ====================
+        // ==================== LEFT BIG CONTENT AREA (BOUNDED TO NOT CROSS RIGHT NAV) ====================
         rightContentArea = new FrameLayout(getContext());
         rightContentArea.setBackground(null);
         int padL = Math.max(safeLeft, px(32));
-        LayoutParams leftLp = new LayoutParams(px(560), -2, Gravity.TOP | Gravity.LEFT);
+        int screenW = getWidth() > 0 ? getWidth() : getResources().getDisplayMetrics().widthPixels;
+        int maxLeftW = Math.max(px(340), screenW - px(290) - padL - padR - px(24));
+        LayoutParams leftLp = new LayoutParams(maxLeftW, -2, Gravity.TOP | Gravity.LEFT);
         leftLp.leftMargin = padL;
         leftLp.topMargin = padT;
         masterRoot.addView(rightContentArea, leftLp);
@@ -2820,7 +2856,9 @@ private final FrameLayout controls;
         rightContentArea = new FrameLayout(getContext());
         rightContentArea.setBackground(null);
         int padL = Math.max(safeLeft, px(32));
-        LayoutParams leftLp = new LayoutParams(px(560), -2, Gravity.TOP | Gravity.LEFT);
+        int screenW_res = getWidth() > 0 ? getWidth() : getResources().getDisplayMetrics().widthPixels;
+        int maxLeftW_res = Math.max(px(340), screenW_res - px(290) - padL - padR - px(24));
+        LayoutParams leftLp = new LayoutParams(maxLeftW_res, -2, Gravity.TOP | Gravity.LEFT);
         leftLp.leftMargin = padL;
         leftLp.topMargin = padT;
         masterRoot.addView(rightContentArea, leftLp);
@@ -2845,21 +2883,9 @@ private final FrameLayout controls;
         card.setBackground(null);
         card.setPadding(0, 0, 0, 0);
 
-        TextView statusTv = makeText(won ? "ROUTE SUCCESSFUL // DISPATCH COMPLETE" : "COURIER CASUALTY // VEHICLE COLLISION", 16f, won ? 0xFFFFFFFF : 0xFFEF4444, true);
-        statusTv.setGravity(Gravity.LEFT);
-        statusTv.setTypeface(Typeface.create("sans-serif-condensed", Typeface.BOLD));
-        statusTv.setLetterSpacing(0.12f);
-        card.addView(statusTv);
-
-        TextView subTv = makeText(won ? "ALL PACKAGES DELIVERED ON SCHEDULE" : "ACCIDENT DETECTED - VEHICLE CRITICAL DAMAGE", 11f, 0xFF94A3B8, false);
-        subTv.setGravity(Gravity.LEFT);
-        subTv.setLetterSpacing(0.10f);
-        subTv.setPadding(0, px(2), 0, px(12));
-        card.addView(subTv);
-
-        View div = new View(getContext());
-        div.setBackgroundColor(0x33CBD5E1);
-        card.addView(div, new LinearLayout.LayoutParams(-1, px(1)));
+        addStandardPanelHeader(card,
+                won ? "ROUTE COMPLETE" : "TERMINATED",
+                won ? "ALL PACKAGES DELIVERED ON SCHEDULE" : "ACCIDENT DETECTED - VEHICLE DAMAGE");
 
         if (won && data != null) {
             String starsStr = switch (Math.max(1, Math.min(3, data.stars()))) {
@@ -3070,23 +3096,44 @@ private final FrameLayout controls;
         card.setPadding(0, 0, 0, 0);
 
         UserManager user = UserManager.get();
-
-        TextView nameTv = makeText(user.getUsername().toUpperCase(Locale.ROOT), 21f, 0xFFFFFFFF, true);
-        nameTv.setGravity(Gravity.LEFT);
-        nameTv.setTypeface(Typeface.create("sans-serif-condensed", Typeface.BOLD));
-        nameTv.setLetterSpacing(0.14f);
-        card.addView(nameTv);
-
         String opId = user.getUid() != null && user.getUid().length() >= 8 ? user.getUid().substring(0, 8).toUpperCase(Locale.ROOT) : "COURIER";
-        TextView subTv = makeText("SYNDICATE OPERATOR // ID: " + opId, 11f, 0xFF94A3B8, false);
-        subTv.setGravity(Gravity.LEFT);
-        subTv.setLetterSpacing(0.10f);
-        subTv.setPadding(0, px(2), 0, px(12));
-        card.addView(subTv);
 
-        View div = new View(getContext());
-        div.setBackgroundColor(0x33CBD5E1);
-        card.addView(div, new LinearLayout.LayoutParams(-1, px(1)));
+        // Standardized Header with top line at identical height
+        addStandardPanelHeader(card, user.getUsername(), "SYNDICATE OPERATOR // ID: " + opId);
+
+        // Avatar & Profile Settings Access Row
+        LinearLayout avatarRow = new LinearLayout(getContext());
+        avatarRow.setOrientation(LinearLayout.HORIZONTAL);
+        avatarRow.setGravity(Gravity.CENTER_VERTICAL);
+        avatarRow.setPadding(0, px(8), 0, px(6));
+
+        ImageView ivAvatar = new ImageView(getContext());
+        int avatarSize = px(40);
+        LinearLayout.LayoutParams avLp = new LinearLayout.LayoutParams(avatarSize, avatarSize);
+        avLp.rightMargin = px(12);
+        ivAvatar.setLayoutParams(avLp);
+
+        if (user.hasCustomProfilePic()) {
+            Bitmap customBmp = user.getProfilePicBitmap();
+            if (customBmp != null) {
+                ivAvatar.setImageBitmap(UserManager.getCircularBitmap(customBmp));
+            } else {
+                ivAvatar.setImageResource(UserManager.getDefaultAvatarDrawable(user.getAvatarId()));
+            }
+        } else {
+            ivAvatar.setImageResource(UserManager.getDefaultAvatarDrawable(user.getAvatarId()));
+        }
+        avatarRow.addView(ivAvatar);
+
+        LinearLayout avText = new LinearLayout(getContext());
+        avText.setOrientation(LinearLayout.VERTICAL);
+        TextView avTypeTv = makeText(user.hasCustomProfilePic() ? "CUSTOM PHOTO ACTIVE" : ("DEFAULT AVATAR #" + user.getAvatarId()), 12f, 0xFF38BDF8, true);
+        avTypeTv.setTypeface(Typeface.create("sans-serif-condensed", Typeface.BOLD));
+        avText.addView(avTypeTv);
+        TextView avSubTv = makeText("TAP 'EDIT PROFILE' TO CUSTOMIZE AVATAR & PHOTO", 10f, 0xFF94A3B8, false);
+        avText.addView(avSubTv);
+        avatarRow.addView(avText);
+        card.addView(avatarRow);
 
         addProfileRow(card, "GLOBAL RANK", "#" + user.getGlobalRank());
         addProfileRow(card, "COMPLETED DELIVERIES", String.valueOf(user.getCompletedDeliveries()));
@@ -3099,14 +3146,19 @@ private final FrameLayout controls;
         String timeStr = hrs > 0 ? (hrs + "h " + (mins % 60) + "m") : (mins + "m " + sec + "s");
         addProfileRow(card, "TIME IN TRANSIT", timeStr);
 
-        View div2 = new View(getContext());
-        div2.setBackgroundColor(0x33CBD5E1);
-        card.addView(div2, new LinearLayout.LayoutParams(-1, px(1)));
+        // Standardized Bottom Divider Line
+        addStandardBottomDivider(card);
 
         LinearLayout actBox = new LinearLayout(getContext());
-        actBox.setOrientation(LinearLayout.VERTICAL);
-        actBox.setPadding(0, px(10), 0, 0);
-        addContentButton(actBox, "SHARE MY SCORE", true, () -> ScoreCardGenerator.shareScoreCard(activity));
+        actBox.setOrientation(LinearLayout.HORIZONTAL);
+        actBox.setPadding(0, px(6), 0, 0);
+
+        addContentButton(actBox, "SHARE SCORE", true, () -> ScoreCardGenerator.shareScoreCard(activity));
+        addContentButton(actBox, "EDIT PROFILE", false, () -> {
+            activity.feedback(20);
+            android.content.Intent pIntent = new android.content.Intent(activity, ProfileActivity.class);
+            activity.startActivity(pIntent);
+        });
         card.addView(actBox);
 
         setLeftContentWithAnim(card);
@@ -3148,15 +3200,7 @@ private final FrameLayout controls;
 
         int cashVal = data != null ? data.cash() : saves.cash();
         int ticketVal = data != null ? data.tickets() : saves.tickets();
-        TextView wallet = makeText("WALLET: $" + String.format(Locale.US, "%,d", cashVal) + "  |  " + ticketVal + " TICKETS", 11.5f, 0xFF94A3B8, false);
-        wallet.setGravity(Gravity.LEFT);
-        wallet.setLetterSpacing(0.10f);
-        wallet.setPadding(0, 0, 0, px(8));
-        card.addView(wallet);
-
-        View div1 = new View(getContext());
-        div1.setBackgroundColor(0x33CBD5E1);
-        card.addView(div1, new LinearLayout.LayoutParams(-1, px(1)));
+        addStandardPanelHeader(card, "FLEET GARAGE", "WALLET: $" + String.format(Locale.US, "%,d", cashVal) + "  |  " + ticketVal + " TICKETS");
 
         // Fleet Showroom Header
         TextView fleetHeader = makeText("FLEET SHOWROOM // SELECT OR BUY", 11.5f, 0xFF38BDF8, true);
@@ -3274,12 +3318,7 @@ private final FrameLayout controls;
         });
 
         // Headwear & Accessories
-        View div3 = new View(getContext());
-        div3.setBackgroundColor(0x33CBD5E1);
-        LinearLayout.LayoutParams div3Lp = new LinearLayout.LayoutParams(-1, px(1));
-        div3Lp.topMargin = px(12);
-        div3Lp.bottomMargin = px(8);
-        card.addView(div3, div3Lp);
+        addStandardBottomDivider(card);
 
         TextView hatHeader = makeText("COURIER HEADWEAR & GEAR", 11.5f, 0xFFF59E0B, true);
         hatHeader.setLetterSpacing(0.12f);
@@ -3339,15 +3378,7 @@ private final FrameLayout controls;
         card.setBackground(null);
         card.setPadding(0, 0, 0, 0);
 
-        TextView subtitle = makeText("WORLDWIDE COURIER SYNDICATE RANKINGS", 11f, 0xFF94A3B8, false);
-        subtitle.setGravity(Gravity.LEFT);
-        subtitle.setLetterSpacing(0.12f);
-        subtitle.setPadding(0, 0, 0, px(10));
-        card.addView(subtitle);
-
-        View div = new View(getContext());
-        div.setBackgroundColor(0x33CBD5E1);
-        card.addView(div, new LinearLayout.LayoutParams(-1, px(1)));
+        addStandardPanelHeader(card, "LEADERBOARD", "WORLDWIDE COURIER SYNDICATE RANKINGS");
 
         LinearLayout list = new LinearLayout(getContext());
         list.setOrientation(LinearLayout.VERTICAL);
@@ -3392,14 +3423,7 @@ private final FrameLayout controls;
         card.setBackground(null);
         card.setPadding(0, 0, 0, 0);
 
-        TextView hint = makeText("VEHICLE & ENVIRONMENT CONTROLS", 11f, 0xFF94A3B8, false);
-        hint.setLetterSpacing(0.12f);
-        hint.setPadding(0, 0, 0, px(12));
-        card.addView(hint);
-
-        View div = new View(getContext());
-        div.setBackgroundColor(0x33CBD5E1);
-        card.addView(div, new LinearLayout.LayoutParams(-1, px(1)));
+        addStandardPanelHeader(card, "SETTINGS", "VEHICLE & ENVIRONMENT CONTROLS");
 
         boolean tiltOn = saves.flag("native-tilt", true);
         addContentButton(card, "GYRO STEERING: " + (tiltOn ? "ENABLED" : "TOUCH CONTROLS"), false, () -> {
@@ -3512,10 +3536,8 @@ private final FrameLayout controls;
         paint.setColor(0x28FFFFFF);
         drawChamferedRect(canvas, orderX, orderY, orderX + orderW, orderY + orderH, 5, paint);
 
-        // Left cyan accent notch
-        paint.setStyle(Paint.Style.FILL);
-        paint.setColor(0xFF38BDF8);
-        canvas.drawRoundRect(orderX + 3.5f, orderY + 6.5f, orderX + 5.5f, orderY + orderH - 6.5f, 1f, 1f, paint);
+        // Blue vertical line removed as requested; aligned with rest of UI
+        float textLeft = orderX + 9f;
 
         DispatchGame.DeliveryOrder active = game.getActiveDelivery();
         DispatchGame.DeliveryOrder next = game.getNextDelivery();
@@ -3529,11 +3551,7 @@ private final FrameLayout controls;
             paint.setTextSize(10.5f);
             paint.setColor(COLOR_WHITE);
             String name = active.recipient.toUpperCase(Locale.ROOT);
-            canvas.drawText(name, orderX + 11, orderY + 14.5f, paint);
-
-            float nameW = paint.measureText(name);
-            paint.setColor(0xFF38BDF8);
-            canvas.drawText(" +$" + active.payout, orderX + 11 + nameW, orderY + 14.5f, paint);
+            canvas.drawText(name + "  +$" + active.payout, textLeft, orderY + 14.5f, paint);
 
             int distM = Math.round(data.distance());
             String sideStr = (active.side != null && active.side.equalsIgnoreCase("left")) ? "L" : "R";
@@ -3548,7 +3566,7 @@ private final FrameLayout controls;
             paint.setTypeface(Typeface.create("sans-serif-bold", Typeface.BOLD));
             paint.setTextSize(10f);
             paint.setColor(0xFF94A3B8);
-            canvas.drawText("STANDBY", orderX + 11, orderY + 14.5f, paint);
+            canvas.drawText("STANDBY", textLeft, orderY + 14.5f, paint);
 
             paint.setTextAlign(Paint.Align.RIGHT);
             paint.setTypeface(Typeface.create("sans-serif-condensed", Typeface.BOLD));
@@ -3561,19 +3579,19 @@ private final FrameLayout controls;
         paint.setStyle(Paint.Style.STROKE);
         paint.setStrokeWidth(0.8f);
         paint.setColor(0x18FFFFFF);
-        canvas.drawLine(orderX + 11, orderY + 20f, orderX + orderW - 7, orderY + 20f, paint);
+        canvas.drawLine(textLeft, orderY + 20f, orderX + orderW - 7, orderY + 20f, paint);
 
-        // --- ROW 2: NEXT QUEUED ORDER & DELIVERED / TIMER ---
+        // --- ROW 2: NEXT QUEUED ORDER & DELIVERED / TIMER (Monochrome minimal aligned) ---
         paint.setStyle(Paint.Style.FILL);
         paint.setTextAlign(Paint.Align.LEFT);
         paint.setTypeface(Typeface.create("sans-serif-condensed", Typeface.NORMAL));
         paint.setTextSize(9.5f);
-        paint.setColor(0xFF94A3B8);
+        paint.setColor(0xFFCBD5E1);
 
         String nextStr = (next != null)
                 ? ("NEXT: " + next.recipient.toUpperCase(Locale.ROOT) + " (+$" + next.payout + ")")
                 : "NEXT: NONE";
-        canvas.drawText(nextStr, orderX + 11, orderY + 30.5f, paint);
+        canvas.drawText(nextStr, textLeft, orderY + 30.5f, paint);
 
         int sec = Math.max(0, (int) Math.ceil(data.time()));
         String timeStr = String.format(Locale.US, "%d:%02d", sec / 60, sec % 60);
@@ -3582,16 +3600,16 @@ private final FrameLayout controls;
         paint.setTextAlign(Paint.Align.RIGHT);
         paint.setTypeface(Typeface.create("sans-serif-condensed", Typeface.BOLD));
         paint.setTextSize(9.5f);
-        paint.setColor(sec < 20 ? 0xFFFFAA88 : COLOR_SILVER);
+        paint.setColor(COLOR_SILVER);
         canvas.drawText(metaStr, orderX + orderW - 7, orderY + 30.5f, paint);
         paint.setTextAlign(Paint.Align.LEFT);
 
-        // 2. TOP-RIGHT: RADAR MINIMAP (Planted to the left of the Pause Button)
+        // 2. TOP-RIGHT: RADAR MINIMAP (Moved slightly downward as requested)
         float pauseRight = Math.max(safeRightDp, 24);
         float pauseTop = Math.max(safeTopDp, 18);
         float radarRadius = 38f;
         float radarCx = w - pauseRight - 42 - 14 - radarRadius; // 14dp gap left of pause button
-        float radarCy = pauseTop + 21; // Vertically centered with pause button
+        float radarCy = pauseTop + 34f; // Moved a little down (+13dp) from top edge
         drawRadarMap(canvas, radarCx, radarCy, radarRadius);
 
         // 3. TOP-CENTER: LIVE FPS READOUT (Subtle Low-Poly Gaming Badge)
