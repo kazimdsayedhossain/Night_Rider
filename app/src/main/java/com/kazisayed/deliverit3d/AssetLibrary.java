@@ -46,7 +46,14 @@ public final class AssetLibrary implements AutoCloseable {
     public final List<Template> buildings=new ArrayList<>(),houses=new ArrayList<>(),trees=new ArrayList<>(),shrubs=new ArrayList<>();
     public final Map<String,Template> namedBuildings=new LinkedHashMap<>();
     public final Map<String,Template> props=new LinkedHashMap<>();
-    public final Map<String,Template> vehicles=new LinkedHashMap<>();public final Map<String,Model> couriers=new LinkedHashMap<>();public Model deliveryBicycle;public Template mountain;
+    public final Map<String,Template> vehicles=new LinkedHashMap<>();public final Map<String,Model> couriers=new LinkedHashMap<>();public final Model[] trafficCouriers=new Model[5];public Model deliveryBicycle;public Template mountain;
+
+    public Model pickTrafficCourier(int seed) {
+        if (trafficCouriers[0] == null) return couriers.getOrDefault("cap", null);
+        int idx = Math.abs(seed) % trafficCouriers.length;
+        Model m = trafficCouriers[idx];
+        return m != null ? m : couriers.getOrDefault("cap", null);
+    }
     private final List<SceneAsset> owned=new ArrayList<>();private int stage;public String status="Preparing city assets";
     private static com.badlogic.gdx.graphics.Texture buildingFacadeTexture;
     private static com.badlogic.gdx.graphics.Texture brickTexture;
@@ -286,8 +293,21 @@ public final class AssetLibrary implements AutoCloseable {
                         m.set(PBRFloatAttribute.createMetallic(.48f));
                     }
                 }
+                vehicles.put("bicycle", new Template(new ModelInstance(deliveryBicycle), 1.9f, 8, 1000, 0, false, true));
             }
-            case 23 -> {SceneAsset a=load("generated/courier-cap.glb");couriers.put("cap",a.scene.model);}
+            case 23 -> {
+                SceneAsset a=load("generated/courier-cap.glb");
+                couriers.put("cap",a.scene.model);
+                for(int i=1;i<=5;i++){
+                    try {
+                        SceneAsset ca=load("generated/courier-char" + i + ".glb");
+                        couriers.put("char" + i, ca.scene.model);
+                        trafficCouriers[i - 1] = ca.scene.model;
+                    } catch(Throwable t) {
+                        trafficCouriers[i - 1] = a.scene.model;
+                    }
+                }
+            }
             case 24 -> {SceneAsset a=load("generated/courier-helmet.glb");couriers.put("helmet",a.scene.model);}
             case 25 -> {SceneAsset a=load("generated/courier-crown.glb");couriers.put("crown",a.scene.model);}
             case 26 -> prop("barn","generated/barn.glb",28,26,2.4f,0,true,1.4f);

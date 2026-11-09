@@ -17,10 +17,10 @@ public final class TrafficSystem {
     private static String templateFor(String type) {
         return switch (type) {
             case "sports" -> "nissan"; case "bus" -> "bus"; case "motorcycle" -> "guzzi"; case "police" -> "police";
-            case "muscle_car" -> "barracuda"; case "scooter", "bicycle" -> "scooter"; case "truck" -> "truck"; default -> "cuda";
+            case "muscle_car" -> "barracuda"; case "scooter" -> "scooter"; case "bicycle" -> "bicycle"; case "truck" -> "truck"; default -> "cuda";
         };
     }
-    private static final class View { ModelInstance model, beam, tail, head, groundRefl; AssetLibrary.Template template; boolean braking; }
+    private static final class View { ModelInstance model, beam, tail, head, groundRefl, rider; Vector3 riderOffset; float riderScale; AssetLibrary.Template template; boolean braking; }
 
     public final TrafficSim sim;
     private final AssetLibrary assets;
@@ -68,6 +68,34 @@ public final class TrafficSystem {
             view.tail = kit.streak(kit.tailStreak);
             view.head = kit.streak(kit.headStreak);
         }
+
+        // Mount diverse 3D character on traffic vehicle (motorcycles, scooters, bicycles, cars)
+        int seed = v.poolSlot * 31 + Math.abs((int) v.x * 17) + Math.abs((int) v.z * 13);
+        Model courierModel = assets.pickTrafficCourier(seed);
+        if (courierModel != null) {
+            view.rider = new ModelInstance(courierModel);
+            view.riderScale = 1.0f;
+            if ("motorcycle".equals(v.type)) {
+                view.riderOffset = new Vector3(0, 0.72f, -0.14f);
+                view.riderScale = 0.98f;
+            } else if ("scooter".equals(v.type)) {
+                view.riderOffset = new Vector3(0, 0.68f, -0.12f);
+                view.riderScale = 0.95f;
+            } else if ("bicycle".equals(v.type)) {
+                view.riderOffset = new Vector3(0, 0.88f, -0.14f);
+                view.riderScale = 1.0f;
+            } else if ("truck".equals(v.type)) {
+                view.riderOffset = new Vector3(-0.48f, 1.22f, 1.45f);
+                view.riderScale = 0.90f;
+            } else if ("bus".equals(v.type)) {
+                view.riderOffset = new Vector3(-0.55f, 0.82f, 2.70f);
+                view.riderScale = 0.90f;
+            } else {
+                // Seated driver in sports, muscle_car, cuda, police
+                view.riderOffset = new Vector3(-0.36f, 0.32f, -0.20f);
+                view.riderScale = 0.88f;
+            }
+        }
         views.put(v, view);
     }
 
@@ -86,6 +114,15 @@ public final class TrafficSystem {
             TrafficSim.Vehicle v = e.getKey(); View w = e.getValue();
             float y = WorldGrid.elevation(v.x, v.z);
             w.template.placePitched(w.model, v.x, y, v.z, v.yaw * MathUtils.radiansToDegrees, v.pitch);
+            if (w.rider != null && w.riderOffset != null) {
+                w.rider.transform.idt()
+                    .translate(v.x, y, v.z)
+                    .rotate(Vector3.Y, v.yaw * MathUtils.radiansToDegrees)
+                    .rotate(Vector3.X, -v.pitch * MathUtils.radiansToDegrees)
+                    .translate(w.riderOffset)
+                    .scale(w.riderScale, w.riderScale, w.riderScale);
+                w.rider.calculateTransforms();
+            }
             boolean twoWheeler = isTwoWheeler(v.type);
             float beamWidth = twoWheeler ? 2.4f : Math.max(3.4f, w.template.width * 1.8f);
             float beamLength = twoWheeler ? 13.0f : 17.0f;
@@ -137,6 +174,7 @@ public final class TrafficSystem {
                 View w = e.getValue();
                 if (w.groundRefl != null) out.add(w.groundRefl);
                 out.add(w.model);
+                if (w.rider != null) out.add(w.rider);
                 if (night && kit.night() > .02f) {
                     /* w already defined */
                     out.add(w.beam);
