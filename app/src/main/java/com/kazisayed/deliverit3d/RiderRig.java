@@ -88,7 +88,8 @@ public final class RiderRig implements AutoCloseable {
     public void collect(Array<RenderableProvider> out,int inventory){
         out.add(headlightBeam);
         out.add(groundRefl);
-        out.add(tailStreak);
+        boolean isBicycle = "bike".equalsIgnoreCase(selected) || selected.isEmpty();
+        if(!isBicycle) out.add(tailStreak);
         if(detailed&&detailedBike!=null){
             out.add(detailedBike);
             if(detailedCourier!=null)out.add(detailedCourier);
