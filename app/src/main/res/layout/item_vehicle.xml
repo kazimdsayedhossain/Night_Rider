@@ -1,82 +1,73 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Clean vehicle card for Garage RecyclerView - Only bikes and cycles -->
-<androidx.cardview.widget.CardView
+<!-- Clean, transparent vehicle row matching the rest of the game UI -->
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/card_vehicle"
+    android:id="@+id/layout_vehicle_row"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginHorizontal="6dp"
-    android:layout_marginVertical="5dp"
+    android:orientation="vertical"
+    android:background="?android:attr/selectableItemBackground"
     android:clickable="true"
     android:focusable="true"
-    android:foreground="?android:attr/selectableItemBackground"
-    app:cardBackgroundColor="#121720"
-    app:cardCornerRadius="6dp"
-    app:cardElevation="2dp">
+    android:paddingHorizontal="4dp"
+    android:paddingVertical="10dp">
 
+    <!-- Top Row: Name, Type, Status -->
     <LinearLayout
-        android:id="@+id/layout_card_inner"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="14dp">
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
 
-        <!-- Top Row: Name, Type Badge, Price/Status Tag -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical">
-
-            <TextView
-                android:id="@+id/tv_vehicle_name"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:textColor="#FFFFFF"
-                android:textSize="15.5sp"
-                android:fontFamily="sans-serif-condensed"
-                android:textStyle="bold"
-                android:letterSpacing="0.06" />
-
-            <TextView
-                android:id="@+id/tv_vehicle_type"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textColor="#94A3B8"
-                android:textSize="11sp"
-                android:fontFamily="sans-serif-condensed"
-                android:paddingHorizontal="7dp"
-                android:paddingVertical="2dp"
-                android:background="#1E293B"
-                android:layout_marginEnd="8dp" />
-
-            <TextView
-                android:id="@+id/tv_vehicle_status"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textColor="#38BDF8"
-                android:textSize="12sp"
-                android:fontFamily="sans-serif-condensed"
-                android:textStyle="bold"
-                android:paddingHorizontal="9dp"
-                android:paddingVertical="4dp"
-                android:background="#162A45" />
-
-        </LinearLayout>
-
-        <!-- Stats line: Base Speed & Capacity -->
         <TextView
-            android:id="@+id/tv_vehicle_stats"
-            android:layout_width="match_parent"
+            android:id="@+id/tv_vehicle_name"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textColor="#FFFFFF"
+            android:textSize="15.5sp"
+            android:fontFamily="sans-serif-condensed"
+            android:textStyle="bold"
+            android:letterSpacing="0.08" />
+
+        <TextView
+            android:id="@+id/tv_vehicle_type"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="#94A3B8"
-            android:textSize="11.5sp"
+            android:textSize="11sp"
             android:fontFamily="sans-serif-condensed"
-            android:letterSpacing="0.04"
-            android:layout_marginTop="6dp" />
+            android:letterSpacing="0.06"
+            android:layout_marginEnd="12dp" />
+
+        <TextView
+            android:id="@+id/tv_vehicle_status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#FFFFFF"
+            android:textSize="12sp"
+            android:fontFamily="sans-serif-condensed"
+            android:textStyle="bold"
+            android:letterSpacing="0.08" />
 
     </LinearLayout>
 
-</androidx.cardview.widget.CardView>
+    <!-- Stats Line -->
+    <TextView
+        android:id="@+id/tv_vehicle_stats"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="#94A3B8"
+        android:textSize="11sp"
+        android:fontFamily="sans-serif-condensed"
+        android:letterSpacing="0.04"
+        android:layout_marginTop="3dp" />
+
+    <!-- Thin Divider Line matching other menus -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#14FFFFFF"
+        android:layout_marginTop="9dp" />
+
+</LinearLayout>

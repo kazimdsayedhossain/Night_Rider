@@ -13,7 +13,7 @@ import java.util.*;
  */
 public final class TrafficSim {
     public static final String[] TYPES = {"sports", "bus", "motorcycle", "police", "muscle_car", "bicycle", "scooter", "truck"};
-    private static final int MAX_CROSS = 4;
+    private static final int MAX_CROSS = 12;
     private static final float LANE = 2.2f;
 
     /** Set to false to disable all traffic vehicles on the road. */
@@ -77,7 +77,7 @@ public final class TrafficSim {
             for (int i = 0; i < profile.lanePool(); i++) {
                 String type = TYPES[i % TYPES.length];
                 boolean fwd = i % 2 == 0;
-                float startZ = (fwd ? 220f : 280f) + (i / 2) * 75f;
+                float startZ = (fwd ? 110f : 160f) + (i / 2) * 52f;
                 Vehicle v = make(type, fwd ? 1 : -1, i, 0.94f + ((i + 1) * 37 % 13) / 100f);
                 v.cross = false; v.roadX = 0; v.laneX = fwd ? LANE : -LANE; v.x = v.laneX; v.z = startZ;
                 v.yaw = fwd ? 0 : (float) Math.PI; v.sync();
@@ -261,13 +261,34 @@ public final class TrafficSim {
 
     private float followLimit(Vehicle c, Leader l, float target) {
         if (l == null) return target;
-        float desired = c.profile.gap() + c.speed * c.profile.headway();
-        if (l.gap() >= desired) return target;
-        return Math.min(target, Math.max(0, l.v().speed + (l.gap() - desired) * 1.35f));
+        float leaderSpeed = Math.max(0f, l.v().speed);
+        float leaderHalfLen = l.v().halfLength;
+        // Bumper-to-bumper physical gap
+        float bumperGap = l.gap();
+
+        // Hard minimum standstill distance: 4.0 meters buffer so vehicles NEVER touch at red lights or traffic stops
+        float standStillBuffer = 4.0f;
+        if (bumperGap <= standStillBuffer) {
+            return 0f;
+        }
+
+        // Dynamic stopping distance based on relative speed
+        float myBrake = Math.max(8.0f, c.profile.brake());
+        float relSpeed = Math.max(0f, c.speed - leaderSpeed);
+        float stoppingDist = (relSpeed * relSpeed) / (2f * myBrake);
+        float desiredGap = standStillBuffer + c.speed * c.profile.headway() + stoppingDist;
+
+        if (bumperGap < desiredGap) {
+            float factor = Math.max(0f, (bumperGap - standStillBuffer) / Math.max(0.1f, desiredGap - standStillBuffer));
+            float safeTarget = leaderSpeed * factor;
+            return Math.min(target, Math.max(0f, safeTarget));
+        }
+        return target;
     }
 
     private float signalLimit(Vehicle c, List<Light> lights, float target) {
-        float stopOffset = 5f + c.halfLength + .4f, nearest = Float.MAX_VALUE; Light sig = null;
+        float stopOffset = 5.5f + c.halfLength;
+        float nearest = Float.MAX_VALUE; Light sig = null;
         for (Light l : lights) {
             if (c.cross) {
                 if (Math.abs(l.z() - c.z) >= 4.5f) continue;
@@ -280,12 +301,16 @@ public final class TrafficSim {
         c.stoppedAtLight = false;
         if (sig == null) return target;
         float toLine = nearest - stopOffset;
-        if (toLine <= 0 || toLine > 75) return target;
-        float braking = c.speed * c.speed / (2 * c.profile.brake()) + 1.1f;
+        if (toLine <= 0 || toLine > 85) return target;
+        float braking = c.speed * c.speed / (2 * c.profile.brake()) + 2.5f;
         int st = c.cross ? sig.crossState() : sig.state();
         if (st == 2 || (st == 1 && toLine > braking)) {
-            target = Math.min(target, (float) Math.sqrt(Math.max(0, 2 * c.profile.brake() * Math.max(0, toLine - .25f))));
-            c.stoppedAtLight = toLine < .8f || target < .6f;
+            if (toLine <= 1.0f) {
+                c.stoppedAtLight = true;
+                return 0f;
+            }
+            target = Math.min(target, (float) Math.sqrt(Math.max(0, 2 * c.profile.brake() * Math.max(0, toLine - 0.8f))));
+            if (c.speed < 0.6f && toLine < 2.5f) c.stoppedAtLight = true;
         }
         return target;
     }
@@ -383,14 +408,39 @@ public final class TrafficSim {
         for (int i = 0; i < all.size(); i++) for (int j = i + 1; j < all.size(); j++) {
             Vehicle a = all.get(i), b = all.get(j);
             float dx = a.x - b.x, dz = a.z - b.z;
-            if (dx * dx + dz * dz > 100) continue;
+            if (dx * dx + dz * dz > 80) continue;
             Collision.Contact c = Collision.contact(a.box, b.box, 0);
             if (c == null) continue;
-            float sep = c.depth() + .02f;
-            boolean la = Math.abs(Math.sin(a.yaw)) < .3, lb = Math.abs(Math.sin(b.yaw)) < .3;
-            a.x += (la ? c.x() * .15f : c.x()) * sep * .5f; a.z += (la ? c.z() : c.z() * .15f) * sep * .5f;
-            b.x -= (lb ? c.x() * .15f : c.x()) * sep * .5f; b.z -= (lb ? c.z() : c.z() * .15f) * sep * .5f;
-            a.speed = Math.max(0, a.speed * .4f); b.speed = Math.max(0, b.speed * .4f); a.sync(); b.sync();
+
+            // Intelligently fix collision immediately:
+            float sep = c.depth() + 0.30f;
+            float nx = c.x(), nz = c.z();
+
+            // Push apart along normal so boxes completely disengage
+            a.x += nx * sep * 0.5f; a.z += nz * sep * 0.5f;
+            b.x -= nx * sep * 0.5f; b.z -= nz * sep * 0.5f;
+
+            // Determine which vehicle is behind in direction of travel
+            if (a.cross == b.cross) {
+                boolean aIsBehind = a.cross ? ((b.x - a.x) * a.dir > 0) : ((b.z - a.z) * a.dir > 0);
+                if (aIsBehind) {
+                    a.speed = 0f; a.prevSpeed = 0f;
+                    if (a.cross) a.x -= a.dir * 0.6f; else a.z -= a.dir * 0.6f;
+                } else {
+                    b.speed = 0f; b.prevSpeed = 0f;
+                    if (b.cross) b.x -= b.dir * 0.6f; else b.z -= b.dir * 0.6f;
+                }
+            } else {
+                // Crossing collision: yielding vehicle halts and backs off slightly
+                if (a.speed >= b.speed) {
+                    b.speed = 0f; b.prevSpeed = 0f;
+                    if (b.cross) b.x -= b.dir * 0.8f; else b.z -= b.dir * 0.8f;
+                } else {
+                    a.speed = 0f; a.prevSpeed = 0f;
+                    if (a.cross) a.x -= a.dir * 0.8f; else a.z -= a.dir * 0.8f;
+                }
+            }
+            a.sync(); b.sync();
         }
     }
 

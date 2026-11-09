@@ -13,16 +13,16 @@
         android:scaleType="centerCrop"
         android:contentDescription="Background" />
 
-    <!-- Left Section: Vehicle Fleet Items (Bikes & Cycles) -->
+    <!-- Left Section: Vehicle Fleet Items (Bikes & Cycles) - Clean text list matching rest of UI -->
     <LinearLayout
         android:id="@+id/layout_left_section"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        android:layout_marginStart="24dp"
-        android:layout_marginTop="28dp"
-        android:layout_marginBottom="28dp"
-        android:layout_marginEnd="16dp"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="32dp"
+        android:layout_marginBottom="32dp"
+        android:layout_marginEnd="24dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/layout_right_section"
         app:layout_constraintTop_toTopOf="parent"
@@ -33,21 +33,27 @@
             android:layout_height="wrap_content"
             android:text="GARAGE FLEET"
             android:textColor="#FFFFFF"
-            android:textSize="17sp"
+            android:textSize="18sp"
             android:textStyle="bold"
             android:fontFamily="sans-serif-condensed"
-            android:letterSpacing="0.14"
-            android:layout_marginBottom="4dp" />
+            android:letterSpacing="0.14" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="SELECT ANY PURCHASED VEHICLE TO TUNE ACCESSORIES"
-            android:textColor="#38BDF8"
+            android:textColor="#94A3B8"
             android:textSize="11sp"
             android:fontFamily="sans-serif-condensed"
             android:letterSpacing="0.08"
-            android:layout_marginBottom="10dp" />
+            android:layout_marginTop="3dp"
+            android:layout_marginBottom="8dp" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#26FFFFFF"
+            android:layout_marginBottom="8dp" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rv_vehicles"
@@ -62,11 +68,11 @@
     <!-- Entire Right Window: Switches between Default Garage & Dedicated Vehicle Accessories -->
     <FrameLayout
         android:id="@+id/layout_right_section"
-        android:layout_width="380dp"
+        android:layout_width="360dp"
         android:layout_height="match_parent"
         android:layout_marginEnd="24dp"
-        android:layout_marginTop="28dp"
-        android:layout_marginBottom="28dp"
+        android:layout_marginTop="32dp"
+        android:layout_marginBottom="32dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent">
@@ -101,71 +107,55 @@
 
             </LinearLayout>
 
-            <!-- Courier Wallet Balance -->
-            <LinearLayout
-                android:id="@+id/layout_wallet_box"
-                android:layout_width="match_parent"
+            <!-- Courier Wallet Balance - Clean text -->
+            <TextView
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:background="@drawable/bg_days_gone_item"
-                android:paddingHorizontal="16dp"
-                android:paddingVertical="12dp"
-                android:layout_marginBottom="16dp"
-                android:orientation="vertical">
+                android:text="COURIER BALANCE"
+                android:textColor="#94A3B8"
+                android:textSize="10.5sp"
+                android:fontFamily="sans-serif-condensed"
+                android:letterSpacing="0.12" />
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="COURIER BALANCE"
-                    android:textColor="#94A3B8"
-                    android:textSize="10.5sp"
-                    android:fontFamily="sans-serif-condensed"
-                    android:letterSpacing="0.12" />
+            <TextView
+                android:id="@+id/tv_garage_wallet"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="WALLET: $100"
+                android:textColor="#FFFFFF"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:fontFamily="sans-serif-condensed"
+                android:letterSpacing="0.06"
+                android:layout_marginTop="2dp"
+                android:layout_marginBottom="16dp" />
 
-                <TextView
-                    android:id="@+id/tv_garage_wallet"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="WALLET: $100"
-                    android:textColor="#10B981"
-                    android:textSize="17sp"
-                    android:textStyle="bold"
-                    android:fontFamily="sans-serif-condensed"
-                    android:letterSpacing="0.08"
-                    android:layout_marginTop="2dp" />
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#26FFFFFF"
+                android:layout_marginBottom="16dp" />
 
-            </LinearLayout>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="WORKSHOP TUNING"
+                android:textColor="#FFFFFF"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:fontFamily="sans-serif-condensed"
+                android:letterSpacing="0.10" />
 
-            <!-- Guide hint box -->
-            <LinearLayout
+            <TextView
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"
-                android:background="@drawable/bg_days_gone_item"
-                android:padding="16dp"
-                android:orientation="vertical"
-                android:layout_marginBottom="16dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="WORKSHOP TUNING"
-                    android:textColor="#38BDF8"
-                    android:textSize="12sp"
-                    android:textStyle="bold"
-                    android:fontFamily="sans-serif-condensed"
-                    android:letterSpacing="0.10" />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Select any purchased vehicle on the left to open its accessories section and tune performance parts."
-                    android:textColor="#94A3B8"
-                    android:textSize="11.5sp"
-                    android:fontFamily="sans-serif-condensed"
-                    android:lineSpacingExtra="4dp"
-                    android:layout_marginTop="8dp" />
-
-            </LinearLayout>
+                android:text="Select any purchased vehicle on the left to inspect its performance parts and accessories."
+                android:textColor="#94A3B8"
+                android:textSize="12sp"
+                android:fontFamily="sans-serif-condensed"
+                android:lineSpacingExtra="4dp"
+                android:layout_marginTop="6dp" />
 
             <TextView
                 android:id="@+id/btn_back_garage"
@@ -184,7 +174,7 @@
 
         </LinearLayout>
 
-        <!-- State B: Dedicated Accessories Section in the Entire Right Window -->
+        <!-- State B: Dedicated Accessories Section in the Entire Right Window - Clean text, no color/boxes -->
         <LinearLayout
             android:id="@+id/layout_accessories_section"
             android:layout_width="match_parent"
@@ -199,7 +189,7 @@
                 android:background="@drawable/bg_days_gone_box"
                 android:paddingHorizontal="16dp"
                 android:paddingVertical="8dp"
-                android:layout_marginBottom="10dp"
+                android:layout_marginBottom="12dp"
                 android:orientation="vertical">
 
                 <TextView
@@ -217,36 +207,39 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="ACCESSORIES &amp; TUNING"
-                    android:textColor="#38BDF8"
+                    android:textColor="#94A3B8"
                     android:textSize="10.5sp"
                     android:fontFamily="sans-serif-condensed"
                     android:letterSpacing="0.10" />
 
             </LinearLayout>
 
-            <!-- Wallet readout -->
+            <!-- Wallet readout - Clean text -->
             <TextView
                 android:id="@+id/tv_acc_wallet"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@drawable/bg_days_gone_item"
-                android:paddingHorizontal="14dp"
-                android:paddingVertical="8dp"
                 android:text="WALLET: $100"
-                android:textColor="#10B981"
-                android:textSize="13.5sp"
+                android:textColor="#FFFFFF"
+                android:textSize="14sp"
                 android:textStyle="bold"
                 android:fontFamily="sans-serif-condensed"
                 android:letterSpacing="0.08"
-                android:layout_marginBottom="10dp" />
+                android:layout_marginBottom="8dp" />
 
-            <!-- Accessories List -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#26FFFFFF"
+                android:layout_marginBottom="8dp" />
+
+            <!-- Accessories List: Clean text rows, no dark rectangular boxes behind every item -->
             <ScrollView
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"
                 android:scrollbars="none"
-                android:layout_marginBottom="10dp">
+                android:layout_marginBottom="12dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -259,9 +252,8 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
-                        android:background="@drawable/bg_accessory_card"
-                        android:padding="12dp"
-                        android:layout_marginBottom="8dp">
+                        android:paddingVertical="8dp"
+                        android:layout_marginBottom="6dp">
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -276,7 +268,7 @@
                                 android:layout_weight="1"
                                 android:text="SPEED PART"
                                 android:textColor="#FFFFFF"
-                                android:textSize="13.5sp"
+                                android:textSize="14sp"
                                 android:textStyle="bold"
                                 android:fontFamily="sans-serif-condensed" />
 
@@ -285,7 +277,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="TIER 0/3"
-                                android:textColor="#F59E0B"
+                                android:textColor="#CBD5E1"
                                 android:textSize="11sp"
                                 android:textStyle="bold"
                                 android:fontFamily="sans-serif-condensed" />
@@ -299,24 +291,31 @@
                             android:text="+12% Speed Boost"
                             android:textColor="#94A3B8"
                             android:textSize="11sp"
+                            android:fontFamily="sans-serif-condensed"
                             android:layout_marginTop="2dp"
-                            android:layout_marginBottom="8dp" />
+                            android:layout_marginBottom="6dp" />
 
                         <TextView
                             android:id="@+id/btn_acc_speed_buy"
-                            android:layout_width="match_parent"
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="BUY ($150)"
                             android:textColor="#FFFFFF"
-                            android:textSize="12sp"
+                            android:textSize="12.5sp"
                             android:textStyle="bold"
                             android:fontFamily="sans-serif-condensed"
                             android:letterSpacing="0.08"
-                            android:gravity="center"
-                            android:paddingVertical="7dp"
-                            android:background="@drawable/bg_btn_dialog_buy"
+                            android:paddingVertical="4dp"
+                            android:paddingHorizontal="10dp"
+                            android:background="@drawable/bg_days_gone_box"
                             android:clickable="true"
                             android:focusable="true" />
+
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="1dp"
+                            android:background="#14FFFFFF"
+                            android:layout_marginTop="8dp" />
 
                     </LinearLayout>
 
@@ -326,9 +325,8 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
-                        android:background="@drawable/bg_accessory_card"
-                        android:padding="12dp"
-                        android:layout_marginBottom="8dp">
+                        android:paddingVertical="8dp"
+                        android:layout_marginBottom="6dp">
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -343,7 +341,7 @@
                                 android:layout_weight="1"
                                 android:text="CARGO PART"
                                 android:textColor="#FFFFFF"
-                                android:textSize="13.5sp"
+                                android:textSize="14sp"
                                 android:textStyle="bold"
                                 android:fontFamily="sans-serif-condensed" />
 
@@ -352,7 +350,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="TIER 0/3"
-                                android:textColor="#10B981"
+                                android:textColor="#CBD5E1"
                                 android:textSize="11sp"
                                 android:textStyle="bold"
                                 android:fontFamily="sans-serif-condensed" />
@@ -366,24 +364,31 @@
                             android:text="+2 Cargo Slots"
                             android:textColor="#94A3B8"
                             android:textSize="11sp"
+                            android:fontFamily="sans-serif-condensed"
                             android:layout_marginTop="2dp"
-                            android:layout_marginBottom="8dp" />
+                            android:layout_marginBottom="6dp" />
 
                         <TextView
                             android:id="@+id/btn_acc_cargo_buy"
-                            android:layout_width="match_parent"
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="BUY ($100)"
                             android:textColor="#FFFFFF"
-                            android:textSize="12sp"
+                            android:textSize="12.5sp"
                             android:textStyle="bold"
                             android:fontFamily="sans-serif-condensed"
                             android:letterSpacing="0.08"
-                            android:gravity="center"
-                            android:paddingVertical="7dp"
-                            android:background="@drawable/bg_btn_dialog_buy"
+                            android:paddingVertical="4dp"
+                            android:paddingHorizontal="10dp"
+                            android:background="@drawable/bg_days_gone_box"
                             android:clickable="true"
                             android:focusable="true" />
+
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="1dp"
+                            android:background="#14FFFFFF"
+                            android:layout_marginTop="8dp" />
 
                     </LinearLayout>
 
@@ -393,8 +398,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
-                        android:background="@drawable/bg_accessory_card"
-                        android:padding="12dp"
+                        android:paddingVertical="8dp"
                         android:layout_marginBottom="4dp">
 
                         <LinearLayout
@@ -410,7 +414,7 @@
                                 android:layout_weight="1"
                                 android:text="UTILITY PART"
                                 android:textColor="#FFFFFF"
-                                android:textSize="13.5sp"
+                                android:textSize="14sp"
                                 android:textStyle="bold"
                                 android:fontFamily="sans-serif-condensed" />
 
@@ -419,7 +423,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="TIER 0/3"
-                                android:textColor="#38BDF8"
+                                android:textColor="#CBD5E1"
                                 android:textSize="11sp"
                                 android:textStyle="bold"
                                 android:fontFamily="sans-serif-condensed" />
@@ -433,31 +437,38 @@
                             android:text="+15% Wet Grip"
                             android:textColor="#94A3B8"
                             android:textSize="11sp"
+                            android:fontFamily="sans-serif-condensed"
                             android:layout_marginTop="2dp"
-                            android:layout_marginBottom="8dp" />
+                            android:layout_marginBottom="6dp" />
 
                         <TextView
                             android:id="@+id/btn_acc_util_buy"
-                            android:layout_width="match_parent"
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="BUY ($120)"
                             android:textColor="#FFFFFF"
-                            android:textSize="12sp"
+                            android:textSize="12.5sp"
                             android:textStyle="bold"
                             android:fontFamily="sans-serif-condensed"
                             android:letterSpacing="0.08"
-                            android:gravity="center"
-                            android:paddingVertical="7dp"
-                            android:background="@drawable/bg_btn_dialog_buy"
+                            android:paddingVertical="4dp"
+                            android:paddingHorizontal="10dp"
+                            android:background="@drawable/bg_days_gone_box"
                             android:clickable="true"
                             android:focusable="true" />
+
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="1dp"
+                            android:background="#14FFFFFF"
+                            android:layout_marginTop="8dp" />
 
                     </LinearLayout>
 
                 </LinearLayout>
             </ScrollView>
 
-            <!-- Bottom Actions: Equip & Back to Garage -->
+            <!-- Bottom Actions: Equip & Back to Garage - Clean text matching UI -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -470,13 +481,13 @@
                     android:layout_weight="1"
                     android:text="EQUIP"
                     android:textColor="#FFFFFF"
-                    android:textSize="13sp"
+                    android:textSize="14sp"
                     android:textStyle="bold"
                     android:fontFamily="sans-serif-condensed"
                     android:gravity="center"
                     android:paddingVertical="10dp"
-                    android:layout_marginEnd="6dp"
-                    android:background="@drawable/bg_btn_dialog_buy"
+                    android:layout_marginEnd="8dp"
+                    android:background="@drawable/bg_days_gone_box"
                     android:clickable="true"
                     android:focusable="true" />
 
@@ -487,11 +498,11 @@
                     android:layout_weight="1"
                     android:text="BACK"
                     android:textColor="#CBD5E1"
-                    android:textSize="13sp"
+                    android:textSize="14sp"
                     android:fontFamily="sans-serif-condensed"
                     android:gravity="center"
                     android:paddingVertical="10dp"
-                    android:background="@drawable/bg_btn_dialog_cancel"
+                    android:background="@drawable/bg_days_gone_item"
                     android:clickable="true"
                     android:focusable="true" />
 

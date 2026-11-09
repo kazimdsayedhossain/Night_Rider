@@ -1,6 +1,7 @@
 package com.kazisayed.deliverit3d.adapter;
 
 import android.content.Context;
+import android.graphics.Typeface;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import androidx.annotation.NonNull;
@@ -60,33 +61,34 @@ public class VehicleAdapter extends RecyclerView.Adapter<VehicleAdapter.VehicleV
         boolean isEquipped = v.getId().equals(equippedId);
         boolean isSelected = v.getId().equals(selectedVehicleId);
 
+        // Vehicle Name
         holder.binding.tvVehicleName.setText(v.getName().toUpperCase(Locale.ROOT));
+        holder.binding.tvVehicleName.setTypeface(Typeface.create("sans-serif-condensed", isSelected || isEquipped ? Typeface.BOLD : Typeface.NORMAL));
+        holder.binding.tvVehicleName.setTextColor(isSelected || isEquipped ? 0xFFFFFFFF : 0xFFCBD5E1);
+
+        // Vehicle Type and Stats (clean text, no colored pill boxes)
         holder.binding.tvVehicleType.setText(v.getType().toUpperCase(Locale.ROOT));
         holder.binding.tvVehicleStats.setText(v.getStats().toUpperCase(Locale.ROOT));
 
-        // Highlight selected vehicle card in list
-        if (isSelected) {
-            holder.binding.cardVehicle.setCardBackgroundColor(0xFF1E293B);
-        } else {
-            holder.binding.cardVehicle.setCardBackgroundColor(0xFF121720);
-        }
-
-        // Status badge: Purchased, Equipped, or Buy ($...)
+        // Status text (clean text, no colored boxes, just bold text if necessary)
         if (isEquipped) {
             holder.binding.tvVehicleStatus.setText("PURCHASED [EQUIPPED]");
-            holder.binding.tvVehicleStatus.setTextColor(0xFF10B981);
-            holder.binding.tvVehicleStatus.setBackgroundColor(0x2210B981);
+            holder.binding.tvVehicleStatus.setTypeface(Typeface.create("sans-serif-condensed", Typeface.BOLD));
+            holder.binding.tvVehicleStatus.setTextColor(0xFFFFFFFF);
         } else if (isOwned) {
             holder.binding.tvVehicleStatus.setText("PURCHASED");
-            holder.binding.tvVehicleStatus.setTextColor(0xFF38BDF8);
-            holder.binding.tvVehicleStatus.setBackgroundColor(0x2238BDF8);
+            holder.binding.tvVehicleStatus.setTypeface(Typeface.create("sans-serif-condensed", Typeface.NORMAL));
+            holder.binding.tvVehicleStatus.setTextColor(0xFFCBD5E1);
         } else {
             holder.binding.tvVehicleStatus.setText("BUY ($" + String.format(Locale.US, "%,d", v.getPrice()) + ")");
-            holder.binding.tvVehicleStatus.setTextColor(0xFFF59E0B);
-            holder.binding.tvVehicleStatus.setBackgroundColor(0x22F59E0B);
+            holder.binding.tvVehicleStatus.setTypeface(Typeface.create("sans-serif-condensed", Typeface.BOLD));
+            holder.binding.tvVehicleStatus.setTextColor(0xFFFFFFFF);
         }
 
-        // Card Click Handler
+        // Row background: transparent, clean text list matching rest of game UI
+        holder.binding.layoutVehicleRow.setBackgroundColor(isSelected ? 0x24FFFFFF : 0x00000000);
+
+        // Click Handler
         holder.itemView.setOnClickListener(view -> {
             if (isOwned) {
                 selectedVehicleId = v.getId();

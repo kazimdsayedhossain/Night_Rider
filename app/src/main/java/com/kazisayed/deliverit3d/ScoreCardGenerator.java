@@ -12,6 +12,11 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.util.Locale;
 
+/**
+ * ScoreCardGenerator: Minimal, elegant, monochrome Courier Dossier image.
+ * Zero multicolor / AI-slop graphics, no colored vertical or horizontal lines,
+ * minimal text, crisp condensed typography.
+ */
 public final class ScoreCardGenerator {
     private static final String TAG = "ScoreCard";
 
@@ -24,7 +29,7 @@ public final class ScoreCardGenerator {
         Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bitmap);
 
-        // 1. Load Background: First loading screen image (loading_bg.jpg from assets or bg_foggy_forest)
+        // 1. Dark Cinematic Background
         Bitmap bg = null;
         try (InputStream is = context.getAssets().open("loading_bg.jpg")) {
             bg = BitmapFactory.decodeStream(is);
@@ -40,288 +45,166 @@ public final class ScoreCardGenerator {
             Rect dst = new Rect(0, 0, width, height);
             canvas.drawBitmap(bg, src, dst, paint);
         } else {
-            canvas.drawColor(0xFF070B12);
+            canvas.drawColor(0xFF090D14);
         }
 
-        // 2. Translucent Vignette & Atmospheric Tint (ensures perfect readability)
+        // 2. Heavy 82% dark vignette overlay (guarantees high text contrast, no colored wash)
         paint.setStyle(Paint.Style.FILL);
-        paint.setColor(0xB3060A10); // 70% dark frosted glass
+        paint.setColor(0xD1080C12);
         canvas.drawRect(0, 0, width, height, paint);
 
-        // Linear gradient for bottom/top depth
+        // Subtle gradient
         Paint gradPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         Shader vGrad = new LinearGradient(0, 0, 0, height,
-                new int[]{0xCC000000, 0x44000000, 0xDD000000},
+                new int[]{0xEE05080E, 0x9905080E, 0xF505080E},
                 new float[]{0f, 0.45f, 1f}, Shader.TileMode.CLAMP);
         gradPaint.setShader(vGrad);
         canvas.drawRect(0, 0, width, height, gradPaint);
 
-        // 3. Cyberpunk Low-Poly Frame & Corner Accents
+        // 3. Ultra-subtle border frame
         paint.setStyle(Paint.Style.STROKE);
-        paint.setStrokeWidth(2f);
-        paint.setColor(0x40FFFFFF);
-        canvas.drawRect(36, 36, width - 36, height - 36, paint);
+        paint.setStrokeWidth(1.5f);
+        paint.setColor(0x22FFFFFF); // Faint clean white border
+        canvas.drawRect(40, 40, width - 40, height - 40, paint);
 
-        paint.setStrokeWidth(3f);
-        paint.setColor(0xCC38BDF8); // Cyan corner brackets
-        // Top-Left corner
-        canvas.drawLine(32, 32, 80, 32, paint);
-        canvas.drawLine(32, 32, 32, 80, paint);
-        // Top-Right corner
-        canvas.drawLine(width - 80, 32, width - 32, 32, paint);
-        canvas.drawLine(width - 32, 32, width - 32, 80, paint);
-        // Bottom-Left corner
-        canvas.drawLine(32, height - 32, 80, height - 32, paint);
-        canvas.drawLine(32, height - 80, 32, height - 32, paint);
-        // Bottom-Right corner
-        canvas.drawLine(width - 80, height - 32, width - 32, height - 32, paint);
-        canvas.drawLine(width - 32, height - 80, width - 32, height - 32, paint);
-
-        // 4. Header: Game Logo & Title
+        // 4. Header: Game Logo & Title (Monochrome, crisp condensed)
         paint.setStyle(Paint.Style.FILL);
         paint.setTypeface(Typeface.create("sans-serif-condensed", Typeface.BOLD));
-        paint.setTextSize(36f);
+        paint.setTextSize(34f);
         paint.setLetterSpacing(0.22f);
         paint.setColor(0xFFFFFFFF);
-        paint.setShadowLayer(8, 0, 3, 0xEE000000);
-        canvas.drawText("NIGHT RIDER", 64, 96, paint);
-        paint.clearShadowLayer();
+        canvas.drawText("NIGHT RIDER", 70, 96, paint);
 
-        paint.setTextSize(13f);
-        paint.setLetterSpacing(0.16f);
-        paint.setColor(0xFF38BDF8); // Cyan
-        canvas.drawText("SYNDICATE COURIER DOSSIER // OFFICIAL DISPATCH RECORD", 64, 122, paint);
+        paint.setTextSize(12.5f);
+        paint.setLetterSpacing(0.14f);
+        paint.setColor(0xFF94A3B8);
+        canvas.drawText("COURIER DOSSIER // OFFICIAL DISPATCH RECORD", 70, 124, paint);
 
-        paint.setStrokeWidth(1.5f);
-        paint.setColor(0x33CBD5E1);
-        canvas.drawLine(64, 138, width - 64, 138, paint);
+        // Subtle horizontal divider (1px faint white)
+        paint.setStrokeWidth(1f);
+        paint.setColor(0x1FFFFFFF);
+        canvas.drawLine(70, 148, width - 70, 148, paint);
 
-        // 5. Left Column: Operator Profile Card
-        float col1X = 64;
-        float col1Y = 164;
-        float col1W = 340;
-        float col1H = 470;
+        // 5. Rider Section: Avatar + Name + ID
+        float avatarX = 70;
+        float avatarY = 176;
+        float avatarSize = 76;
 
-        // Card background
-        paint.setStyle(Paint.Style.FILL);
-        paint.setColor(0x2EFFFFFF);
-        drawChamfered(canvas, col1X, col1Y, col1X + col1W, col1Y + col1H, 10, paint);
-        paint.setStyle(Paint.Style.STROKE);
-        paint.setStrokeWidth(1.5f);
-        paint.setColor(0x40FFFFFF);
-        drawChamfered(canvas, col1X, col1Y, col1X + col1W, col1Y + col1H, 10, paint);
-
-        // Avatar icon (custom profile photo or one of 5 default avatars)
+        // Draw Avatar
         try {
             Bitmap avBmp = null;
             if (user.hasCustomProfilePic()) {
                 Bitmap custom = user.getProfilePicBitmap();
-                if (custom != null) {
-                    avBmp = UserManager.getCircularBitmap(custom);
-                }
+                if (custom != null) avBmp = UserManager.getCircularBitmap(custom);
             }
             if (avBmp == null) {
-                int avatarRes = UserManager.getDefaultAvatarDrawable(user.getAvatarId());
-                avBmp = BitmapFactory.decodeResource(context.getResources(), avatarRes);
+                int defRes = UserManager.getDefaultAvatarDrawable(user.getAvatarId());
+                Bitmap defBmp = BitmapFactory.decodeResource(context.getResources(), defRes);
+                if (defBmp != null) avBmp = UserManager.getCircularBitmap(defBmp);
             }
             if (avBmp != null) {
-                Rect avDst = new Rect((int)(col1X + col1W / 2 - 50), (int)(col1Y + 30), (int)(col1X + col1W / 2 + 50), (int)(col1Y + 130));
-                canvas.drawBitmap(avBmp, null, avDst, paint);
+                Rect aSrc = new Rect(0, 0, avBmp.getWidth(), avBmp.getHeight());
+                RectF aDst = new RectF(avatarX, avatarY, avatarX + avatarSize, avatarY + avatarSize);
+                canvas.drawBitmap(avBmp, aSrc, aDst, paint);
+            } else {
+                paint.setStyle(Paint.Style.FILL);
+                paint.setColor(0xFF1E293B);
+                canvas.drawCircle(avatarX + avatarSize / 2f, avatarY + avatarSize / 2f, avatarSize / 2f, paint);
             }
         } catch (Exception ignored) {}
 
-        // Avatar frame
+        // Avatar subtle outline
         paint.setStyle(Paint.Style.STROKE);
-        paint.setStrokeWidth(2f);
-        paint.setColor(0x8838BDF8);
-        canvas.drawCircle(col1X + col1W / 2, col1Y + 80, 52, paint);
+        paint.setStrokeWidth(1.5f);
+        paint.setColor(0x40FFFFFF);
+        canvas.drawCircle(avatarX + avatarSize / 2f, avatarY + avatarSize / 2f, avatarSize / 2f, paint);
 
-        // Operator name
+        // Rider Name & ID
         paint.setStyle(Paint.Style.FILL);
-        paint.setTextAlign(Paint.Align.CENTER);
         paint.setTypeface(Typeface.create("sans-serif-condensed", Typeface.BOLD));
         paint.setTextSize(26f);
-        paint.setLetterSpacing(0.12f);
+        paint.setLetterSpacing(0.08f);
         paint.setColor(0xFFFFFFFF);
-        canvas.drawText(user.getUsername().toUpperCase(Locale.ROOT), col1X + col1W / 2, col1Y + 172, paint);
+        canvas.drawText(user.getUsername().toUpperCase(Locale.ROOT), avatarX + avatarSize + 22, avatarY + 34, paint);
 
-        // Operator UID
-        String uid = user.getUid() != null && user.getUid().length() >= 8 ? user.getUid().substring(0, 8).toUpperCase(Locale.ROOT) : "GUEST";
-        paint.setTextSize(13f);
-        paint.setLetterSpacing(0.14f);
-        paint.setColor(0xFF94A3B8);
-        canvas.drawText("OPERATOR ID: #" + uid, col1X + col1W / 2, col1Y + 196, paint);
-
-        // Divider inside profile card
-        paint.setColor(0x33CBD5E1);
-        canvas.drawLine(col1X + 24, col1Y + 220, col1X + col1W - 24, col1Y + 220, paint);
-
-        // Global Rank Pill
-        paint.setStyle(Paint.Style.FILL);
-        paint.setColor(0x33F59E0B);
-        drawChamfered(canvas, col1X + 36, col1Y + 242, col1X + col1W - 36, col1Y + 288, 6, paint);
-        paint.setStyle(Paint.Style.STROKE);
-        paint.setColor(0x88F59E0B);
-        drawChamfered(canvas, col1X + 36, col1Y + 242, col1X + col1W - 36, col1Y + 288, 6, paint);
-
-        paint.setStyle(Paint.Style.FILL);
-        paint.setTypeface(Typeface.create("sans-serif-condensed", Typeface.BOLD));
-        paint.setTextSize(16f);
-        paint.setLetterSpacing(0.14f);
-        paint.setColor(0xFFFCD34D);
-        canvas.drawText("GLOBAL RANK #" + user.getGlobalRank(), col1X + col1W / 2, col1Y + 272, paint);
-
-        // Equipped vehicle badge
-        String eqVeh = saves.text("deliver3d_vehicle", "bike");
-        String vehName = switch (eqVeh) {
-            case "scooter" -> "URBAN SCOOTER";
-            case "superbike" -> "CRUISER MOTORCYCLE";
-            case "gold" -> "GOLD SPECIAL BIKE";
-            default -> "CLASSIC BICYCLE";
-        };
-        paint.setTextSize(11f);
-        paint.setLetterSpacing(0.12f);
-        paint.setColor(0xFF94A3B8);
-        canvas.drawText("FLEET DEPLOYED", col1X + col1W / 2, col1Y + 340, paint);
-        paint.setTextSize(15f);
-        paint.setColor(0xFFFFFFFF);
-        canvas.drawText(vehName, col1X + col1W / 2, col1Y + 364, paint);
-
-        // Rating
-        paint.setTextSize(11f);
-        paint.setColor(0xFF94A3B8);
-        canvas.drawText("CLEARANCE RATING", col1X + col1W / 2, col1Y + 410, paint);
-        paint.setTextSize(18f);
-        paint.setColor(0xFF38BDF8);
-        canvas.drawText("\u2605 \u2605 \u2605 ELITE", col1X + col1W / 2, col1Y + 436, paint);
-
-        // 6. Right Side: Statistics Grid (4 Big Stat Cards)
-        paint.setTextAlign(Paint.Align.LEFT);
-        float gridX = 432;
-        float gridY = 164;
-        float cardW = 380;
-        float cardH = 104;
-        float gapX = 24;
-        float gapY = 18;
-
-        // Stat 1: Total Points
-        drawStatCard(canvas, gridX, gridY, cardW, cardH,
-                "TOTAL REPUTATION POINTS",
-                String.format(Locale.US, "%,d PTS", user.getPoints()),
-                "ACHIEVED ON URBAN TRANSIT ROUTES", 0xFF38BDF8, paint);
-
-        // Stat 2: Total Coins Collected
-        drawStatCard(canvas, gridX + cardW + gapX, gridY, cardW, cardH,
-                "TOTAL COINS COLLECTED",
-                String.format(Locale.US, "%,d COINS", user.getTotalCoins()),
-                "STREET TOKENS SECURED", 0xFFF59E0B, paint);
-
-        // Stat 3: Total Money Earned
-        drawStatCard(canvas, gridX, gridY + cardH + gapY, cardW, cardH,
-                "LIFETIME DISPATCH EARNINGS",
-                "$" + String.format(Locale.US, "%,d", user.getTotalMoney()),
-                "CONTRACT PAYOUTS RECEIVED", 0xFF10B981, paint);
-
-        // Stat 4: Deliveries Completed
-        drawStatCard(canvas, gridX + cardW + gapX, gridY + cardH + gapY, cardW, cardH,
-                "COMPLETED DELIVERIES",
-                user.getCompletedDeliveries() + " PACKAGES",
-                "100% ROUTE SUCCESS RATIO", 0xFFA78BFA, paint);
-
-        // Stat 5: Playtime (Wide banner card spanning both columns)
-        float bannerY = gridY + (cardH + gapY) * 2;
-        float bannerW = cardW * 2 + gapX;
-        float bannerH = 110;
-
-        paint.setStyle(Paint.Style.FILL);
-        paint.setColor(0x28FFFFFF);
-        drawChamfered(canvas, gridX, bannerY, gridX + bannerW, bannerY + bannerH, 8, paint);
-        paint.setStyle(Paint.Style.STROKE);
-        paint.setStrokeWidth(1.2f);
-        paint.setColor(0x35FFFFFF);
-        drawChamfered(canvas, gridX, bannerY, gridX + bannerW, bannerY + bannerH, 8, paint);
-
-        paint.setStyle(Paint.Style.FILL);
-        paint.setTypeface(Typeface.create("sans-serif-condensed", Typeface.BOLD));
+        String uid = user.getUid();
+        String shortUid = (uid != null && uid.length() > 8) ? uid.substring(0, 8).toUpperCase(Locale.ROOT) : (uid != null ? uid.toUpperCase(Locale.ROOT) : "GUEST");
         paint.setTextSize(12f);
-        paint.setLetterSpacing(0.14f);
+        paint.setTypeface(Typeface.create("sans-serif-condensed", Typeface.NORMAL));
+        paint.setLetterSpacing(0.12f);
         paint.setColor(0xFF94A3B8);
-        canvas.drawText("LIFETIME TIME IN TRANSIT", gridX + 24, bannerY + 34, paint);
+        canvas.drawText("ID: #" + shortUid + "  |  REGISTERED COURIER", avatarX + avatarSize + 22, avatarY + 62, paint);
 
+        // Divider
+        paint.setStrokeWidth(1f);
+        paint.setColor(0x1FFFFFFF);
+        canvas.drawLine(70, 280, width - 70, 280, paint);
+
+        // 6. Minimal 4-Column Key Statistics (Pure White bold numbers, muted slate labels, NO multicolor!)
+        float startX = 70;
+        float statY = 325;
+        float colWidth = (width - 140) / 4f;
+
+        // Stat 1: Total Earnings
+        drawStatColumn(canvas, startX + 0 * colWidth, statY, "TOTAL EARNINGS", "$" + String.format(Locale.US, "%,d", user.getCash()), paint);
+
+        // Stat 2: Syndicate Score
+        drawStatColumn(canvas, startX + 1 * colWidth, statY, "SYNDICATE SCORE", String.format(Locale.US, "%,d PTS", user.getPoints()), paint);
+
+        // Stat 3: Deliveries
+        drawStatColumn(canvas, startX + 2 * colWidth, statY, "DELIVERIES", user.getCompletedDeliveries() + " COMPLETED", paint);
+
+        // Stat 4: Time in Transit
         long totalSecs = user.getTotalPlaytime();
         long hours = totalSecs / 3600;
         long mins = (totalSecs % 3600) / 60;
         long secs = totalSecs % 60;
-        String playtimeStr = (hours > 0 ? (hours + "h ") : "") + mins + "m " + secs + "s";
+        String playtimeStr = (hours > 0 ? (hours + "H ") : "") + mins + "M " + secs + "S";
+        drawStatColumn(canvas, startX + 3 * colWidth, statY, "TIME IN TRANSIT", playtimeStr, paint);
 
-        paint.setTextSize(32f);
+        // Divider
+        paint.setStrokeWidth(1f);
+        paint.setColor(0x1FFFFFFF);
+        canvas.drawLine(70, 435, width - 70, 435, paint);
+
+        // 7. Active Vehicle & Equipment Details (Clean text)
+        String activeVehicleId = saves.text("deliver3d_vehicle", "bike");
+        com.kazisayed.deliverit3d.model.VehicleSpec activeSpec = com.kazisayed.deliverit3d.model.VehicleSpec.findById(activeVehicleId);
+        String vName = activeSpec != null ? activeSpec.getName().toUpperCase(Locale.ROOT) : "FIXIE MESSENGER";
+        String vType = activeSpec != null ? activeSpec.getType().toUpperCase(Locale.ROOT) : "BICYCLE";
+        int vSpeed = activeSpec != null ? (int) activeSpec.getBaseSpeedKmh() : 30;
+
+        paint.setStyle(Paint.Style.FILL);
+        paint.setTypeface(Typeface.create("sans-serif-condensed", Typeface.BOLD));
+        paint.setTextSize(13f);
         paint.setLetterSpacing(0.10f);
-        paint.setColor(0xFFF8FAFC);
-        canvas.drawText(playtimeStr, gridX + 24, bannerY + 76, paint);
+        paint.setColor(0xFFCBD5E1);
+        canvas.drawText("ACTIVE VEHICLE: " + vName + " (" + vType + ")  |  BASE SPEED: " + vSpeed + " KM/H", 70, 475, paint);
 
+        // 8. Footer (Minimal, discreet)
+        paint.setTypeface(Typeface.create("sans-serif-condensed", Typeface.NORMAL));
         paint.setTextSize(11f);
-        paint.setLetterSpacing(0.12f);
-        paint.setColor(0xFF64748B);
-        canvas.drawText("AUTO-SYNCED TO WORLDWIDE SYNDICATE DATABASE", gridX + 24, bannerY + 96, paint);
-
-        // 7. Footer: Verification Watermark
-        paint.setTextSize(10f);
-        paint.setLetterSpacing(0.15f);
-        paint.setColor(0xFF64748B);
-        paint.setTextAlign(Paint.Align.RIGHT);
-        canvas.drawText("NIGHT RIDER 3D // DISPATCH ENGINE v2.0 // VERIFIED DOSSIER", width - 64, height - 48, paint);
+        paint.setLetterSpacing(0.14f);
+        paint.setColor(0xFF475569);
+        canvas.drawText("NIGHT RIDER 3D // DISPATCH ENGINE v2.0 // OFFICIAL DISPATCH RECORD", 70, height - 70, paint);
 
         return bitmap;
     }
 
-    private static void drawStatCard(Canvas canvas, float x, float y, float w, float h, String label, String value, String sub, int accentColor, Paint paint) {
+    private static void drawStatColumn(Canvas canvas, float x, float y, String label, String value, Paint paint) {
+        // Label: Muted slate, bold condensed, tracked
         paint.setStyle(Paint.Style.FILL);
-        paint.setColor(0x26FFFFFF);
-        drawChamfered(canvas, x, y, x + w, y + h, 8, paint);
-
-        paint.setStyle(Paint.Style.STROKE);
-        paint.setStrokeWidth(1.2f);
-        paint.setColor(0x33FFFFFF);
-        drawChamfered(canvas, x, y, x + w, y + h, 8, paint);
-
-        // Accent indicator bar on left edge of card
-        paint.setStyle(Paint.Style.FILL);
-        paint.setColor(accentColor);
-        canvas.drawRect(x, y + 16, x + 4, y + h - 16, paint);
-
-        // Label
         paint.setTypeface(Typeface.create("sans-serif-condensed", Typeface.BOLD));
-        paint.setTextSize(11f);
-        paint.setLetterSpacing(0.14f);
+        paint.setTextSize(11.5f);
+        paint.setLetterSpacing(0.12f);
         paint.setColor(0xFF94A3B8);
-        canvas.drawText(label, x + 20, y + 28, paint);
+        canvas.drawText(label, x, y, paint);
 
-        // Value
+        // Value: Bold white, large and readable
         paint.setTextSize(26f);
-        paint.setLetterSpacing(0.08f);
-        paint.setColor(accentColor);
-        canvas.drawText(value, x + 20, y + 66, paint);
-
-        // Subtitle
-        paint.setTypeface(Typeface.create("sans-serif-condensed", Typeface.NORMAL));
-        paint.setTextSize(10f);
-        paint.setLetterSpacing(0.10f);
-        paint.setColor(0xFF64748B);
-        canvas.drawText(sub, x + 20, y + 88, paint);
-    }
-
-    private static void drawChamfered(Canvas c, float l, float t, float r, float b, float ch, Paint p) {
-        Path path = new Path();
-        path.moveTo(l + ch, t);
-        path.lineTo(r - ch, t);
-        path.lineTo(r, t + ch);
-        path.lineTo(r, b - ch);
-        path.lineTo(r - ch, b);
-        path.lineTo(l + ch, b);
-        path.lineTo(l, b - ch);
-        path.lineTo(l, t + ch);
-        path.close();
-        c.drawPath(path, p);
+        paint.setLetterSpacing(0.06f);
+        paint.setColor(0xFFFFFFFF);
+        canvas.drawText(value, x, y + 42, paint);
     }
 
     public static void shareScoreCard(Context context) {

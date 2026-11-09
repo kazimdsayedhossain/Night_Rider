@@ -112,8 +112,8 @@ public final class Rules {
 
     public record TrafficProfile(int lanePool, float crossIntervalScale, float crossSpeedBonus) {}
     public static TrafficProfile trafficProfileFor(int level) {
-        return new TrafficProfile(8 + Math.min(2, (level - 1) / 2),
-            (float) Math.max(0.85, 1.3 - 0.04 * (level - 1)),
+        return new TrafficProfile(24 + Math.min(6, (level - 1) * 2),
+            (float) Math.max(0.40, 0.55 - 0.02 * (level - 1)),
             (float) Math.min(3.5, 0.3 * (level - 1)));
     }
 

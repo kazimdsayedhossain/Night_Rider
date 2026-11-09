@@ -195,8 +195,13 @@ public final class AssetLibrary implements AutoCloseable {
         if(stage<files.length){
             String file=files[stage];SceneAsset a=load("buildings/"+file+".glb");
             ModelInstance mi=new ModelInstance(a.scene.model);illuminateWindows(mi);
-            float hScale = file.equals("b5_green_bakery") ? 1.55f : file.equals("b3_brick_cafe") ? 1.22f : (file.equals("b1_blue_corner_shop") || file.equals("b4_music_store")) ? 1.18f : 1.0f;
-            Template t=new Template(mi,16.5f,42,2.4f,0,false,true,hScale);buildings.add(t);namedBuildings.put(file,t);
+            boolean is3x = file.equals("b6_apartment_mart") || file.equals("b7_office_tower");
+            // 3X size on newly added buildings b6 & b7, robust 20.0f footprint on b1..b5 so none are tiny
+            float footprint = is3x ? 49.5f : 20.0f;
+            float heightLimit = is3x ? 126.0f : 44.0f;
+            float maxScale = is3x ? 7.2f : 2.8f;
+            float hScale = is3x ? 3.0f : (file.equals("b5_green_bakery") ? 1.6f : file.equals("b3_brick_cafe") ? 1.28f : (file.equals("b1_blue_corner_shop") || file.equals("b4_music_store")) ? 1.22f : 1.15f);
+            Template t=new Template(mi,footprint,heightLimit,maxScale,0,false,true,hScale);buildings.add(t);namedBuildings.put(file,t);
         }
         else switch(stage){
             case 7 -> {
