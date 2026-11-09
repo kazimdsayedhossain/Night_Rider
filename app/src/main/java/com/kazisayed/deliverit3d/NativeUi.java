@@ -2474,7 +2474,9 @@ private final FrameLayout controls;
 
             tvDispatchRoute.setText(dCall.route);
 
-            tvDispatchMeta.setText(String.format(Locale.US, "+$%d  |  %ds limit", dCall.payout, dCall.timeLimit));
+            int curQ = game != null ? game.getPendingDeliveryCount() : 0;
+            int maxQ = game != null ? game.getMaxPendingDeliveries() : 10;
+            tvDispatchMeta.setText(String.format(Locale.US, "+$%d  |  %ds limit  |  Slot %d/%d", dCall.payout, dCall.timeLimit, curQ + 1, maxQ));
 
             tvDispatchTimer.setText(Math.round(dCall.ringTimer) + "s");
 
@@ -3091,13 +3093,46 @@ private final FrameLayout controls;
         itemsList.setGravity(Gravity.LEFT);
         itemsList.setPadding(0, px(6), 0, 0);
 
-        addGarageItemRow(itemsList, true, "bike", "CLASSIC BICYCLE", 0, 0);
-        addGarageItemRow(itemsList, true, "scooter", "URBAN SCOOTER", 1200, 0);
-        addGarageItemRow(itemsList, true, "superbike", "CRUISER MOTORCYCLE", 3500, 0);
-        addGarageItemRow(itemsList, true, "gold", "GOLD SPECIAL BIKE", 0, 40);
+        addGarageItemRow(itemsList, true, "bike", "FIXIE MESSENGER", 0, 0);
+        addGarageItemRow(itemsList, true, "scooter", "VESPA SPRINT", 450, 0);
+        addGarageItemRow(itemsList, true, "superbike", "BOBBER 750", 1400, 0);
+        addGarageItemRow(itemsList, true, "guzzi", "V7 NIGHT RIDER", 3200, 0);
+        addGarageItemRow(itemsList, true, "barracuda", "BARRACUDA 440", 7500, 0);
         addGarageItemRow(itemsList, false, "cap", "COURIER CAP", 0, 0);
         addGarageItemRow(itemsList, false, "helmet", "AERO HELMET", 800, 0);
         addGarageItemRow(itemsList, false, "crown", "GOLD CROWN", 0, 25);
+
+        // Tuning Sub-Section for Equipped Vehicle
+        String eqVeh = saves.text("deliver3d_vehicle", "bike");
+        com.kazisayed.deliverit3d.model.VehicleSpec eqSpec = com.kazisayed.deliverit3d.model.VehicleSpec.findById(eqVeh);
+        int spdTier = saves.number("upgrade_speed_" + eqVeh, 0);
+        int cpTier = saves.number("upgrade_cap_" + eqVeh, 0);
+        int spdCost = com.kazisayed.deliverit3d.model.VehicleSpec.getSpeedUpgradeCost(eqVeh, spdTier);
+        int cpCost = com.kazisayed.deliverit3d.model.VehicleSpec.getCapacityUpgradeCost(eqVeh, cpTier);
+
+        TextView tuneHeader = makeText("TUNING // " + eqSpec.getName().toUpperCase(Locale.ROOT), 11.5f, 0xFF38BDF8, true);
+        tuneHeader.setPadding(0, px(12), 0, px(4));
+        itemsList.addView(tuneHeader);
+
+        String spdLabel = "⚡ " + eqSpec.getSpeedPartName() + " (LV " + spdTier + "/3)" + (spdCost > 0 ? (" - $" + spdCost) : " [MAX]");
+        addContentButton(itemsList, spdLabel, spdCost <= 0, () -> {
+            activity.feedback(20);
+            activity.post(() -> game.upgradeVehiclePart(true));
+            postDelayed(() -> {
+                data = game.snapshot;
+                showGarageInLeft(true);
+            }, 120);
+        });
+
+        String capLabel = "📦 " + eqSpec.getCapacityPartName() + " (LV " + cpTier + "/3)" + (cpCost > 0 ? (" - $" + cpCost) : " [MAX]");
+        addContentButton(itemsList, capLabel, cpCost <= 0, () -> {
+            activity.feedback(20);
+            activity.post(() -> game.upgradeVehiclePart(false));
+            postDelayed(() -> {
+                data = game.snapshot;
+                showGarageInLeft(true);
+            }, 120);
+        });
 
         card.addView(itemsList);
         setLeftContentWithAnim(card);
@@ -3111,6 +3146,20 @@ private final FrameLayout controls;
         String label = name + "  |  " + tag;
 
         addContentButton(panel, label, equipped, () -> {
+            int currentCash = data != null ? data.cash() : saves.cash();
+            int currentTickets = data != null ? data.tickets() : saves.tickets();
+            if (!owned) {
+                if (priceCash > 0 && currentCash < priceCash) {
+                    activity.feedback(40);
+                    activity.post(() -> game.announce("Insufficient cash: Need $" + priceCash + " (Have $" + currentCash + ")"));
+                    return;
+                }
+                if (priceTokens > 0 && currentTickets < priceTokens) {
+                    activity.feedback(40);
+                    activity.post(() -> game.announce("Insufficient tickets: Need " + priceTokens + " (Have " + currentTickets + ")"));
+                    return;
+                }
+            }
             activity.feedback(20);
             activity.post(() -> game.buy(isVehicles, id, priceCash, priceTokens));
             activity.playCue(owned ? "equip" : "buy");

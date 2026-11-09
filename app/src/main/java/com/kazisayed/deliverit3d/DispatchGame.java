@@ -76,7 +76,13 @@ public final class DispatchGame extends ApplicationAdapter {
     }
 
     public static final int MAX_PENDING_DELIVERIES = 10;
-    private final ArrayDeque<DeliveryOrder> deliveryQueue = new ArrayDeque<>(MAX_PENDING_DELIVERIES);
+    private final ArrayDeque<DeliveryOrder> deliveryQueue = new ArrayDeque<>(32);
+
+    public int getMaxPendingDeliveries(){
+        String veh = vehicleId != null ? vehicleId : (saves != null ? saves.text("deliver3d_vehicle", "bike") : "bike");
+        int capTier = saves != null ? saves.number("upgrade_cap_" + veh, 0) : 0;
+        return com.kazisayed.deliverit3d.model.VehicleSpec.getCapacityForTier(veh, capTier);
+    }
     private int nextOrderId = 101;
     private DispatchCall pendingCall = null;
     private float dispatchCallTimer = 0f;
@@ -108,8 +114,9 @@ public final class DispatchGame extends ApplicationAdapter {
 
     public void acceptCall(){
         if(pendingCall == null) return;
-        if(deliveryQueue.size() >= MAX_PENDING_DELIVERIES){
-            announce("Queue full - Max 10 pending deliveries");
+        int maxCap = getMaxPendingDeliveries();
+        if(deliveryQueue.size() >= maxCap){
+            announce("Queue full - Max " + maxCap + " pending deliveries");
             pendingCall = null;
             return;
         }
@@ -117,7 +124,7 @@ public final class DispatchGame extends ApplicationAdapter {
         deliveryQueue.addLast(order);
         inventory = deliveryQueue.size();
         time += 25f;
-        announce("Order Accepted: " + order.recipient + " (" + deliveryQueue.size() + "/10 queued)");
+        announce("Order Accepted: " + order.recipient + " (" + deliveryQueue.size() + "/" + maxCap + " queued)");
         audio.cue("ui_click");
         pendingCall = null;
     }
@@ -301,7 +308,7 @@ public final class DispatchGame extends ApplicationAdapter {
             if(dispatchCallTimer >= nextDispatchInterval){
                 dispatchCallTimer = 0;
                 nextDispatchInterval = 45f + (float)(Math.random() * 45f);
-                if(deliveryQueue.size() < MAX_PENDING_DELIVERIES){
+                if(deliveryQueue.size() < getMaxPendingDeliveries()){
                     generateDispatchCall();
                 }
             }
@@ -315,14 +322,16 @@ public final class DispatchGame extends ApplicationAdapter {
         if(Math.abs(steering) < .004f) steering = 0;
         throttle = Rules.lerp(throttle, input.pedal ? 1 : 0, 1 - (float)Math.exp(-dt * 12));
 
-        float grip = (weather.rain > .4f ? .84f : weather.snow > .4f ? .68f : 1) * (vehicleId.equals("scooter") ? 1.18f : vehicleId.equals("superbike") ? .92f : 1);
-        float vehicleSpeed = vehicleId.equals("superbike") ? 1.24f : vehicleId.equals("gold") ? 1.12f : vehicleId.equals("scooter") ? .92f : 1;
-        float maximum = level.speed * (combo.fever() ? 1.25f : 1) * vehicleSpeed * (weather.rain > .4f ? .92f : weather.snow > .4f ? .82f : 1) * (WorldGrid.road(x, z) ? 1 : .68f);
+        float grip = (weather.rain > .4f ? .84f : weather.snow > .4f ? .68f : 1) * com.kazisayed.deliverit3d.model.VehicleSpec.getGrip(vehicleId);
+        float baseVehicleSpeed = com.kazisayed.deliverit3d.model.VehicleSpec.getBaseSpeed(vehicleId);
+        int speedTier = saves != null ? saves.number("upgrade_speed_" + vehicleId, 0) : 0;
+        float upgradeSpeedMult = com.kazisayed.deliverit3d.model.VehicleSpec.getSpeedMultiplier(vehicleId, speedTier);
+        float maximum = level.speed * (combo.fever() ? 1.25f : 1) * baseVehicleSpeed * upgradeSpeedMult * (weather.rain > .4f ? .92f : weather.snow > .4f ? .82f : 1) * (WorldGrid.road(x, z) ? 1 : .68f);
 
-        // Responsive 60% acceleration boost
-        float acceleration = (combo.fever() ? 40f : 28f) * 1.6f;
-        if(vehicleId.equals("superbike")) acceleration *= 1.25f;
-        else if(vehicleId.equals("scooter")) acceleration *= 1.10f;
+        // Responsive acceleration tuned per vehicle & upgrade tier
+        float baseAccelMult = com.kazisayed.deliverit3d.model.VehicleSpec.getBaseAccel(vehicleId);
+        float upgradeAccelMult = com.kazisayed.deliverit3d.model.VehicleSpec.getAccelMultiplier(vehicleId, speedTier);
+        float acceleration = (combo.fever() ? 40f : 28f) * 1.6f * baseAccelMult * upgradeAccelMult;
 
         if(input.brake){
             speed -= 32 * grip * dt;
@@ -524,7 +533,7 @@ public final class DispatchGame extends ApplicationAdapter {
         }
         publish();
     }
-    private void announce(String text){notice=text;noticeTime=3;}
+    public void announce(String text){notice=text;noticeTime=3;}
     public void command(String command){if(state==State.LOADING||state==State.ERROR)return;switch(command){
         case "start"->{state=State.PLAYING;status="";input.release();audio.resume();announce("Ride close to customers to deliver");}
         case "pause"->{if(state==State.PLAYING){state=State.PAUSED;input.release();audio.pause();}}
@@ -537,7 +546,55 @@ public final class DispatchGame extends ApplicationAdapter {
         case "weather"->{weather.automatic=false;weather.mode=WeatherSystem.Mode.values()[(weather.mode.ordinal()+1)%3];saves.put("native-weather",weather.mode.name());saves.put("native-weather-auto",false);}
         case "recover"->{prevX=x=level.startX;prevZ=z=level.startZ;prevYaw=yaw=level.startYaw*MathUtils.degreesToRadians;smoothElev=WorldGrid.elevation(x,z);speed=0;time=Math.max(0,time-5);announce("Reset to road - 5 second penalty");}
     }publish();}
-    public void buy(boolean vehicles,String id,int price,int tokenPrice){if(saves.owned(vehicles).contains(id)){saves.put(vehicles?"deliver3d_vehicle":"deliver3d_hat",id);}else {if(cash<price||tickets<tokenPrice){announce("Not enough funds");publish();return;}cash-=price;tickets-=tokenPrice;saves.buy(vehicles,id,cash,tickets);}vehicleId=saves.text("deliver3d_vehicle","bike");hatId=saves.text("deliver3d_hat","cap");rider.equip(vehicleId,hatId);announce("Equipped");publish();}
+    public void buy(boolean vehicles,String id,int price,int tokenPrice){
+        if(saves.owned(vehicles).contains(id)){
+            saves.put(vehicles?"deliver3d_vehicle":"deliver3d_hat",id);
+        } else {
+            if(cash<price||tickets<tokenPrice){
+                announce("Not enough funds");
+                publish();
+                return;
+            }
+            cash-=price;
+            tickets-=tokenPrice;
+            saves.buy(vehicles,id,cash,tickets);
+            try {
+                com.kazisayed.deliverit3d.UserManager.get().spendCash(null, price);
+            } catch(Throwable ignored) {}
+        }
+        vehicleId=saves.text("deliver3d_vehicle","bike");
+        hatId=saves.text("deliver3d_hat","cap");
+        rider.equip(vehicleId,hatId);
+        announce("Equipped " + (vehicles ? com.kazisayed.deliverit3d.model.VehicleSpec.findById(vehicleId).getName() : id));
+        publish();
+    }
+
+    public void upgradeVehiclePart(boolean isSpeed) {
+        String veh = vehicleId != null ? vehicleId : saves.text("deliver3d_vehicle", "bike");
+        int curTier = saves.number((isSpeed ? "upgrade_speed_" : "upgrade_cap_") + veh, 0);
+        int cost = isSpeed ? com.kazisayed.deliverit3d.model.VehicleSpec.getSpeedUpgradeCost(veh, curTier)
+                           : com.kazisayed.deliverit3d.model.VehicleSpec.getCapacityUpgradeCost(veh, curTier);
+        if(cost <= 0){
+            announce("Part already at MAX tier");
+            return;
+        }
+        if(cash < cost){
+            announce("Need $" + cost + " (Wallet: $" + cash + ")");
+            return;
+        }
+        boolean success = isSpeed ? saves.upgradeSpeedPart(veh, cost) : saves.upgradeCapPart(veh, cost);
+        if(success){
+            cash = saves.cash();
+            try {
+                com.kazisayed.deliverit3d.UserManager.get().spendCash(null, cost);
+            } catch(Throwable ignored) {}
+            String partName = isSpeed ? com.kazisayed.deliverit3d.model.VehicleSpec.findById(veh).getSpeedPartName()
+                                      : com.kazisayed.deliverit3d.model.VehicleSpec.findById(veh).getCapacityPartName();
+            announce("Upgraded: " + partName + " (Tier " + (curTier + 1) + ")");
+            audio.cue("delivery");
+            publish();
+        }
+    }
     public void settings(){input.tilt=saves.flag("native-tilt",true);tilt.configure(saves.decimal("native-tilt-sensitivity",1),saves.flag("native-tilt-invert",false));audio.volumes(saves.decimal("dispatch-volume-master",.75f),saves.decimal("dispatch-volume-sfx",.8f),saves.decimal("dispatch-volume-ambient",.5f));if(weather!=null){weather.automatic=saves.flag("native-weather-auto",true);weather.dayCycle=saves.flag("native-day-cycle",true);weather.headlights=saves.flag("native-headlights",true);}}
     private void publish(){
         String target="Awaiting Dispatch";float distance=0,bearing=0;ArrayList<Marker> points=new ArrayList<>();

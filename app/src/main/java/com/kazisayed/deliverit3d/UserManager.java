@@ -166,6 +166,20 @@ public final class UserManager {
         }
     }
 
+    public boolean spendCash(Context context, int amount) {
+        if (amount <= 0) return true;
+        if (this.cash < amount) return false;
+        this.cash -= amount;
+        saveLocal(context);
+
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user != null) {
+            FirebaseFirestore.getInstance().collection("users").document(user.getUid())
+                    .update("cash", this.cash);
+        }
+        return true;
+    }
+
     public void addReward(Context context, int earnedCash, long earnedPoints, int deliveriesCount) {
         this.cash += earnedCash;
         this.totalMoney += earnedCash;
@@ -243,7 +257,7 @@ public final class UserManager {
         s.put("player_avatar_id", avatarId);
     }
 
-    private void loadLocal(Context context) {
+    public void loadLocal(Context context) {
         if (context == null) return;
         SaveStore s = new SaveStore(context);
         this.uid = s.text("player_uid", "guest");

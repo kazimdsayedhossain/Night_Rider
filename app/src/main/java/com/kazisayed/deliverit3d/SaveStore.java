@@ -87,6 +87,84 @@ public final class SaveStore {
     public static void setEquippedVehicle(android.content.Context ctx,String id){new SaveStore(ctx).put("deliver3d_vehicle",id);}
     public static long getBestScore(android.content.Context ctx){try{return Long.parseLong(new SaveStore(ctx).text("nightrider_best_score","0"));}catch(Exception e){return 0L;}}
     public static void setBestScore(android.content.Context ctx,long score){new SaveStore(ctx).put("nightrider_best_score",score);}
+
+    public int speedUpgrade(String vehicleId) {
+        return Math.max(0, Math.min(3, number("upgrade_speed_" + (vehicleId != null ? vehicleId : "bike"), 0)));
+    }
+
+    public int capUpgrade(String vehicleId) {
+        return Math.max(0, Math.min(3, number("upgrade_cap_" + (vehicleId != null ? vehicleId : "bike"), 0)));
+    }
+
+    public boolean upgradeSpeedPart(String vehicleId, int cost) {
+        int curTier = speedUpgrade(vehicleId);
+        if (curTier >= 3) return false;
+        if (cash() < cost) return false;
+        int remaining = cash() - cost;
+        put("deliver3d_cash", remaining);
+        put("upgrade_speed_" + vehicleId, curTier + 1);
+        return true;
+    }
+
+    public boolean upgradeCapPart(String vehicleId, int cost) {
+        int curTier = capUpgrade(vehicleId);
+        if (curTier >= 3) return false;
+        if (cash() < cost) return false;
+        int remaining = cash() - cost;
+        put("deliver3d_cash", remaining);
+        put("upgrade_cap_" + vehicleId, curTier + 1);
+        return true;
+    }
+
+    public static int getSpeedUpgradeLevel(android.content.Context ctx, String vehicleId) {
+        return new SaveStore(ctx).speedUpgrade(vehicleId);
+    }
+
+    public static int getCapacityUpgradeLevel(android.content.Context ctx, String vehicleId) {
+        return new SaveStore(ctx).capUpgrade(vehicleId);
+    }
+
+    public static boolean isVehicleOwned(android.content.Context ctx, String vehicleId) {
+        if (vehicleId == null || vehicleId.equalsIgnoreCase("bike")) return true;
+        return new SaveStore(ctx).owned(true).contains(vehicleId);
+    }
+
+    public static boolean buyVehicle(android.content.Context ctx, String vehicleId, int price) {
+        SaveStore s = new SaveStore(ctx);
+        if (s.owned(true).contains(vehicleId)) return true;
+        if (s.cash() < price) return false;
+        int remaining = s.cash() - price;
+        s.buy(true, vehicleId, remaining, s.tickets());
+        try {
+            UserManager.get().loadLocal(ctx);
+            UserManager.get().spendCash(ctx, price);
+        } catch (Throwable ignored) {}
+        return true;
+    }
+
+    public static boolean upgradeVehicleSpeed(android.content.Context ctx, String vehicleId, int cost) {
+        SaveStore s = new SaveStore(ctx);
+        boolean success = s.upgradeSpeedPart(vehicleId, cost);
+        if (success) {
+            try {
+                UserManager.get().loadLocal(ctx);
+                UserManager.get().spendCash(ctx, cost);
+            } catch (Throwable ignored) {}
+        }
+        return success;
+    }
+
+    public static boolean upgradeVehicleCapacity(android.content.Context ctx, String vehicleId, int cost) {
+        SaveStore s = new SaveStore(ctx);
+        boolean success = s.upgradeCapPart(vehicleId, cost);
+        if (success) {
+            try {
+                UserManager.get().loadLocal(ctx);
+                UserManager.get().spendCash(ctx, cost);
+            } catch (Throwable ignored) {}
+        }
+        return success;
+    }
     public static void cacheContracts(android.content.Context ctx,java.util.List<com.kazisayed.deliverit3d.model.Contract> list){
         if(list==null)return;
         try{
