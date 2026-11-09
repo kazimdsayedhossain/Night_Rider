@@ -13,7 +13,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:src="@drawable/bg_foggy_forest"
-        android:scaleType="centerCrop"
+        android:scaleType="fitXY"
         android:fitsSystemWindows="false"
         android:contentDescription="Foggy Forest Motorcycle" />
 
@@ -127,18 +127,41 @@
                 android:layout_marginStart="6dp" />
         </LinearLayout>
 
-        <TextView
-            android:id="@+id/btn_content_close"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="CLOSE  [X]"
-            android:textColor="#94A3B8"
-            android:textSize="13sp"
-            android:fontFamily="sans-serif-condensed"
-            android:letterSpacing="0.14"
-            android:paddingVertical="8dp" android:paddingHorizontal="0dp"
-            android:layout_gravity="start"
-            android:layout_marginTop="10dp" />
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginTop="12dp">
+
+            <TextView
+                android:id="@+id/btn_forgot_password"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="FORGOT PASSWORD?"
+                android:textColor="#38BDF8"
+                android:textSize="12.5sp"
+                android:textStyle="bold"
+                android:fontFamily="sans-serif-condensed"
+                android:letterSpacing="0.12"
+                android:paddingVertical="6dp" />
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_weight="1" />
+
+            <TextView
+                android:id="@+id/btn_content_close"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="CLOSE  [X]"
+                android:textColor="#94A3B8"
+                android:textSize="13sp"
+                android:fontFamily="sans-serif-condensed"
+                android:letterSpacing="0.14"
+                android:paddingVertical="6dp" />
+        </LinearLayout>
 
     </LinearLayout>
 

@@ -2530,7 +2530,7 @@ private final FrameLayout controls;
 
         ImageView bgView = new ImageView(getContext());
 
-        bgView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+        bgView.setScaleType(ImageView.ScaleType.FIT_XY);
 
         try (java.io.InputStream is = getContext().getAssets().open("loading_bg.jpg")) {
 
@@ -2755,6 +2755,7 @@ private final FrameLayout controls;
         }
 
         addNavButton(navList, "SIGN OUT", false, () -> {
+            saves.put("user_logged_in", false);
             com.google.firebase.auth.FirebaseAuth.getInstance().signOut();
             android.content.Intent intent = new android.content.Intent(activity, AuthActivity.class);
             intent.putExtra("force_auth", true);
@@ -3413,29 +3414,62 @@ private final FrameLayout controls;
         paint.setTextAlign(Paint.Align.LEFT);
         paint.setLetterSpacing(0);
 
-        // 4. BOTTOM-CENTER: RACING SPEEDOMETER (Pure Floating White Digits + KM/H)
+        // 4. BOTTOM-CENTER: RACING SPEEDOMETER (Dedicated Bike/Cycle Speed Widget)
         int kmh = Math.round(Math.abs(data.speed()) * 3.6f);
         String speedStr = String.valueOf(kmh);
 
+        float meterW = 120;
+        float meterH = 50;
+        float meterX = w * 0.5f - meterW * 0.5f;
+        float meterY = h - Math.max((safeBottom / dp) + 14, 60);
+
+        // Translucent chamfered glass pill
         paint.setStyle(Paint.Style.FILL);
-        paint.setTextAlign(Paint.Align.LEFT);
+        paint.setColor(0x330B111A);
+        drawChamferedRect(canvas, meterX, meterY, meterX + meterW, meterY + meterH, 6, paint);
+
+        paint.setStyle(Paint.Style.STROKE);
+        paint.setStrokeWidth(1.2f);
+        paint.setColor(0x35FFFFFF);
+        drawChamferedRect(canvas, meterX, meterY, meterX + meterW, meterY + meterH, 6, paint);
+
+        // Header Label: "BIKE SPEED"
+        paint.setStyle(Paint.Style.FILL);
+        paint.setTextAlign(Paint.Align.CENTER);
+        paint.setTypeface(Typeface.create("sans-serif-condensed", Typeface.BOLD));
+        paint.setTextSize(9f);
+        paint.setLetterSpacing(0.12f);
+        paint.setColor(0xFF94A3B8);
+        canvas.drawText("BIKE SPEED", w * 0.5f, meterY + 13, paint);
+
+        // Velocity Digits + KM/H
         paint.setTypeface(Typeface.create("sans-serif-black", Typeface.BOLD));
-        paint.setTextSkewX(-0.16f);
-        paint.setTextSize(42);
-        paint.setColor(COLOR_WHITE_TRANSPARENT);
+        paint.setTextSkewX(-0.14f);
+        paint.setTextSize(24);
+        paint.setColor(COLOR_WHITE);
         paint.setShadowLayer(4, 0, 2, 0x99000000);
-
         float numW = paint.measureText(speedStr);
-        float speedX = w * 0.5f - (numW + 36) * 0.5f;
-        float speedY = h - 22;
+        float textX = w * 0.5f - (numW + 28) * 0.5f;
+        canvas.drawText(speedStr, textX, meterY + 36, paint);
 
-        canvas.drawText(speedStr, speedX, speedY, paint);
-
+        paint.clearShadowLayer();
         paint.setTextSkewX(0);
-        paint.setTextSize(11);
+        paint.setTextSize(9.5f);
         paint.setTypeface(Typeface.create("sans-serif-bold", Typeface.BOLD));
-        paint.setColor(0xFFCBD5E1);
-        canvas.drawText("KM/H", speedX + numW + 6, speedY - 6, paint);
+        paint.setColor(0xFF38BDF8);
+        canvas.drawText("KM/H", textX + numW + 4, meterY + 35, paint);
+
+        // Dynamic speed bar along bottom of badge
+        float barFill = Math.min(1.0f, kmh / 120.0f);
+        paint.setColor(0x22FFFFFF);
+        canvas.drawRect(meterX + 12, meterY + 42, meterX + meterW - 12, meterY + 44, paint);
+        if (barFill > 0) {
+            paint.setColor(kmh > 80 ? 0xFFEF4444 : kmh > 50 ? 0xFFF59E0B : 0xFF38BDF8);
+            canvas.drawRect(meterX + 12, meterY + 42, meterX + 12 + (meterW - 24) * barFill, meterY + 44, paint);
+        }
+
+        paint.setTextAlign(Paint.Align.LEFT);
+        paint.setLetterSpacing(0);
 
         // 4. CENTER SCREEN NOTIFICATION / TOAST (data.notice())
         if (data.notice() != null && !data.notice().isEmpty()) {

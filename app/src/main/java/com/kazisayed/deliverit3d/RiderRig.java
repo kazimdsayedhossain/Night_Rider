@@ -37,10 +37,8 @@ public final class RiderRig implements AutoCloseable {
             vehicleTemplate=assets.vehicles.get(id.equals("superbike")?"superbike":id.equals("scooter")?"scooter":"");
             vehicle=vehicleTemplate==null?null:vehicleTemplate.create(0,0,0,0,1);
         }
-        if(detailed){
-            Model model=assets.couriers.getOrDefault(headwear,assets.couriers.get("cap"));
-            if(model!=null)detailedCourier=new ModelInstance(model);
-        }
+        Model model=assets.couriers.getOrDefault(headwear,assets.couriers.get("cap"));
+        if(model!=null)detailedCourier=new ModelInstance(model);
         hat.materials.get(0).set(headwear.equals("crown")?kit.amber:headwear.equals("helmet")?kit.ivory:kit.jacket);
     }
     private void place(ModelInstance i,Vector3 p,float w,float h,float d,float pitch){i.transform.set(root).translate(p).rotate(Vector3.X,pitch).scale(w,h,d);}
@@ -80,6 +78,11 @@ public final class RiderRig implements AutoCloseable {
             float p=phase+s*MathUtils.PI;Vector3 hip=new Vector3(mount).add(side*.095f,-.018f,0);Vector3 ankle=vehicle==null?new Vector3(side*.11f,.411f+.13f*(float)Math.cos(p),-.055f+.13f*(float)Math.sin(p)):new Vector3(side*.18f,.4f,.1f);Vector3 knee=elbow(hip,ankle,.405f,.415f,new Vector3(0,.1f,1));segment(legs[s*2],hip,knee,.13f);segment(legs[s*2+1],knee,ankle,.095f);place(feet[s],new Vector3(ankle).add(0,-.035f,.045f),.095f,.07f,.24f,-5);
         }
         if(vehicle!=null)vehicleTemplate.place(vehicle,x,elev,z,yaw*MathUtils.radiansToDegrees,1);
+        if(detailedCourier!=null){
+            Vector3 riderMount = (vehicle != null) ? new Vector3(0, .72f, -.12f) : mount;
+            detailedCourier.transform.set(root).translate(riderMount);
+            detailedCourier.calculateTransforms();
+        }
     }
     /** Frame vertices are cached in local space; wrapper applies the cyclist's world transform. */
     public void collect(Array<RenderableProvider> out,int inventory){
@@ -93,7 +96,9 @@ public final class RiderRig implements AutoCloseable {
             for(int i=0;i<Math.min(inventory,cargo.length);i++)out.add(cargo[i]);
             return;
         }
-        if(vehicle!=null)out.add(vehicle);else {out.add((renderables,pool)->{int start=renderables.size;frame.getRenderables(renderables,pool);for(int i=start;i<renderables.size;i++)renderables.get(i).worldTransform.mulLeft(root);});for(ModelInstance w:wheels)out.add(w);for(int i=0;i<Math.min(inventory,cargo.length);i++)out.add(cargo[i]);}out.addAll(body.toArray(new ModelInstance[0]));
+        if(vehicle!=null)out.add(vehicle);else {out.add((renderables,pool)->{int start=renderables.size;frame.getRenderables(renderables,pool);for(int i=start;i<renderables.size;i++)renderables.get(i).worldTransform.mulLeft(root);});for(ModelInstance w:wheels)out.add(w);}
+        if(detailedCourier!=null)out.add(detailedCourier);else out.addAll(body.toArray(new ModelInstance[0]));
+        for(int i=0;i<Math.min(inventory,cargo.length);i++)out.add(cargo[i]);
     }
     @Override public void close(){frame.dispose();}
 }

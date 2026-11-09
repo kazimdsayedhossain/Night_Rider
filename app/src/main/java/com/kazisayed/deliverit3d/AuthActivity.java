@@ -93,11 +93,18 @@ public class AuthActivity extends AppCompatActivity {
                 .build();
         googleClient = GoogleSignIn.getClient(this, gso);
 
-        // Auto-skip ONLY if user is already authenticated with a real account (Google or Email)
+        SaveStore saves = new SaveStore(this);
+        String savedEmail = saves.text("saved_auth_email", "");
+        if (!savedEmail.isEmpty()) {
+            binding.etEmail.setText(savedEmail);
+        }
+
+        // Auto-skip ONLY if user is already authenticated and didn't log out
         FirebaseUser currentUser = auth.getCurrentUser();
         boolean forceAuth = getIntent().getBooleanExtra("force_auth", false);
-        if (currentUser != null && !currentUser.isAnonymous() && !forceAuth) {
-            Log.i(TAG, "Existing authenticated user found: " + currentUser.getEmail() + " (" + currentUser.getDisplayName() + ")");
+        boolean sessionActive = saves.flag("user_logged_in", true);
+        if (currentUser != null && sessionActive && !forceAuth) {
+            Log.i(TAG, "Existing authenticated session found: " + currentUser.getEmail() + " (" + currentUser.getDisplayName() + ")");
             UserManager.get().loadOrCreateProfile(this, currentUser, currentUser.getDisplayName(), mgr -> navigateToGame());
             return;
         }
@@ -114,6 +121,7 @@ public class AuthActivity extends AppCompatActivity {
         // 2. Open Right-Side Email & Password Section
         binding.btnToggleEmail.setOnClickListener(v -> toggleEmailSection(true));
         binding.btnContentClose.setOnClickListener(v -> toggleEmailSection(false));
+        binding.btnForgotPassword.setOnClickListener(v -> handleForgotPassword());
 
         // 3. Email & Password Sign In
         binding.btnEmailSignIn.setOnClickListener(v -> {
@@ -272,8 +280,34 @@ public class AuthActivity extends AppCompatActivity {
                 });
     }
 
+    private void handleForgotPassword() {
+        String email = getEmail();
+        if (TextUtils.isEmpty(email) || !email.contains("@")) {
+            binding.etEmail.setError("Enter your registered email address first");
+            Toast.makeText(this, "Enter your email above to receive a password reset link", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        setLoading(true);
+        auth.sendPasswordResetEmail(email)
+                .addOnSuccessListener(unused -> {
+                    setLoading(false);
+                    Toast.makeText(this, "Reset link sent to " + email + ". Check your inbox.", Toast.LENGTH_LONG).show();
+                })
+                .addOnFailureListener(e -> {
+                    setLoading(false);
+                    showError("Password reset failed: " + e.getMessage());
+                });
+    }
+
     private void onAuthSuccess(String preferredName) {
         FirebaseUser user = auth.getCurrentUser();
+        SaveStore saves = new SaveStore(this);
+        saves.put("user_logged_in", true);
+        if (user != null && user.getEmail() != null) {
+            saves.put("saved_auth_email", user.getEmail());
+        } else if (!getEmail().isEmpty()) {
+            saves.put("saved_auth_email", getEmail());
+        }
         Log.i(TAG, "Auth success, syncing profile for UID: " + (user != null ? user.getUid() : "null") + ", name: " + preferredName);
         UserManager.get().loadOrCreateProfile(this, user, preferredName, mgr -> navigateToGame());
     }

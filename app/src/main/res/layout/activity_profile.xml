@@ -11,7 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:src="@drawable/bg_foggy_forest"
-        android:scaleType="centerCrop"
+        android:scaleType="fitXY"
         android:contentDescription="Foggy Background" />
 
     <!-- Left Section: Profile Content -->
